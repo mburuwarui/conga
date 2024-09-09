@@ -17,7 +17,8 @@ defmodule Conga.Application do
       # Start a worker by calling: Conga.Worker.start_link(arg)
       # {Conga.Worker, arg},
       # Start to serve requests, typically the last entry
-      CongaWeb.Endpoint
+      CongaWeb.Endpoint,
+      {AshAuthentication.Supervisor, otp_app: :conga}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

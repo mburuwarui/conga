@@ -21,7 +21,7 @@ defmodule CongaWeb do
 
   def router do
     quote do
-      use Phoenix.Router, helpers: false
+      use Phoenix.Router, helpers: true
 
       # Import common connection and controller functions to use in pipelines
       import Plug.Conn
@@ -43,8 +43,7 @@ defmodule CongaWeb do
         layouts: [html: CongaWeb.Layouts]
 
       import Plug.Conn
-      import CongaWeb.Gettext
-
+      use Gettext, backend: CongaWeb.Gettext
       unquote(verified_routes())
     end
   end
@@ -85,7 +84,7 @@ defmodule CongaWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import CongaWeb.CoreComponents
-      import CongaWeb.Gettext
+      use Gettext, backend: CongaWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

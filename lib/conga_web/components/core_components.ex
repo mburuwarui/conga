@@ -17,7 +17,7 @@ defmodule CongaWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import CongaWeb.Gettext
+  use Gettext, backend: CongaWeb.Gettext
 
   @doc """
   Renders a modal.

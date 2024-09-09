@@ -1,5 +1,10 @@
 defmodule CongaWeb.Router do
   use CongaWeb, :router
+  use AshAuthentication.Phoenix.Router
+
+  pipeline :graphql do
+    plug AshGraphql.Plug
+  end
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,16 +13,58 @@ defmodule CongaWeb.Router do
     plug :put_root_layout, html: {CongaWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+  end
+
+  scope "/api/json" do
+    pipe_through [:api]
+
+    forward "/swaggerui",
+            OpenApiSpex.Plug.SwaggerUI,
+            path: "/api/json/open_api",
+            default_model_expand_depth: 4
+
+    forward "/", CongaWeb.AshJsonApiRouter
+  end
+
+  scope "/gql" do
+    pipe_through [:graphql]
+
+    forward "/playground",
+            Absinthe.Plug.GraphiQL,
+            schema: Module.concat(["CongaWeb.GraphqlSchema"]),
+            interface: :playground
+
+    forward "/",
+            Absinthe.Plug,
+            schema: Module.concat(["CongaWeb.GraphqlSchema"])
   end
 
   scope "/", CongaWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    # add these lines -->
+    # Leave out `register_path` and `reset_path` if you don't want to support
+    # user registration and/or password resets respectively.
+    sign_in_route(register_path: "/register", reset_path: "/reset")
+    sign_out_route AuthController
+    auth_routes_for Conga.Accounts.User, to: AuthController
+    reset_route []
+    # <-- add these lines
+
+    live "/posts", PostLive.Index, :index
+    live "/posts/new", PostLive.Index, :new
+    live "/posts/:id/edit", PostLive.Index, :edit
+
+    live "/posts/:id", PostLive.Show, :show
+    live "/posts/:id/show/edit", PostLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
