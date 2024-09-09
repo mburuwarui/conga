@@ -62,9 +62,12 @@ defmodule CongaWeb.PostLive.FormComponent do
   defp assign_form(%{assigns: %{post: post}} = socket) do
     form =
       if post do
-        AshPhoenix.Form.for_update(post, :update, as: "post", actor: socket.assigns.y)
+        AshPhoenix.Form.for_update(post, :update, as: "post", actor: socket.assigns.current_user)
       else
-        AshPhoenix.Form.for_create(Conga.Posts.Post, :create, as: "post", actor: socket.assigns.y)
+        AshPhoenix.Form.for_create(Conga.Posts.Post, :create,
+          as: "post",
+          actor: socket.assigns.current_user
+        )
       end
 
     assign(socket, form: to_form(form))

@@ -47,7 +47,7 @@ defmodule CongaWeb.PostLive.Index do
         module={CongaWeb.PostLive.FormComponent}
         id={(@post && @post.id) || :new}
         title={@page_title}
-        y={@y}
+        current_user={@current_user}
         action={@live_action}
         post={@post}
         patch={~p"/posts"}
@@ -60,8 +60,8 @@ defmodule CongaWeb.PostLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> stream(:posts, Ash.read!(Conga.Posts.Post, actor: socket.assigns[:y]))
-     |> assign_new(:y, fn -> nil end)}
+     |> stream(:posts, Ash.read!(Conga.Posts.Post, actor: socket.assigns[:current_user]))
+     |> assign_new(:current_user, fn -> nil end)}
   end
 
   @impl true
@@ -72,7 +72,7 @@ defmodule CongaWeb.PostLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Post")
-    |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.y))
+    |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -94,8 +94,8 @@ defmodule CongaWeb.PostLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    post = Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.y)
-    Ash.destroy!(post, actor: socket.assigns.y)
+    post = Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
+    Ash.destroy!(post, actor: socket.assigns.current_user)
 
     {:noreply, stream_delete(socket, :posts, post)}
   end

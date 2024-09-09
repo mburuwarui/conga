@@ -31,7 +31,7 @@ defmodule CongaWeb.PostLive.Show do
         id={@post.id}
         title={@page_title}
         action={@live_action}
-        y={@y}
+        current_user={@current_user}
         post={@post}
         patch={~p"/posts/#{@post}"}
       />
@@ -49,7 +49,7 @@ defmodule CongaWeb.PostLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.y))}
+     |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user))}
   end
 
   defp page_title(:show), do: "Show Post"
