@@ -53,20 +53,30 @@ defmodule CongaWeb.Router do
     # add these lines -->
     # Leave out `register_path` and `reset_path` if you don't want to support
     # user registration and/or password resets respectively.
-    sign_in_route(register_path: "/register", reset_path: "/reset")
+    sign_in_route(
+      on_mount: [{CongaWeb.LiveUserAuth, :live_no_user}],
+      register_path: "/register",
+      reset_path: "/reset"
+    )
+
     sign_out_route AuthController
     auth_routes_for Conga.Accounts.User, to: AuthController
     reset_route []
     # <-- add these lines
 
-    ash_authentication_live_session :authentication_optional,
-      on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
-      live "/posts", PostLive.Index, :index
+    ash_authentication_live_session :authentication_required,
+      on_mount: {CongaWeb.LiveUserAuth, :live_user_required} do
       live "/posts/new", PostLive.Index, :new
       live "/posts/:id/edit", PostLive.Index, :edit
 
-      live "/posts/:id", PostLive.Show, :show
       live "/posts/:id/show/edit", PostLive.Show, :edit
+    end
+
+    ash_authentication_live_session :authentication_optional,
+      on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
+      live "/posts", PostLive.Index, :index
+
+      live "/posts/:id", PostLive.Show, :show
     end
   end
 
