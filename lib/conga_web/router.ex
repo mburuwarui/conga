@@ -57,7 +57,8 @@ defmodule CongaWeb.Router do
       on_mount: [{CongaWeb.LiveUserAuth, :live_no_user}],
       register_path: "/register",
       reset_path: "/reset",
-      live_view: CongaWeb.SignInLive
+      # live_view: CongaWeb.SignInLive,
+      overrides: [CongaWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
     )
 
     sign_out_route AuthController
