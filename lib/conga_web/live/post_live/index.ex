@@ -57,11 +57,11 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     {:ok,
      socket
      |> stream(:posts, Ash.read!(Conga.Posts.Post, actor: socket.assigns[:current_user]))
-     |> assign_new(:current_user, fn -> nil end)}
+     |> assign_new(:current_user, fn -> session["current_user"] end)}
   end
 
   @impl true

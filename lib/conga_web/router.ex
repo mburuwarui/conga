@@ -56,7 +56,8 @@ defmodule CongaWeb.Router do
     sign_in_route(
       on_mount: [{CongaWeb.LiveUserAuth, :live_no_user}],
       register_path: "/register",
-      reset_path: "/reset"
+      reset_path: "/reset",
+      live_view: CongaWeb.SignInLive
     )
 
     sign_out_route AuthController

@@ -9,16 +9,17 @@ defmodule Conga.Application do
   def start(_type, _args) do
     children = [
       CongaWeb.Telemetry,
+      {AshAuthentication.Supervisor, otp_app: :conga},
       Conga.Repo,
       {DNSCluster, query: Application.get_env(:conga, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Conga.PubSub},
+
       # Start the Finch HTTP client for sending emails
       {Finch, name: Conga.Finch},
       # Start a worker by calling: Conga.Worker.start_link(arg)
       # {Conga.Worker, arg},
       # Start to serve requests, typically the last entry
-      CongaWeb.Endpoint,
-      {AshAuthentication.Supervisor, otp_app: :conga}
+      CongaWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
