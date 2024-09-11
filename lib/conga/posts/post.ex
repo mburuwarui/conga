@@ -37,37 +37,7 @@ defmodule Conga.Posts.Post do
 
       change manage_relationship(:author_id, :author, type: :append)
 
-      change set_attribute(:reading_time, fn _, changes ->
-               text = Map.get(changes, :text, "")
-
-               # Rough estimate: 200 words per minute
-               String.length(text) |> div(200)
-             end)
-    end
-
-    update :react do
-      accept []
-
-      argument :type, :atom do
-        allow_nil? false
-        constraints one_of: Conga.Posts.ReactionType.all()
-      end
-
-      argument :user_id, :uuid do
-        allow_nil? false
-      end
-
-      change manage_relationship(:user_id, :reactions,
-               type: :append_and_remove,
-               destination_attribute: :type,
-               destination_path: [:type]
-             )
-
-      change set_attribute(:reaction_counts, fn post, changes ->
-               reaction_type = changes.arguments.type
-               current_counts = Map.get(post, :reaction_counts, %{})
-               Map.update(current_counts, reaction_type, 1, &(&1 + 1))
-             end)
+      change set_attribute(:reading_time, expr(div(string_length(text), 200)))
     end
 
     read :list_public do
@@ -125,13 +95,6 @@ defmodule Conga.Posts.Post do
       description "Visibility setting for the post"
     end
 
-    attribute :reaction_counts, :map do
-      default %{}
-      public? true
-      description "counts of each reaction type"
-      constraints type: {:map, {:integer}}
-    end
-
     timestamps()
   end
 
@@ -146,17 +109,6 @@ defmodule Conga.Posts.Post do
     has_many :bookmarks, Conga.Posts.Bookmark
   end
 
-  calculations do
-    calculate :popularity_score, :float, expr(like_count * 2 + comment_count + bookmark_count)
-    calculate :total_reactions, :integer, expr(sum(values(reaction_counts)))
-  end
-
-  aggregates do
-    count :like_count, :likes
-    count :comment_count, :comments
-    count :bookmark_count, :bookmarks
-  end
-
   pub_sub do
     module CongaWeb.Endpoint
     prefix "post"
@@ -164,6 +116,5 @@ defmodule Conga.Posts.Post do
     publish_all :create, ["posts"]
     publish_all :update, ["posts"]
     publish_all :destroy, ["posts"]
-    publish :react, ["post", :id, "reaction"]
   end
 end

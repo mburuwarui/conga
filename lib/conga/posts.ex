@@ -3,5 +3,8 @@ defmodule Conga.Posts do
 
   resources do
     resource Conga.Posts.Post
+    resource Conga.Posts.Comment
+    resource Conga.Posts.Like
+    resource Conga.Posts.Bookmark
   end
 end
