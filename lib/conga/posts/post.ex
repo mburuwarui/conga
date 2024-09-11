@@ -109,6 +109,19 @@ defmodule Conga.Posts.Post do
     has_many :bookmarks, Conga.Posts.Bookmark
   end
 
+  calculations do
+    calculate :total_likes, :integer, expr(count(likes))
+    calculate :total_bookmarks, :integer, expr(count(bookmarks))
+    calculate :total_comments, :integer, expr(count(comments))
+    calculate :popularity_score, :float, expr(total_likes * 2 + total_comments + total_bookmarks)
+  end
+
+  aggregates do
+    count :like_count, :likes
+    count :comment_count, :comments
+    count :bookmark_count, :bookmarks
+  end
+
   pub_sub do
     module CongaWeb.Endpoint
     prefix "post"
