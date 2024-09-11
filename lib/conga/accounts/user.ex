@@ -11,6 +11,20 @@ defmodule Conga.Accounts.User do
     type "user"
   end
 
+  authentication do
+    strategies do
+      password :password do
+        identity_field :email
+      end
+    end
+
+    tokens do
+      enabled? true
+      token_resource Conga.Accounts.Token
+      signing_secret Conga.Accounts.Secrets
+    end
+  end
+
   graphql do
     type :user
   end
@@ -35,20 +49,6 @@ defmodule Conga.Accounts.User do
     attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
 
     timestamps()
-  end
-
-  authentication do
-    strategies do
-      password :password do
-        identity_field :email
-      end
-    end
-
-    tokens do
-      enabled? true
-      token_resource Conga.Accounts.Token
-      signing_secret Conga.Accounts.Secrets
-    end
   end
 
   identities do
