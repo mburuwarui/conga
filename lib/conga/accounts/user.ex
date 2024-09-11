@@ -51,6 +51,13 @@ defmodule Conga.Accounts.User do
     timestamps()
   end
 
+  relationships do
+    has_many :posts, Conga.Posts.Post
+    has_many :comments, Conga.Posts.Comment
+    has_many :likes, Conga.Posts.Like
+    has_many :bookmarks, Conga.Posts.Bookmark
+  end
+
   identities do
     identity :unique_email, [:email]
   end

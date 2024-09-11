@@ -40,7 +40,7 @@ defmodule Conga.Posts.Comment do
       end
 
       change manage_relationship(:post_id, :post, type: :append)
-      change manage_relationship(:author_id, :author, type: :append)
+      change manage_relationship(:author_id, :user, type: :append)
     end
 
     update :approve do
@@ -56,11 +56,11 @@ defmodule Conga.Posts.Comment do
 
     policy action_type(:read) do
       authorize_if expr(is_approved == true)
-      authorize_if relates_to_actor_via(:author)
+      authorize_if relates_to_actor_via(:user)
     end
 
     policy action_type([:update, :destroy]) do
-      authorize_if relates_to_actor_via(:author)
+      authorize_if relates_to_actor_via(:user)
     end
 
     policy action(:approve) do
@@ -92,7 +92,7 @@ defmodule Conga.Posts.Comment do
       allow_nil? false
     end
 
-    belongs_to :author, Conga.Accounts.User do
+    belongs_to :user, Conga.Accounts.User do
       public? true
       allow_nil? false
     end

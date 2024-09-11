@@ -20,9 +20,17 @@ defmodule CongaWeb.PostLive.Index do
     >
       <:col :let={{_id, post}} label="Id"><%= post.id %></:col>
 
+      <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
+
       <:col :let={{_id, post}} label="Text"><%= post.text %></:col>
 
-      <:col :let={{_id, post}} label="User"><%= post.user_id %></:col>
+      <:col :let={{_id, post}} label="Category"><%= post.category %></:col>
+
+      <:col :let={{_id, post}} label="Reading time"><%= post.reading_time %></:col>
+
+      <:col :let={{_id, post}} label="Visibility"><%= post.visibility %></:col>
+
+      <:col :let={{_id, post}} label="Author"><%= post.author_id %></:col>
 
       <:action :let={{_id, post}}>
         <div class="sr-only">
@@ -57,11 +65,11 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   @impl true
-  def mount(_params, session, socket) do
+  def mount(_params, _session, socket) do
     {:ok,
      socket
      |> stream(:posts, Ash.read!(Conga.Posts.Post, actor: socket.assigns[:current_user]))
-     |> assign_new(:current_user, fn -> session["current_user"] end)}
+     |> assign_new(:current_user, fn -> nil end)}
   end
 
   @impl true

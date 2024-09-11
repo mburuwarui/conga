@@ -18,9 +18,17 @@ defmodule CongaWeb.PostLive.Show do
     <.list>
       <:item title="Id"><%= @post.id %></:item>
 
+      <:item title="Title"><%= @post.title %></:item>
+
       <:item title="Text"><%= @post.text %></:item>
 
-      <:item title="User"><%= @post.user_id %></:item>
+      <:item title="Category"><%= @post.category %></:item>
+
+      <:item title="Reading time"><%= @post.reading_time %></:item>
+
+      <:item title="Visibility"><%= @post.visibility %></:item>
+
+      <:item title="Author"><%= @post.author_id %></:item>
     </.list>
 
     <.back navigate={~p"/posts"}>Back to posts</.back>

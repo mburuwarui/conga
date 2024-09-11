@@ -35,7 +35,7 @@ defmodule Conga.Posts.Post do
         allow_nil? false
       end
 
-      change manage_relationship(:author_id, :author, type: :append)
+      change manage_relationship(:author_id, :user, type: :append)
 
       change set_attribute(:reading_time, expr(div(string_length(text), 200)))
     end
@@ -48,16 +48,16 @@ defmodule Conga.Posts.Post do
   policies do
     policy action_type(:read) do
       authorize_if expr(visibility == :public)
-      authorize_if relates_to_actor_via(:author)
-      authorize_if expr(relates_to_actor_via([:author, :friends]) and visibility == :friends)
+      authorize_if relates_to_actor_via(:user)
+      authorize_if expr(relates_to_actor_via([:user, :friends]) and visibility == :friends)
     end
 
     policy action_type(:update) do
-      authorize_if relates_to_actor_via(:author)
+      authorize_if relates_to_actor_via(:user)
     end
 
     policy action_type(:destroy) do
-      authorize_if relates_to_actor_via(:author)
+      authorize_if relates_to_actor_via(:user)
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Conga.Posts.Post do
   end
 
   relationships do
-    belongs_to :author, Conga.Accounts.User do
+    belongs_to :user, Conga.Accounts.User do
       public? true
       allow_nil? false
     end
