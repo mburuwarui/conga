@@ -66,7 +66,6 @@ defmodule Conga.Posts.Post do
     end
   end
 
-  # Rest of the resource definition remains the same
   attributes do
     uuid_primary_key :id
 
