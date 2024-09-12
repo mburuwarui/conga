@@ -114,7 +114,7 @@ defmodule Conga.Posts.Post do
     calculate :total_bookmarks, :integer, expr(count(bookmarks))
     calculate :total_comments, :integer, expr(count(comments))
     calculate :popularity_score, :float, expr(total_likes * 2 + total_comments + total_bookmarks)
-    calculate :reading_time, :integer, expr(div(length(:body), 200))
+    calculate :reading_time, :integer, expr(string_length(body) / 200)
   end
 
   aggregates do

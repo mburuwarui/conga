@@ -26,6 +26,8 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="Reading time"><%= @post.reading_time %></:item>
 
+      <:item title="Total likes"><%= @post.total_likes %></:item>
+
       <:item title="Visibility"><%= @post.visibility %></:item>
 
       <:item title="User"><%= @post.user_id %></:item>
@@ -54,10 +56,15 @@ defmodule CongaWeb.PostLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
+    post =
+      Conga.Posts.Post
+      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Ash.load!([:total_likes, :reading_time])
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user))}
+     |> assign(:post, post)}
   end
 
   defp page_title(:show), do: "Show Post"
