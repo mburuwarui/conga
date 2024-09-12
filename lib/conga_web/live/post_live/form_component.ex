@@ -17,6 +17,10 @@ defmodule CongaWeb.PostLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
+        <.input field={@form[:title]} label="Title" />
+        <.input field={@form[:body]} label="Body" />
+        <.input field={@form[:category]} label="Category" />
+        <.input field={@form[:visibility]} label="Visibility" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Post</.button>
         </:actions>
@@ -31,14 +35,21 @@ defmodule CongaWeb.PostLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign_form()}
+
+    # |> IO.inspect(label: "form_component_update_assigns")
   end
 
   @impl true
   def handle_event("validate", %{"post" => post_params}, socket) do
+    IO.inspect(post_params, label: "form_component_post_params")
+
     {:noreply, assign(socket, form: AshPhoenix.Form.validate(socket.assigns.form, post_params))}
   end
 
+  @impl true
   def handle_event("save", %{"post" => post_params}, socket) do
+    post_params = Map.put(post_params, "user_id", socket.assigns.current_user.id)
+
     case AshPhoenix.Form.submit(socket.assigns.form, params: post_params) do
       {:ok, post} ->
         notify_parent({:saved, post})
@@ -51,16 +62,27 @@ defmodule CongaWeb.PostLive.FormComponent do
         {:noreply, socket}
 
       {:error, form} ->
-        {:noreply, assign(socket, form: form)}
+        error_message =
+          case form.errors do
+            [] -> "Failed to save post. Please check your input."
+            [error | _] -> error.message
+          end
+
+        {:noreply, socket |> put_flash(:error, error_message) |> assign(form: form)}
     end
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
   defp assign_form(%{assigns: %{post: post}} = socket) do
+    IO.inspect(post, label: "assign_form_post")
+
     form =
       if post do
-        AshPhoenix.Form.for_update(post, :update, as: "post", actor: socket.assigns.current_user)
+        AshPhoenix.Form.for_update(post, :update,
+          as: "post",
+          actor: socket.assigns.current_user
+        )
       else
         AshPhoenix.Form.for_create(Conga.Posts.Post, :create,
           as: "post",

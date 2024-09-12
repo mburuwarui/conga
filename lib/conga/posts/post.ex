@@ -26,18 +26,20 @@ defmodule Conga.Posts.Post do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:read, :destroy]
 
-    create :publish do
-      accept [:title, :text, :category, :visibility]
+    create :create do
+      accept [:title, :body, :category, :visibility]
 
-      argument :author_id, :uuid do
+      argument :user_id, :uuid do
         allow_nil? false
       end
 
-      change manage_relationship(:author_id, :user, type: :append)
+      change manage_relationship(:user_id, :user, type: :append)
+    end
 
-      change set_attribute(:reading_time, expr(div(string_length(text), 200)))
+    update :update do
+      accept [:title, :body, :category, :visibility]
     end
 
     read :list_public do
@@ -49,7 +51,6 @@ defmodule Conga.Posts.Post do
     policy action_type(:read) do
       authorize_if expr(visibility == :public)
       authorize_if relates_to_actor_via(:user)
-      authorize_if expr(relates_to_actor_via([:user, :friends]) and visibility == :friends)
     end
 
     policy action_type(:update) do
@@ -59,8 +60,13 @@ defmodule Conga.Posts.Post do
     policy action_type(:destroy) do
       authorize_if relates_to_actor_via(:user)
     end
+
+    policy action_type(:create) do
+      authorize_if actor_present()
+    end
   end
 
+  # Rest of the resource definition remains the same
   attributes do
     uuid_primary_key :id
 
@@ -70,7 +76,7 @@ defmodule Conga.Posts.Post do
       description "The title of the blog post"
     end
 
-    attribute :text, :string do
+    attribute :body, :string do
       allow_nil? false
       public? true
       description "The main content of the blog post"
@@ -80,12 +86,6 @@ defmodule Conga.Posts.Post do
       allow_nil? false
       public? true
       description "The category of the blog post"
-    end
-
-    attribute :reading_time, :integer do
-      default 0
-      public? true
-      description "Estimated reading time in minutes"
     end
 
     attribute :visibility, :atom do
@@ -114,6 +114,7 @@ defmodule Conga.Posts.Post do
     calculate :total_bookmarks, :integer, expr(count(bookmarks))
     calculate :total_comments, :integer, expr(count(comments))
     calculate :popularity_score, :float, expr(total_likes * 2 + total_comments + total_bookmarks)
+    calculate :reading_time, :integer, expr(div(length(:body), 200))
   end
 
   aggregates do
@@ -125,7 +126,6 @@ defmodule Conga.Posts.Post do
   pub_sub do
     module CongaWeb.Endpoint
     prefix "post"
-
     publish_all :create, ["posts"]
     publish_all :update, ["posts"]
     publish_all :destroy, ["posts"]
