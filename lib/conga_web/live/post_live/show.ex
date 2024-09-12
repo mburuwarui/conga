@@ -33,6 +33,16 @@ defmodule CongaWeb.PostLive.Show do
       <:item title="User"><%= @post.user_id %></:item>
     </.list>
 
+    <.header class="mt-4">Comments</.header>
+
+    <ul>
+      <%= for comment <- @post.comments do %>
+        <li>
+          <%= comment.body %>
+        </li>
+      <% end %>
+    </ul>
+
     <.back navigate={~p"/posts"}>Back to posts</.back>
 
     <.modal :if={@live_action == :edit} id="post-modal" show on_cancel={JS.patch(~p"/posts/#{@post}")}>
@@ -59,7 +69,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:total_likes, :reading_time])
+      |> Ash.load!([:total_likes, :reading_time, :comments])
 
     {:noreply,
      socket

@@ -35,12 +35,12 @@ defmodule Conga.Posts.Comment do
         allow_nil? false
       end
 
-      argument :author_id, :uuid do
+      argument :user_id, :uuid do
         allow_nil? false
       end
 
       change manage_relationship(:post_id, :post, type: :append)
-      change manage_relationship(:author_id, :user, type: :append)
+      change manage_relationship(:user_id, :user, type: :append)
     end
 
     update :approve do
