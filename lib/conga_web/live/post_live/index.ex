@@ -70,9 +70,14 @@ defmodule CongaWeb.PostLive.Index do
 
     IO.inspect(current_user, label: "index_current_user")
 
+    posts =
+      Conga.Posts.Post
+      |> Ash.read!(actor: current_user)
+      |> Ash.load!([:total_likes, :reading_time])
+
     {:ok,
      socket
-     |> stream(:posts, Ash.read!(Conga.Posts.Post, actor: current_user))
+     |> stream(:posts, posts)
      |> assign_new(:current_user, fn -> nil end)}
     |> IO.inspect(label: "index_mount/2")
   end
