@@ -35,14 +35,10 @@ defmodule CongaWeb.PostLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign_form()}
-
-    # |> IO.inspect(label: "form_component_update_assigns")
   end
 
   @impl true
   def handle_event("validate", %{"post" => post_params}, socket) do
-    IO.inspect(post_params, label: "form_component_post_params")
-
     {:noreply, assign(socket, form: AshPhoenix.Form.validate(socket.assigns.form, post_params))}
   end
 

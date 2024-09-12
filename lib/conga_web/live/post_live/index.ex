@@ -68,8 +68,6 @@ defmodule CongaWeb.PostLive.Index do
   def mount(_params, _session, socket) do
     current_user = socket.assigns.current_user
 
-    IO.inspect(current_user, label: "index_current_user")
-
     posts =
       Conga.Posts.Post
       |> Ash.read!(actor: current_user)
@@ -79,7 +77,6 @@ defmodule CongaWeb.PostLive.Index do
      socket
      |> stream(:posts, posts)
      |> assign_new(:current_user, fn -> nil end)}
-    |> IO.inspect(label: "index_mount/2")
   end
 
   @impl true
