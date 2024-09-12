@@ -22,7 +22,7 @@ defmodule CongaWeb.PostLive.Index do
 
       <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
 
-      <:col :let={{_id, post}} label="Text"><%= post.body %></:col>
+      <:col :let={{_id, post}} label="Body"><%= post.body %></:col>
 
       <:col :let={{_id, post}} label="Category"><%= post.category %></:col>
 

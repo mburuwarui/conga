@@ -20,7 +20,7 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="Title"><%= @post.title %></:item>
 
-      <:item title="Text"><%= @post.body %></:item>
+      <:item title="Body"><%= @post.body %></:item>
 
       <:item title="Category"><%= @post.category %></:item>
 
