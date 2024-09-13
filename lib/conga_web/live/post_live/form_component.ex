@@ -58,13 +58,7 @@ defmodule CongaWeb.PostLive.FormComponent do
         {:noreply, socket}
 
       {:error, form} ->
-        error_message =
-          case form.errors do
-            [] -> "Failed to save post. Please check your input."
-            [error | _] -> error.message
-          end
-
-        {:noreply, socket |> put_flash(:error, error_message) |> assign(form: form)}
+        {:noreply, assign(socket, form: form)}
     end
   end
 

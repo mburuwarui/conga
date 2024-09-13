@@ -37,7 +37,9 @@ defmodule CongaWeb.PostLive.Index do
           <.link navigate={~p"/posts/#{post}"}>Show</.link>
         </div>
 
-        <.link patch={~p"/posts/#{post}/edit"}>Edit</.link>
+        <.link patch={~p"/posts/#{post}/edit"}>
+          <.icon name="hero-pencil" class="text-blue-500" />
+        </.link>
       </:action>
 
       <:action :let={{id, post}}>
@@ -45,7 +47,7 @@ defmodule CongaWeb.PostLive.Index do
           phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
           data-confirm="Are you sure?"
         >
-          Delete
+          <.icon name="hero-trash" class="text-red-500" />
         </.link>
       </:action>
     </.table>
