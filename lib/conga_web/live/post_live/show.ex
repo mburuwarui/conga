@@ -100,7 +100,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:total_likes, :reading_time, :comments])
+      |> Ash.load!([:total_likes, :total_comments, :reading_time, :comments])
 
     IO.inspect(post.comments, label: "post_comments")
 
@@ -113,7 +113,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:total_likes, :reading_time, :comments])
+      |> Ash.load!([:comments])
 
     socket
     |> assign(:page_title, "Edit Post")

@@ -55,15 +55,10 @@ defmodule CongaWeb.CommentLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    post =
-      Conga.Posts.Post
-      |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:comments])
-
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:comment, post.comments |> Enum.find(&(&1.id == id)))}
+     |> assign(:comment, Ash.get!(Conga.Posts.Comment, id, actor: socket.assigns.current_user))}
   end
 
   defp page_title(:show), do: "Show Comment"
