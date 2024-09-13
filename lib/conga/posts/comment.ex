@@ -14,6 +14,10 @@ defmodule Conga.Posts.Comment do
 
   graphql do
     type :comment
+
+    queries do
+      get :get_comment, :read
+    end
   end
 
   postgres do

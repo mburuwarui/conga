@@ -27,6 +27,10 @@ defmodule Conga.Accounts.User do
 
   graphql do
     type :user
+
+    queries do
+      get :get_user, :read
+    end
   end
 
   postgres do

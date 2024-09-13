@@ -14,6 +14,10 @@ defmodule Conga.Posts.Post do
 
   graphql do
     type :post
+
+    queries do
+      get :get_post, :read
+    end
   end
 
   postgres do
