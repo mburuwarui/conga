@@ -18,7 +18,6 @@ defmodule CongaWeb.CommentLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:content]} label="Content" />
-        <.input field={@form[:is_approved]} label="Is approved" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Comment</.button>
         </:actions>

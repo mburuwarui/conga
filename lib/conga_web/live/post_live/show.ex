@@ -28,6 +28,8 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="Total likes"><%= @post.total_likes %></:item>
 
+      <:item title="Total comments"><%= @post.total_comments %></:item>
+
       <:item title="Visibility"><%= @post.visibility %></:item>
 
       <:item title="User"><%= @post.user_id %></:item>
@@ -45,7 +47,7 @@ defmodule CongaWeb.PostLive.Show do
     <ul>
       <%= for comment <- @post.comments do %>
         <li>
-          <%= comment.body %>
+          <%= comment.content %>
         </li>
       <% end %>
     </ul>
@@ -86,9 +88,7 @@ defmodule CongaWeb.PostLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     socket
-     |> stream(:comments, Ash.read!(Conga.Posts.Comment, actor: socket.assigns[:current_user]))}
+    {:ok, socket}
   end
 
   @impl true
@@ -101,6 +101,8 @@ defmodule CongaWeb.PostLive.Show do
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
       |> Ash.load!([:total_likes, :reading_time, :comments])
+
+    IO.inspect(post.comments, label: "post_comments")
 
     socket
     |> assign(:page_title, "Show Post")
@@ -124,7 +126,7 @@ defmodule CongaWeb.PostLive.Show do
     |> assign(:comment, nil)
   end
 
-  defp apply_action(socket, :edit_comment, %{"id" => id}) do
+  defp apply_action(socket, :edit_comment, %{"c_id" => id}) do
     comment =
       Conga.Posts.Comment
       |> Ash.get!(id, actor: socket.assigns.current_user)

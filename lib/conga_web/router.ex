@@ -73,8 +73,8 @@ defmodule CongaWeb.Router do
       live "/posts/:id/show/edit", PostLive.Show, :edit
 
       live "/posts/:id/comments/new", PostLive.Show, :new_comment
-      live "/posts/:id/comments/:id/edit", PosttLive.Show, :edit_comment
-      live "/posts/:id/comments/:id/show/edit", CommentLive.Show, :edit
+      live "/posts/:id/comments/:c_id/edit", PosttLive.Show, :edit_comment
+      live "/posts/:id/comments/:c_id/show/edit", CommentLive.Show, :edit
     end
 
     ash_authentication_live_session :authentication_optional,

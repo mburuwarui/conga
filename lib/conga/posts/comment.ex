@@ -26,9 +26,9 @@ defmodule Conga.Posts.Comment do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:read, :destroy]
 
-    create :add_comment do
+    create :create do
       accept [:content]
 
       argument :post_id, :uuid do
@@ -43,7 +43,7 @@ defmodule Conga.Posts.Comment do
       change manage_relationship(:user_id, :user, type: :append)
     end
 
-    update :approve do
+    update :update do
       accept []
       change set_attribute(:is_approved, true)
     end
@@ -78,7 +78,7 @@ defmodule Conga.Posts.Comment do
     end
 
     attribute :is_approved, :boolean do
-      default false
+      default true
       public? true
       description "Whether the comment has been approved by a moderator"
     end
