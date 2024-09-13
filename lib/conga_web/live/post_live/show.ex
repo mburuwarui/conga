@@ -47,7 +47,14 @@ defmodule CongaWeb.PostLive.Show do
     <ul>
       <%= for comment <- @post.comments do %>
         <li>
+          <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
+            <.button>Edit comment</.button>
+          </.link>
+
           <%= comment.content %>
+          <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: comment.id})}>
+            Delete
+          </.link>
         </li>
       <% end %>
     </ul>
@@ -74,7 +81,7 @@ defmodule CongaWeb.PostLive.Show do
     >
       <.live_component
         module={CongaWeb.CommentLive.FormComponent}
-        id={(@comment && @comment.id) || :new}
+        id={(@comment && @comment.id) || :new_comment}
         title={@page_title}
         current_user={@current_user}
         action={@live_action}
@@ -130,10 +137,17 @@ defmodule CongaWeb.PostLive.Show do
     comment =
       Conga.Posts.Comment
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:post])
 
     socket
     |> assign(:page_title, "Edit Comment")
     |> assign(:comment, comment)
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    comment = Ash.get!(Conga.Posts.Comment, id, actor: socket.assigns.current_user)
+    Ash.destroy!(comment, actor: socket.assigns.current_user)
+
+    {:noreply, stream_delete(socket, :comments, comment)}
   end
 end
