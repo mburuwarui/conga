@@ -10,7 +10,7 @@ defmodule CongaWeb.PostLive.Show do
 
       <:actions>
         <.link patch={~p"/posts/#{@post}/show/edit"} phx-click={JS.push_focus()}>
-          <.button>Edit post</.button>
+          <.icon name="hero-pencil" class="text-blue-500" />
         </.link>
       </:actions>
     </.header>
@@ -35,29 +35,31 @@ defmodule CongaWeb.PostLive.Show do
       <:item title="User"><%= @post.user_id %></:item>
     </.list>
 
-    <.header class="mt-8">
-      Listing Comments
+    <.header class="my-8">
       <:actions>
         <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
           <.button>New Comment</.button>
         </.link>
       </:actions>
     </.header>
-
-    <ul>
+    <div class="grid grid-cols-1 gap-4">
       <%= for comment <- @post.comments do %>
-        <li>
-          <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
-            <.button>Edit comment</.button>
-          </.link>
-
+        <div class="flex items-center justify-between gap-4 pb-4 border-b-gray-200 border-b-[1px]">
           <%= comment.content %>
-          <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: comment.id})}>
-            Delete
-          </.link>
-        </li>
+          <div>
+            <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
+              <.icon name="hero-pencil" class="text-blue-500" />
+            </.link>
+            <.link
+              data-confirm="Are you sure?"
+              phx-click={JS.push("delete", value: %{id: comment.id})}
+            >
+              <.icon name="hero-trash" class="text-red-500" />
+            </.link>
+          </div>
+        </div>
       <% end %>
-    </ul>
+    </div>
 
     <.back navigate={~p"/posts"}>Back to posts</.back>
 

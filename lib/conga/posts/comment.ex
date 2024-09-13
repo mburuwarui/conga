@@ -48,7 +48,7 @@ defmodule Conga.Posts.Comment do
     end
 
     update :update do
-      accept []
+      accept [:content]
       change set_attribute(:is_approved, true)
     end
   end
