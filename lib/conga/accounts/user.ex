@@ -9,6 +9,13 @@ defmodule Conga.Accounts.User do
 
   json_api do
     type "user"
+
+    routes do
+      base "/users"
+
+      get :read
+      post :create
+    end
   end
 
   authentication do

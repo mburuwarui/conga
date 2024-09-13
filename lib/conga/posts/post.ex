@@ -10,6 +10,13 @@ defmodule Conga.Posts.Post do
 
   json_api do
     type "post"
+
+    routes do
+      base "/posts"
+
+      get :read
+      post :create
+    end
   end
 
   graphql do
