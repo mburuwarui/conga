@@ -70,15 +70,20 @@ defmodule CongaWeb.Router do
       on_mount: {CongaWeb.LiveUserAuth, :live_user_required} do
       live "/posts/new", PostLive.Index, :new
       live "/posts/:id/edit", PostLive.Index, :edit
-
       live "/posts/:id/show/edit", PostLive.Show, :edit
+
+      live "/posts/:id/comments/new", PostLive.Show, :new_comment
+      live "/posts/:id/comments/:id/edit", PosttLive.Show, :edit_comment
+      live "/posts/:id/comments/:id/show/edit", CommentLive.Show, :edit
     end
 
     ash_authentication_live_session :authentication_optional,
       on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
       live "/posts", PostLive.Index, :index
-
       live "/posts/:id", PostLive.Show, :show
+
+      # live "/posts/:id/comments", CommentLive.Index, :index
+      # live "/posts/:id/comments/:id", CommentLive.Show, :show
     end
   end
 
