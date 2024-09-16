@@ -73,7 +73,7 @@ defmodule CongaWeb.PostLive.Index do
     posts =
       Conga.Posts.Post
       |> Ash.read!(actor: current_user)
-      |> Ash.load!([:total_likes, :reading_time])
+      |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks])
 
     {:ok,
      socket
@@ -111,7 +111,9 @@ defmodule CongaWeb.PostLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    post = Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
+    post =
+      Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
+
     Ash.destroy!(post, actor: socket.assigns.current_user)
 
     {:noreply, stream_delete(socket, :posts, post)}

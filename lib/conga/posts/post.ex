@@ -1,4 +1,6 @@
 defmodule Conga.Posts.Post do
+  require Ecto.Query
+
   use Ash.Resource,
     otp_app: :conga,
     domain: Conga.Posts,
@@ -30,10 +32,21 @@ defmodule Conga.Posts.Post do
   postgres do
     table "posts"
     repo Conga.Repo
+
+    references do
+      reference :user do
+        on_delete :delete
+      end
+    end
   end
 
   resource do
     description "A blog post with extended features and policies"
+  end
+
+  code_interface do
+    define :like
+    define :dislike
   end
 
   actions do
@@ -50,7 +63,34 @@ defmodule Conga.Posts.Post do
     end
 
     update :update do
+      primary? true
       accept [:title, :body, :category, :visibility]
+    end
+
+    update :like do
+      accept []
+
+      manual fn changeset, %{actor: actor} ->
+        with {:ok, _} <- Conga.Posts.Like.like(changeset.data.id, actor: actor) do
+          {:ok, changeset.data}
+        end
+      end
+    end
+
+    update :dislike do
+      accept []
+
+      manual fn changeset, %{actor: actor} ->
+        like =
+          Ecto.Query.from(like in Conga.Posts.Like,
+            where: like.user_id == ^actor.id,
+            where: like.post_id == ^changeset.data.id
+          )
+
+        Conga.Repo.delete_all(like)
+
+        {:ok, changeset.data}
+      end
     end
 
     read :list_public do
@@ -125,6 +165,12 @@ defmodule Conga.Posts.Post do
     calculate :total_comments, :integer, expr(count(comments))
     calculate :popularity_score, :float, expr(total_likes * 2 + total_comments + total_bookmarks)
     calculate :reading_time, :integer, expr(string_length(body) / 200)
+
+    calculate :liked_by_user, :boolean, expr(exists(likes, user_id: ^arg(:user_id))) do
+      argument :user_id, :uuid do
+        allow_nil? true
+      end
+    end
   end
 
   aggregates do

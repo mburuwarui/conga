@@ -23,6 +23,16 @@ defmodule Conga.Posts.Comment do
   postgres do
     table "comments"
     repo Conga.Repo
+
+    references do
+      reference :user do
+        on_delete :delete
+      end
+
+      reference :post do
+        on_delete :delete
+      end
+    end
   end
 
   resource do

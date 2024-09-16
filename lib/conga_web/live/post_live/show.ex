@@ -5,13 +5,15 @@ defmodule CongaWeb.PostLive.Show do
   def render(assigns) do
     ~H"""
     <.header>
-      Post <%= @post.id %>
+      Post <%= @post.title %>
       <:subtitle>This is a post record from your database.</:subtitle>
 
       <:actions>
-        <.link patch={~p"/posts/#{@post}/show/edit"} phx-click={JS.push_focus()}>
-          <.icon name="hero-pencil" class="text-blue-500" />
-        </.link>
+        <%= if @current_user do %>
+          <.link patch={~p"/posts/#{@post}/show/edit"} phx-click={JS.push_focus()}>
+            <.icon name="hero-pencil" class="text-blue-500" />
+          </.link>
+        <% end %>
       </:actions>
     </.header>
 
@@ -35,7 +37,23 @@ defmodule CongaWeb.PostLive.Show do
       <:item title="User"><%= @post.user_id %></:item>
     </.list>
 
-    <.header class="my-8">
+    <.header class="my-8 justify-between">
+      <%= if @current_user do %>
+        <%= if @post.liked_by_user do %>
+          <.button phx-click="dislike" phx-value-id={@post.id}>
+            <.icon name="hero-heart-solid" class="text-red-500" />
+          </.button>
+        <% else %>
+          <.button phx-click="like" phx-value-id={@post.id}>
+            <.icon name="hero-heart" class="text-red-500" />
+          </.button>
+        <% end %>
+      <% else %>
+        <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+          <.icon name="hero-heart" class="text-red-500" />
+        </.link>
+      <% end %>
+
       <:actions>
         <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
           <.button>New Comment</.button>
@@ -46,17 +64,22 @@ defmodule CongaWeb.PostLive.Show do
       <%= for comment <- @post.comments do %>
         <div class="flex items-center justify-between gap-4 pb-4 border-b-gray-200 border-b-[1px]">
           <%= comment.content %>
-          <div>
-            <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
-              <.icon name="hero-pencil" class="text-blue-500" />
-            </.link>
-            <.link
-              data-confirm="Are you sure?"
-              phx-click={JS.push("delete", value: %{id: comment.id})}
-            >
-              <.icon name="hero-trash" class="text-red-500" />
-            </.link>
-          </div>
+
+          <%= if @current_user  do %>
+            <div>
+              <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
+                <.icon name="hero-pencil" class="text-blue-500" />
+              </.link>
+              <.link
+                data-confirm="Are you sure?"
+                phx-click={JS.push("delete", value: %{id: comment.id})}
+              >
+                <.icon name="hero-trash" class="text-red-500" />
+              </.link>
+            </div>
+          <% else %>
+            hi
+          <% end %>
         </div>
       <% end %>
     </div>
@@ -109,7 +132,14 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:total_likes, :total_comments, :reading_time, :comments])
+      |> Ash.load!([
+        :total_likes,
+        :total_comments,
+        :reading_time,
+        :comments,
+        :likes,
+        liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id}
+      ])
 
     IO.inspect(post.comments, label: "post_comments")
 
@@ -143,6 +173,27 @@ defmodule CongaWeb.PostLive.Show do
     socket
     |> assign(:page_title, "Edit Comment")
     |> assign(:comment, comment)
+  end
+
+  @impl true
+  def handle_event("like", _params, socket) do
+    post =
+      socket.assigns.post
+      |> Conga.Posts.Post.like!(actor: socket.assigns.current_user)
+      |> Map.put(:liked_by_user, true)
+      |> Ash.load!([:total_likes])
+
+    {:noreply, assign(socket, :post, post)}
+  end
+
+  def handle_event("dislike", _params, socket) do
+    post =
+      socket.assigns.post
+      |> Conga.Posts.Post.dislike!(actor: socket.assigns.current_user)
+      |> Map.put(:liked_by_user, false)
+      |> Ash.load!([:total_likes])
+
+    {:noreply, assign(socket, :post, post)}
   end
 
   @impl true

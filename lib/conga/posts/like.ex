@@ -19,43 +19,43 @@ defmodule Conga.Posts.Like do
   postgres do
     table "likes"
     repo Conga.Repo
+
+    references do
+      reference :user do
+        on_delete :delete
+      end
+
+      reference :post do
+        on_delete :delete
+      end
+
+      reference :comment do
+        on_delete :delete
+      end
+    end
   end
 
   resource do
     description "A like on a post or comment"
   end
 
-  actions do
-    defaults [:create, :read, :destroy]
+  code_interface do
+    define :like, args: [:post_id]
+  end
 
-    create :like_post do
-      accept []
+  actions do
+    defaults [:read, :destroy]
+
+    create :like do
+      upsert? true
+      upsert_identity :unique_user_and_post
 
       argument :post_id, :uuid do
         allow_nil? false
       end
 
-      argument :user_id, :uuid do
-        allow_nil? false
-      end
-
-      change manage_relationship(:post_id, :post, type: :append)
-      change manage_relationship(:user_id, :user, type: :append)
-    end
-
-    create :like_comment do
-      accept []
-
-      argument :comment_id, :uuid do
-        allow_nil? false
-      end
-
-      argument :user_id, :uuid do
-        allow_nil? false
-      end
-
-      change manage_relationship(:comment_id, :comment, type: :append)
-      change manage_relationship(:user_id, :user, type: :append)
+      change set_attribute(:post_id, arg(:post_id))
+      change relate_actor(:user)
     end
   end
 
@@ -94,6 +94,10 @@ defmodule Conga.Posts.Like do
       public? true
       allow_nil? true
     end
+  end
+
+  identities do
+    identity :unique_user_and_post, [:user_id, :post_id]
   end
 
   pub_sub do
