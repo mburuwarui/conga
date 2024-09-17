@@ -62,28 +62,19 @@ defmodule CongaWeb.PostLive.Show do
         </.link>
       </:actions>
     </.header>
-    <div class="grid grid-cols-1 gap-4">
-      <%= for comment <- @post.comments do %>
-        <div class="flex items-center justify-between gap-4 pb-4 border-b-gray-200 border-b-[1px]">
-          <%= comment.content %>
+    <div :for={comment <- @post.comments} class="grid grid-cols-1 gap-4">
+      <div class="flex items-center justify-between gap-4 pb-4 border-b-gray-200 border-b-[1px]">
+        <%= comment.content %>
 
-          <%= if @current_user  do %>
-            <div>
-              <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
-                <.icon name="hero-pencil" class="text-blue-500" />
-              </.link>
-              <.link
-                data-confirm="Are you sure?"
-                phx-click={JS.push("delete", value: %{id: comment.id})}
-              >
-                <.icon name="hero-trash" class="text-red-500" />
-              </.link>
-            </div>
-          <% else %>
-            hi
-          <% end %>
+        <div :if={@current_user} class="flex gap-2">
+          <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
+            <.icon name="hero-pencil" class="text-blue-500" />
+          </.link>
+          <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: comment.id})}>
+            <.icon name="hero-trash" class="text-red-500" />
+          </.link>
         </div>
-      <% end %>
+      </div>
     </div>
 
     <.back navigate={~p"/posts"}>Back to posts</.back>
@@ -134,7 +125,6 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Conga.Posts.Post.inc_page_views!(actor: socket.assigns.current_user, authorize?: false)
       |> Ash.load!([
         :total_likes,
         :total_comments,
@@ -145,6 +135,14 @@ defmodule CongaWeb.PostLive.Show do
       ])
 
     IO.inspect(post, label: "post")
+
+    # Only increment page views if it's not a reconnection
+    unless connected?(socket) do
+      Conga.Posts.Post.inc_page_views!(post,
+        actor: socket.assigns.current_user,
+        authorize?: false
+      )
+    end
 
     socket
     |> assign(:page_title, "Show Post")

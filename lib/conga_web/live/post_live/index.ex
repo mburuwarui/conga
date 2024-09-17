@@ -7,7 +7,7 @@ defmodule CongaWeb.PostLive.Index do
     <.header>
       Listing Posts
       <:actions>
-        <.link patch={~p"/posts/new"}>
+        <.link :if={@current_user} patch={~p"/posts/new"}>
           <.button>New Post</.button>
         </.link>
       </:actions>
@@ -37,13 +37,14 @@ defmodule CongaWeb.PostLive.Index do
           <.link navigate={~p"/posts/#{post}"}>Show</.link>
         </div>
 
-        <.link patch={~p"/posts/#{post}/edit"}>
+        <.link :if={@current_user} patch={~p"/posts/#{post}/edit"}>
           <.icon name="hero-pencil" class="text-blue-500" />
         </.link>
       </:action>
 
       <:action :let={{id, post}}>
         <.link
+          :if={@current_user}
           phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
           data-confirm="Are you sure?"
         >
