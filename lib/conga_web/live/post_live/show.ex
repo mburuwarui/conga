@@ -40,13 +40,13 @@ defmodule CongaWeb.PostLive.Show do
     <.header class="my-8 justify-between">
       <%= if @current_user do %>
         <%= if @post.liked_by_user do %>
-          <.button phx-click="dislike" phx-value-id={@post.id}>
+          <button phx-click="dislike" phx-value-id={@post.id}>
             <.icon name="hero-heart-solid" class="text-red-500" />
-          </.button>
+          </button>
         <% else %>
-          <.button phx-click="like" phx-value-id={@post.id}>
+          <button phx-click="like" phx-value-id={@post.id}>
             <.icon name="hero-heart" class="text-red-500" />
-          </.button>
+          </button>
         <% end %>
       <% else %>
         <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
