@@ -134,7 +134,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Conga.Posts.Post.inc_page_views!(actor: socket.assigns.current_user)
+      |> Conga.Posts.Post.inc_page_views!(actor: socket.assigns.current_user, authorize?: false)
       |> Ash.load!([
         :total_likes,
         :total_comments,
