@@ -34,6 +34,10 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="Total comments"><%= @post.total_comments %></:item>
 
+      <:item title="Total bookmarks"><%= @post.total_bookmarks %></:item>
+
+      <:item title="Popularity score"><%= @post.popularity_score %></:item>
+
       <:item title="Visibility"><%= @post.visibility %></:item>
 
       <:item title="User"><%= @post.user_id %></:item>
@@ -50,9 +54,21 @@ defmodule CongaWeb.PostLive.Show do
             <.icon name="hero-heart" class="text-red-500" />
           </button>
         <% end %>
+        <%= if @post.bookmarked_by_user do %>
+          <button phx-click="unbookmark" phx-value-id={@post.id}>
+            <.icon name="hero-bookmark-solid" class="text-blue-500" />
+          </button>
+        <% else %>
+          <button phx-click="bookmark" phx-value-id={@post.id}>
+            <.icon name="hero-bookmark" class="text-blue-500" />
+          </button>
+        <% end %>
       <% else %>
         <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
           <.icon name="hero-heart" class="text-red-500" />
+        </.link>
+        <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+          <.icon name="hero-bookmark" class="text-blue-500" />
         </.link>
       <% end %>
 
@@ -129,9 +145,14 @@ defmodule CongaWeb.PostLive.Show do
         :total_likes,
         :total_comments,
         :reading_time,
+        :popularity_score,
         :comments,
+        :bookmarks,
         :likes,
-        liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id}
+        liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
+        bookmarked_by_user: %{
+          user_id: socket.assigns.current_user && socket.assigns.current_user.id
+        }
       ])
 
     # IO.inspect(post, label: "post")
@@ -182,7 +203,7 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.like!(actor: socket.assigns.current_user)
       |> Map.put(:liked_by_user, true)
-      |> Ash.load!([:total_likes])
+      |> Ash.load!([:total_likes, :popularity_score])
 
     {:noreply, assign(socket, :post, post)}
   end
@@ -192,7 +213,28 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.dislike!(actor: socket.assigns.current_user)
       |> Map.put(:liked_by_user, false)
-      |> Ash.load!([:total_likes])
+      |> Ash.load!([:total_likes, :popularity_score])
+
+    {:noreply, assign(socket, :post, post)}
+  end
+
+  @impl true
+  def handle_event("bookmark", _params, socket) do
+    post =
+      socket.assigns.post
+      |> Conga.Posts.Post.bookmark!(actor: socket.assigns.current_user)
+      |> Map.put(:bookmarked_by_user, true)
+      |> Ash.load!([:total_bookmarks, :popularity_score])
+
+    {:noreply, assign(socket, :post, post)}
+  end
+
+  def handle_event("unbookmark", _params, socket) do
+    post =
+      socket.assigns.post
+      |> Conga.Posts.Post.unbookmark!(actor: socket.assigns.current_user)
+      |> Map.put(:bookmarked_by_user, false)
+      |> Ash.load!([:total_bookmarks, :popularity_score])
 
     {:noreply, assign(socket, :post, post)}
   end

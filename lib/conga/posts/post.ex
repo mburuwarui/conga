@@ -47,6 +47,8 @@ defmodule Conga.Posts.Post do
   code_interface do
     define :like
     define :dislike
+    define :unbookmark
+    define :bookmark
     define :inc_page_views
   end
 
@@ -89,6 +91,32 @@ defmodule Conga.Posts.Post do
           )
 
         Conga.Repo.delete_all(like)
+
+        {:ok, changeset.data}
+      end
+    end
+
+    update :bookmark do
+      accept []
+
+      manual fn changeset, %{actor: actor} ->
+        with {:ok, _} <- Conga.Posts.Bookmark.bookmark_post(changeset.data.id, actor: actor) do
+          {:ok, changeset.data}
+        end
+      end
+    end
+
+    update :unbookmark do
+      accept []
+
+      manual fn changeset, %{actor: actor} ->
+        bookmark =
+          Ecto.Query.from(like in Conga.Posts.Bookmark,
+            where: like.user_id == ^actor.id,
+            where: like.post_id == ^changeset.data.id
+          )
+
+        Conga.Repo.delete_all(bookmark)
 
         {:ok, changeset.data}
       end
@@ -180,6 +208,12 @@ defmodule Conga.Posts.Post do
     calculate :reading_time, :integer, expr(string_length(body) / 200)
 
     calculate :liked_by_user, :boolean, expr(exists(likes, user_id: ^arg(:user_id))) do
+      argument :user_id, :uuid do
+        allow_nil? true
+      end
+    end
+
+    calculate :bookmarked_by_user, :boolean, expr(exists(bookmarks, user_id: ^arg(:user_id))) do
       argument :user_id, :uuid do
         allow_nil? true
       end

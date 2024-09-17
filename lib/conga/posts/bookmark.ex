@@ -25,27 +25,33 @@ defmodule Conga.Posts.Bookmark do
     description "A bookmark of a post by a user"
   end
 
+  code_interface do
+    define :bookmark_post, args: [:post_id]
+  end
+
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:read, :destroy]
 
     create :bookmark_post do
-      accept [:notes]
+      upsert? true
+      upsert_identity :unique_user_and_post
 
       argument :post_id, :uuid do
         allow_nil? false
       end
 
-      argument :user_id, :uuid do
-        allow_nil? false
-      end
-
-      change manage_relationship(:post_id, :post, type: :append)
-      change manage_relationship(:user_id, :user, type: :append)
+      change set_attribute(:post_id, arg(:post_id))
+      change relate_actor(:user)
     end
+  end
 
-    update :update_notes do
-      accept [:notes]
-    end
+  pub_sub do
+    module CongaWeb.Endpoint
+    prefix "bookmark"
+
+    publish_all :create, ["bookmarks"]
+    publish_all :update, ["bookmarks"]
+    publish_all :destroy, ["bookmarks"]
   end
 
   policies do
@@ -62,22 +68,8 @@ defmodule Conga.Posts.Bookmark do
     end
   end
 
-  pub_sub do
-    module CongaWeb.Endpoint
-    prefix "bookmark"
-
-    publish_all :create, ["bookmarks"]
-    publish_all :update, ["bookmarks"]
-    publish_all :destroy, ["bookmarks"]
-  end
-
   attributes do
     uuid_primary_key :id
-
-    attribute :notes, :string do
-      public? true
-      description "Optional notes for the bookmark"
-    end
 
     timestamps()
   end
@@ -92,5 +84,9 @@ defmodule Conga.Posts.Bookmark do
       public? true
       allow_nil? false
     end
+  end
+
+  identities do
+    identity :unique_user_and_post, [:user_id, :post_id]
   end
 end
