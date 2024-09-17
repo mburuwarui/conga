@@ -134,7 +134,7 @@ defmodule CongaWeb.PostLive.Show do
         liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id}
       ])
 
-    IO.inspect(post, label: "post")
+    # IO.inspect(post, label: "post")
 
     # Only increment page views if it's not a reconnection
     unless connected?(socket) do
