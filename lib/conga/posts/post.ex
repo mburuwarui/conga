@@ -47,6 +47,7 @@ defmodule Conga.Posts.Post do
   code_interface do
     define :like
     define :dislike
+    define :inc_page_views
   end
 
   actions do
@@ -91,6 +92,12 @@ defmodule Conga.Posts.Post do
 
         {:ok, changeset.data}
       end
+    end
+
+    update :inc_page_views do
+      accept []
+
+      change increment(:page_views, amount: 1)
     end
 
     read :list_public do
@@ -143,6 +150,12 @@ defmodule Conga.Posts.Post do
       default :public
       public? true
       description "Visibility setting for the post"
+    end
+
+    attribute :page_views, :integer do
+      default 0
+      public? true
+      description "The number of views for the post"
     end
 
     timestamps()

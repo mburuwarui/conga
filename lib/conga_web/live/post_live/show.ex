@@ -28,6 +28,8 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="Reading time"><%= @post.reading_time %></:item>
 
+      <:item title="View count"><%= @post.page_views %></:item>
+
       <:item title="Total likes"><%= @post.total_likes %></:item>
 
       <:item title="Total comments"><%= @post.total_comments %></:item>
@@ -132,6 +134,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Conga.Posts.Post.inc_page_views!(actor: socket.assigns.current_user)
       |> Ash.load!([
         :total_likes,
         :total_comments,
@@ -141,7 +144,7 @@ defmodule CongaWeb.PostLive.Show do
         liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id}
       ])
 
-    IO.inspect(post.comments, label: "post_comments")
+    IO.inspect(post, label: "post")
 
     socket
     |> assign(:page_title, "Show Post")
