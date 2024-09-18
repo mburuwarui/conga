@@ -32,6 +32,10 @@ defmodule Conga.Posts.Comment do
       reference :post do
         on_delete :delete
       end
+
+      reference :comment do
+        on_delete :delete
+      end
     end
   end
 
@@ -39,10 +43,15 @@ defmodule Conga.Posts.Comment do
     description "A comment on a blog post"
   end
 
+  code_interface do
+    define :create_child_comment, args: [:post_id, :comment_id]
+  end
+
   actions do
     defaults [:read, :destroy]
 
     create :create do
+      primary? true
       accept [:content]
 
       argument :post_id, :uuid do
@@ -55,6 +64,29 @@ defmodule Conga.Posts.Comment do
 
       change manage_relationship(:post_id, :post, type: :append)
       change manage_relationship(:user_id, :user, type: :append)
+    end
+
+    create :create_child_comment do
+      accept [:content]
+      upsert? true
+      upsert_identity :unique_user_comment_and_post
+
+      argument :post_id, :uuid do
+        allow_nil? false
+      end
+
+      argument :comment_id, :uuid do
+        allow_nil? false
+      end
+
+      argument :user_id, :uuid do
+        allow_nil? false
+      end
+
+      change set_attribute(:post_id, arg(:post_id))
+      change set_attribute(:comment_id, arg(:comment_id))
+
+      change relate_actor(:user)
     end
 
     update :update do
@@ -106,6 +138,13 @@ defmodule Conga.Posts.Comment do
       allow_nil? false
     end
 
+    belongs_to :comment, Conga.Posts.Comment do
+      public? true
+      allow_nil? true
+    end
+
+    has_many :comments, Conga.Posts.Comment
+
     belongs_to :user, Conga.Accounts.User do
       public? true
       allow_nil? false
@@ -116,6 +155,10 @@ defmodule Conga.Posts.Comment do
 
   aggregates do
     count :like_count, :likes
+  end
+
+  identities do
+    identity :unique_user_comment_and_post, [:user_id, :post_id, :comment_id]
   end
 
   pub_sub do

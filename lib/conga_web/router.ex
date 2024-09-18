@@ -73,6 +73,8 @@ defmodule CongaWeb.Router do
       live "/posts/:id/show/edit", PostLive.Show, :edit
 
       live "/posts/:id/comments/new", PostLive.Show, :new_comment
+      live "/posts/:id/comments/:c_id/new", PostLive.Show, :new_comment_child
+
       live "/posts/:id/comments/:c_id/edit", PostLive.Show, :edit_comment
       # live "/posts/:id/bookmarks/new", PostLive.Show, :new_bookmark
       # live "/posts/:id/bookmarks/:b_id/edit", PostLive.Show, :edit_bookmark

@@ -83,6 +83,9 @@ defmodule CongaWeb.PostLive.Show do
         <%= comment.content %>
 
         <div :if={@current_user} class="flex gap-2">
+          <.link patch={~p"/posts/#{@post}/comments/#{comment}/new"} phx-click={JS.push_focus()}>
+            <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-500" />
+          </.link>
           <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
             <.icon name="hero-pencil" class="text-blue-500" />
           </.link>
@@ -90,6 +93,7 @@ defmodule CongaWeb.PostLive.Show do
             <.icon name="hero-trash" class="text-red-500" />
           </.link>
         </div>
+        <%= comment.comments %>
       </div>
     </div>
 
@@ -108,7 +112,7 @@ defmodule CongaWeb.PostLive.Show do
     </.modal>
 
     <.modal
-      :if={@live_action in [:new_comment, :edit_comment]}
+      :if={@live_action in [:new_comment, :edit_comment, :new_comment_child]}
       id="comment-modal"
       show
       on_cancel={JS.patch(~p"/posts/#{@post}")}
@@ -121,6 +125,7 @@ defmodule CongaWeb.PostLive.Show do
         action={@live_action}
         post={@post}
         comment={@comment}
+        parent_comment={@parent_comment}
         patch={~p"/posts/#{@post}"}
       />
     </.modal>
@@ -144,6 +149,7 @@ defmodule CongaWeb.PostLive.Show do
       |> Ash.load!([
         :total_likes,
         :total_comments,
+        :total_bookmarks,
         :reading_time,
         :popularity_score,
         :comments,
@@ -155,7 +161,7 @@ defmodule CongaWeb.PostLive.Show do
         }
       ])
 
-    # IO.inspect(post, label: "post")
+    IO.inspect(post, label: "post")
 
     # Only increment page views if it's not a reconnection
     unless connected?(socket) do
@@ -164,6 +170,8 @@ defmodule CongaWeb.PostLive.Show do
         authorize?: false
       )
     end
+
+    IO.inspect(post.comments, label: "comments")
 
     socket
     |> assign(:page_title, "Show Post")
@@ -181,10 +189,34 @@ defmodule CongaWeb.PostLive.Show do
     |> assign(:post, post)
   end
 
-  defp apply_action(socket, :new_comment, _params) do
+  defp apply_action(socket, :new_comment, %{"id" => post_id}) do
+    post =
+      Conga.Posts.Post
+      |> Ash.get!(post_id, actor: socket.assigns.current_user)
+      |> Ash.load!([:comments])
+
     socket
     |> assign(:page_title, "New Comment")
     |> assign(:comment, nil)
+    |> assign(:parent_comment, nil)
+    |> assign(:post, post)
+  end
+
+  defp apply_action(socket, :new_comment_child, %{"c_id" => id}) do
+    parent_comment =
+      Conga.Posts.Comment
+      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Ash.load!([:post, :comments, :comment])
+
+    post =
+      parent_comment.post
+      |> Ash.load!([:comments])
+
+    socket
+    |> assign(:page_title, "New Comment")
+    |> assign(:comment, nil)
+    |> assign(:parent_comment, parent_comment)
+    |> assign(:post, post)
   end
 
   defp apply_action(socket, :edit_comment, %{"c_id" => id}) do
