@@ -78,24 +78,8 @@ defmodule CongaWeb.PostLive.Show do
         </.link>
       </:actions>
     </.header>
-    <div :for={comment <- @post.comments} class="grid grid-cols-1 gap-4">
-      <div class="flex items-center justify-between gap-4 pb-4 border-b-gray-200 border-b-[1px]">
-        <%= comment.content %>
 
-        <div :if={@current_user} class="flex gap-2">
-          <.link patch={~p"/posts/#{@post}/comments/#{comment}/new"} phx-click={JS.push_focus()}>
-            <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-500" />
-          </.link>
-          <.link patch={~p"/posts/#{@post}/comments/#{comment}/edit"} phx-click={JS.push_focus()}>
-            <.icon name="hero-pencil" class="text-blue-500" />
-          </.link>
-          <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: comment.id})}>
-            <.icon name="hero-trash" class="text-red-500" />
-          </.link>
-        </div>
-        <%= comment.comments %>
-      </div>
-    </div>
+    <.comment_tree comments={@post.comments} current_user={@current_user} post={@post} />
 
     <.back navigate={~p"/posts"}>Back to posts</.back>
 
@@ -171,11 +155,19 @@ defmodule CongaWeb.PostLive.Show do
       )
     end
 
-    IO.inspect(post.comments, label: "comments")
+    comments =
+      post.comments
+      |> Enum.map(fn comment ->
+        comment
+        |> Ash.load!([:comments])
+      end)
+
+    IO.inspect(comments, label: "comments")
 
     socket
     |> assign(:page_title, "Show Post")
     |> assign(:post, post)
+    |> assign(:comments, comments)
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -277,5 +269,63 @@ defmodule CongaWeb.PostLive.Show do
     Ash.destroy!(comment, actor: socket.assigns.current_user)
 
     {:noreply, stream_delete(socket, :comments, comment)}
+  end
+
+  defp comment_tree(assigns) do
+    ~H"""
+    <div class="space-y-4">
+      <%= for comment <- root_comments(assigns.comments) do %>
+        <%= render_comment(assigns, comment) %>
+      <% end %>
+    </div>
+    """
+  end
+
+  defp render_comment(assigns, comment) do
+    assigns = assign(assigns, :comment, comment)
+
+    ~H"""
+    <.comment comment={@comment} current_user={@current_user} post={@post}>
+      <%= if has_child_comments?(@comments, @comment.id) do %>
+        <%= for child_comment <- get_child_comments(@comments, @comment.id) do %>
+          <%= render_comment(assigns, child_comment) %>
+        <% end %>
+      <% end %>
+    </.comment>
+    """
+  end
+
+  defp comment(assigns) do
+    ~H"""
+    <div class="border-l-2 border-gray-200 pl-4">
+      <div class="flex items-center justify-between gap-4 pb-2">
+        <%= @comment.content %>
+        <div :if={@current_user} class="flex gap-2">
+          <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
+            <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-500" />
+          </.link>
+          <.link patch={~p"/posts/#{@post}/comments/#{@comment}/edit"} phx-click={JS.push_focus()}>
+            <.icon name="hero-pencil" class="text-blue-500" />
+          </.link>
+          <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: @comment.id})}>
+            <.icon name="hero-trash" class="text-red-500" />
+          </.link>
+        </div>
+      </div>
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  defp root_comments(comments) do
+    Enum.filter(comments, &is_nil(&1.comment_id))
+  end
+
+  defp get_child_comments(comments, parent_id) do
+    Enum.filter(comments, &(&1.comment_id == parent_id))
+  end
+
+  defp has_child_comments?(comments, parent_id) do
+    !Enum.empty?(get_child_comments(comments, parent_id))
   end
 end
