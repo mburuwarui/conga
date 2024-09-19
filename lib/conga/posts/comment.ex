@@ -68,8 +68,6 @@ defmodule Conga.Posts.Comment do
 
     create :create_child_comment do
       accept [:content]
-      upsert? true
-      upsert_identity :unique_user_comment_and_post
 
       argument :post_id, :uuid do
         allow_nil? false
@@ -83,8 +81,8 @@ defmodule Conga.Posts.Comment do
         allow_nil? false
       end
 
-      change set_attribute(:post_id, arg(:post_id))
-      change set_attribute(:parent_comment_id, arg(:parent_comment_id))
+      change manage_relationship(:post_id, :post, type: :append)
+      change manage_relationship(:parent_comment_id, :parent_comment, type: :append)
 
       change relate_actor(:user)
     end
@@ -159,10 +157,6 @@ defmodule Conga.Posts.Comment do
 
   aggregates do
     count :like_count, :likes
-  end
-
-  identities do
-    identity :unique_user_comment_and_post, [:user_id, :post_id, :parent_comment_id]
   end
 
   pub_sub do
