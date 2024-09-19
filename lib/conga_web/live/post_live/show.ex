@@ -215,10 +215,17 @@ defmodule CongaWeb.PostLive.Show do
     comment =
       Conga.Posts.Comment
       |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Ash.load!(:post)
+
+    post =
+      comment.post
+      |> Ash.load!(:comments)
 
     socket
     |> assign(:page_title, "Edit Comment")
     |> assign(:comment, comment)
+    |> assign(:parent_comment, nil)
+    |> assign(:post, post)
   end
 
   @impl true
