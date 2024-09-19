@@ -159,7 +159,7 @@ defmodule CongaWeb.PostLive.Show do
       post.comments
       |> Enum.map(fn comment ->
         comment
-        |> Ash.load!([:comments])
+        |> Ash.load!([:child_comments])
       end)
 
     IO.inspect(comments, label: "comments")
@@ -198,7 +198,7 @@ defmodule CongaWeb.PostLive.Show do
     parent_comment =
       Conga.Posts.Comment
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:post, :comments, :comment])
+      |> Ash.load!([:post, :child_comments, :parent_comment])
 
     post =
       parent_comment.post
@@ -318,11 +318,11 @@ defmodule CongaWeb.PostLive.Show do
   end
 
   defp root_comments(comments) do
-    Enum.filter(comments, &is_nil(&1.comment_id))
+    Enum.filter(comments, &is_nil(&1.parent_comment_id))
   end
 
   defp get_child_comments(comments, parent_id) do
-    Enum.filter(comments, &(&1.comment_id == parent_id))
+    Enum.filter(comments, &(&1.parent_comment_id == parent_id))
   end
 
   defp has_child_comments?(comments, parent_id) do

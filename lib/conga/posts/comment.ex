@@ -33,7 +33,7 @@ defmodule Conga.Posts.Comment do
         on_delete :delete
       end
 
-      reference :comment do
+      reference :parent_comment do
         on_delete :delete
       end
     end
@@ -44,7 +44,7 @@ defmodule Conga.Posts.Comment do
   end
 
   code_interface do
-    define :create_child_comment, args: [:post_id, :comment_id]
+    define :create_child_comment, args: [:post_id, :parent_comment_id]
   end
 
   actions do
@@ -75,7 +75,7 @@ defmodule Conga.Posts.Comment do
         allow_nil? false
       end
 
-      argument :comment_id, :uuid do
+      argument :parent_comment_id, :uuid do
         allow_nil? false
       end
 
@@ -84,7 +84,7 @@ defmodule Conga.Posts.Comment do
       end
 
       change set_attribute(:post_id, arg(:post_id))
-      change set_attribute(:comment_id, arg(:comment_id))
+      change set_attribute(:parent_comment_id, arg(:parent_comment_id))
 
       change relate_actor(:user)
     end
@@ -138,12 +138,16 @@ defmodule Conga.Posts.Comment do
       allow_nil? false
     end
 
-    belongs_to :comment, Conga.Posts.Comment do
+    belongs_to :parent_comment, Conga.Posts.Comment do
       public? true
       allow_nil? true
     end
 
-    has_many :comments, Conga.Posts.Comment
+    has_many :child_comments, Conga.Posts.Comment do
+      public? true
+      source_attribute :id
+      destination_attribute :parent_comment_id
+    end
 
     belongs_to :user, Conga.Accounts.User do
       public? true
@@ -158,7 +162,7 @@ defmodule Conga.Posts.Comment do
   end
 
   identities do
-    identity :unique_user_comment_and_post, [:user_id, :post_id, :comment_id]
+    identity :unique_user_comment_and_post, [:user_id, :post_id, :parent_comment_id]
   end
 
   pub_sub do

@@ -50,7 +50,7 @@ defmodule CongaWeb.CommentLive.FormComponent do
         parent_comment ->
           Map.put(comment_params, "user_id", socket.assigns.current_user.id)
           |> Map.put("post_id", socket.assigns.post.id)
-          |> Map.put("comment_id", parent_comment.id)
+          |> Map.put("parent_comment_id", parent_comment.id)
       end
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: comment_params) do

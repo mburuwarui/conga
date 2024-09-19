@@ -1,4 +1,4 @@
-defmodule Conga.Repo.Migrations.CommentsUpgrade do
+defmodule Conga.Repo.Migrations.ReuseIdentity do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -8,6 +8,10 @@ defmodule Conga.Repo.Migrations.CommentsUpgrade do
   use Ecto.Migration
 
   def up do
+    drop_if_exists unique_index(:comments, [:user_id, :post_id],
+                     name: "comments_unique_user_and_post_index"
+                   )
+
     create unique_index(:comments, [:user_id, :post_id, :comment_id],
              name: "comments_unique_user_comment_and_post_index"
            )
@@ -17,5 +21,9 @@ defmodule Conga.Repo.Migrations.CommentsUpgrade do
     drop_if_exists unique_index(:comments, [:user_id, :post_id, :comment_id],
                      name: "comments_unique_user_comment_and_post_index"
                    )
+
+    create unique_index(:comments, [:user_id, :post_id],
+             name: "comments_unique_user_and_post_index"
+           )
   end
 end
