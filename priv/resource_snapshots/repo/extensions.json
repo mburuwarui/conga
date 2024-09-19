@@ -3,6 +3,7 @@
   "installed": [
     "ash-functions",
     "citext",
-    "uuid-ossp"
+    "uuid-ossp",
+    "timescaledb"
   ]
 }

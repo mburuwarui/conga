@@ -4,7 +4,7 @@ defmodule Conga.Repo do
 
   def installed_extensions do
     # Add extensions here, and the migration generator will install them.
-    ["ash-functions", "citext", "uuid-ossp"]
+    ["ash-functions", "citext", "uuid-ossp", "timescaledb"]
   end
 
   def min_pg_version do
