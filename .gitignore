@@ -35,3 +35,5 @@ conga-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore git.old
+.git.old

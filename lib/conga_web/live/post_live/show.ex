@@ -11,7 +11,7 @@ defmodule CongaWeb.PostLive.Show do
       <:actions>
         <%= if @current_user do %>
           <.link patch={~p"/posts/#{@post}/show/edit"} phx-click={JS.push_focus()}>
-            <.icon name="hero-pencil" class="text-blue-500" />
+            <.icon name="hero-pencil" class="text-blue-400" />
           </.link>
         <% end %>
       </:actions>
@@ -47,16 +47,16 @@ defmodule CongaWeb.PostLive.Show do
       <%= if @current_user do %>
         <%= if @post.liked_by_user do %>
           <button phx-click="dislike" phx-value-id={@post.id}>
-            <.icon name="hero-heart-solid" class="text-red-500" />
+            <.icon name="hero-heart-solid" class="text-red-400" />
           </button>
         <% else %>
           <button phx-click="like" phx-value-id={@post.id}>
-            <.icon name="hero-heart" class="text-red-500" />
+            <.icon name="hero-heart" class="text-red-300" />
           </button>
         <% end %>
         <%= if @post.bookmarked_by_user do %>
           <button phx-click="unbookmark" phx-value-id={@post.id}>
-            <.icon name="hero-bookmark-solid" class="text-blue-500" />
+            <.icon name="hero-bookmark-solid" class="text-blue-400" />
           </button>
         <% else %>
           <button phx-click="bookmark" phx-value-id={@post.id}>
@@ -305,17 +305,17 @@ defmodule CongaWeb.PostLive.Show do
   defp comment(assigns) do
     ~H"""
     <div class="border-l-2 border-gray-200 pl-4">
-      <div class="flex items-center justify-between gap-4 pb-2">
+      <div class="flex items-center justify-between gap-4 pb-2 text-sm text-gray-700">
         <%= @comment.content %>
         <div :if={@current_user} class="flex gap-2">
           <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
-            <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-500" />
+            <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-400 w-5 h-5" />
           </.link>
           <.link patch={~p"/posts/#{@post}/comments/#{@comment}/edit"} phx-click={JS.push_focus()}>
-            <.icon name="hero-pencil" class="text-blue-500" />
+            <.icon name="hero-pencil" class="text-blue-400 w-5 h-5" />
           </.link>
           <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: @comment.id})}>
-            <.icon name="hero-trash" class="text-red-500" />
+            <.icon name="hero-trash" class="text-red-400 w-5 h-5" />
           </.link>
         </div>
       </div>
