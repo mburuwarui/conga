@@ -1,0 +1,70 @@
+classDiagram
+    class Post {
+        UUID id
+        String title
+        String body
+        String category
+        Atom visibility
+        Integer page_views
+        UUID user_id
+        User user
+        destroy()
+        read()
+        create(UUID user_id, String title, String body, String category, ...)
+        update(String title, String body, String category, Atom visibility)
+        like()
+        dislike()
+        bookmark()
+        unbookmark()
+        inc_page_views()
+        list_public()
+    }
+    class Comment {
+        UUID id
+        String content
+        Boolean is_approved
+        UUID post_id
+        UUID parent_comment_id
+        UUID user_id
+        Post post
+        Comment parent_comment
+        Comment[] child_comments
+        User user
+        destroy()
+        read()
+        create(UUID post_id, UUID user_id, String content)
+        create_child_comment(UUID post_id, UUID parent_comment_id, UUID user_id, String content)
+        update(String content)
+    }
+    class Like {
+        UUID id
+        UUID user_id
+        UUID post_id
+        UUID comment_id
+        User user
+        Post post
+        Comment comment
+        destroy()
+        read()
+        like(UUID post_id)
+    }
+    class Bookmark {
+        UUID id
+        UUID user_id
+        UUID post_id
+        User user
+        Post post
+        destroy()
+        read()
+        bookmark_post(UUID post_id)
+    }
+
+    User -- Bookmark
+    User -- Comment
+    User -- Like
+    User -- Post
+    Bookmark -- Post
+    Comment -- Comment
+    Comment -- Like
+    Comment -- Post
+    Like -- Post
