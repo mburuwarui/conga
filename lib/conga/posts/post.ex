@@ -140,7 +140,8 @@ defmodule Conga.Posts.Post do
     end
 
     policy action_type(:update) do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if actor_present()
+      # authorize_if relates_to_actor_via(:user)
     end
 
     policy action_type(:destroy) do

@@ -37,14 +37,14 @@ defmodule CongaWeb.PostLive.Index do
           <.link navigate={~p"/posts/#{post}"}>Show</.link>
         </div>
 
-        <.link :if={@current_user} patch={~p"/posts/#{post}/edit"}>
+        <.link :if={@current_user == post.user} patch={~p"/posts/#{post}/edit"}>
           <.icon name="hero-pencil" class="text-blue-500" />
         </.link>
       </:action>
 
       <:action :let={{id, post}}>
         <.link
-          :if={@current_user}
+          :if={@current_user == post.user}
           phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
           data-confirm="Are you sure?"
         >
@@ -74,7 +74,7 @@ defmodule CongaWeb.PostLive.Index do
     posts =
       Conga.Posts.Post
       |> Ash.read!(actor: current_user)
-      |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks])
+      |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
 
     {:ok,
      socket

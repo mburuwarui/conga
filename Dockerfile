@@ -20,10 +20,33 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
 FROM ${BUILDER_IMAGE} as builder
 
+
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git \
+RUN apt-get update -y && apt-get install -y build-essential git ssh \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
+# Set up SSH for GitHub
+RUN mkdir -p ~/.ssh
+RUN ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+RUN ssh-keygen -t rsa -b 4096 -C "mburuwarui" -f ~/.ssh/id_rsa -N ""
+
+# Start SSH agent and add the key
+RUN eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_rsa
+
+# Display the public key (you'll need to add this to your GitHub account# Set up SSH for GitHub
+RUN mkdir -p ~/.ssh
+RUN ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+# Copy the SSH key from the host machine
+COPY id_rsa /root/.ssh/id_rsa
+COPY id_rsa.pub /root/.ssh/id_rsa.pub
+RUN chmod 600 /root/.ssh/id_rsa
+
+# Start SSH agent and add the key
+RUN eval "$(ssh-agent -s)" && ssh-add /root/.ssh/id_rsa
+
+# Set Git to use SSH instead of HTTPS
+RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 # prepare build dir
 WORKDIR /app
 

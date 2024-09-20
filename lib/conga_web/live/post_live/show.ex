@@ -9,7 +9,7 @@ defmodule CongaWeb.PostLive.Show do
       <:subtitle>This is a post record from your database.</:subtitle>
 
       <:actions>
-        <%= if @current_user do %>
+        <%= if @current_user == @post.user do %>
           <.link patch={~p"/posts/#{@post}/show/edit"} phx-click={JS.push_focus()}>
             <.icon name="hero-pencil" class="text-blue-400" />
           </.link>
@@ -139,6 +139,7 @@ defmodule CongaWeb.PostLive.Show do
         :comments,
         :bookmarks,
         :likes,
+        :user,
         liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
         bookmarked_by_user: %{
           user_id: socket.assigns.current_user && socket.assigns.current_user.id
@@ -159,7 +160,7 @@ defmodule CongaWeb.PostLive.Show do
       post.comments
       |> Enum.map(fn comment ->
         comment
-        |> Ash.load!([:child_comments])
+        |> Ash.load!([:child_comments, :user])
       end)
 
     IO.inspect(comments, label: "comments")
@@ -311,12 +312,17 @@ defmodule CongaWeb.PostLive.Show do
           <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
             <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-400 w-5 h-5" />
           </.link>
-          <.link patch={~p"/posts/#{@post}/comments/#{@comment}/edit"} phx-click={JS.push_focus()}>
-            <.icon name="hero-pencil" class="text-blue-400 w-5 h-5" />
-          </.link>
-          <.link data-confirm="Are you sure?" phx-click={JS.push("delete", value: %{id: @comment.id})}>
-            <.icon name="hero-trash" class="text-red-400 w-5 h-5" />
-          </.link>
+          <div :if={@current_user.id == @comment.user_id}>
+            <.link patch={~p"/posts/#{@post}/comments/#{@comment}/edit"} phx-click={JS.push_focus()}>
+              <.icon name="hero-pencil" class="text-blue-400 w-5 h-5" />
+            </.link>
+            <.link
+              data-confirm="Are you sure?"
+              phx-click={JS.push("delete", value: %{id: @comment.id})}
+            >
+              <.icon name="hero-trash" class="text-red-400 w-5 h-5" />
+            </.link>
+          </div>
         </div>
       </div>
       <%= render_slot(@inner_block) %>
