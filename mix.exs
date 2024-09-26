@@ -88,7 +88,11 @@ defmodule Conga.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind conga", "esbuild conga"],
+      "gleam.build": [
+        "cmd cd assets/hooks && rm -rf build && gleam build"
+      ],
       "assets.deploy": [
+        "gleam.build",
         "tailwind conga --minify",
         "esbuild conga --minify",
         "phx.digest"
