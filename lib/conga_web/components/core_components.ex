@@ -217,8 +217,8 @@ defmodule CongaWeb.CoreComponents do
 
   ## Examples
 
-      <.button>Send!</.button>
-      <.button phx-click="go" class="ml-2">Send!</.button>
+      <.button_core>Send!</.buttonl_core>
+      <.button_core phx-click="go" class="ml-2">Send!</.button_core>
   """
   attr :type, :string, default: nil
   attr :class, :string, default: nil
@@ -226,7 +226,7 @@ defmodule CongaWeb.CoreComponents do
 
   slot :inner_block, required: true
 
-  def button(assigns) do
+  def button_core(assigns) do
     ~H"""
     <button
       type={@type}
@@ -265,8 +265,8 @@ defmodule CongaWeb.CoreComponents do
 
   ## Examples
 
-      <.input field={@form[:email]} type="email" />
-      <.input name="my-input" errors={["oh no!"]} />
+      <.input_core field={@form[:email]} type="email" />
+      <.input_core name="my-input" errors={["oh no!"]} />
   """
   attr :id, :any, default: nil
   attr :name, :any
@@ -293,16 +293,16 @@ defmodule CongaWeb.CoreComponents do
 
   slot :inner_block
 
-  def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
+  def input_core(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
     |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> field.value end)
-    |> input()
+    |> input_core()
   end
 
-  def input(%{type: "checkbox"} = assigns) do
+  def input_core(%{type: "checkbox"} = assigns) do
     assigns =
       assign_new(assigns, :checked, fn ->
         Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
@@ -328,7 +328,7 @@ defmodule CongaWeb.CoreComponents do
     """
   end
 
-  def input(%{type: "select"} = assigns) do
+  def input_core(%{type: "select"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
@@ -347,7 +347,7 @@ defmodule CongaWeb.CoreComponents do
     """
   end
 
-  def input(%{type: "textarea"} = assigns) do
+  def input_core(%{type: "textarea"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
@@ -368,7 +368,7 @@ defmodule CongaWeb.CoreComponents do
   end
 
   # All other inputs text, datetime-local, url, password, etc. are handled here...
-  def input(assigns) do
+  def input_core(assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
@@ -448,10 +448,10 @@ defmodule CongaWeb.CoreComponents do
 
   ## Examples
 
-      <.table id="users" rows={@users}>
+      <.table_core id="users" rows={@users}>
         <:col :let={user} label="id"><%= user.id %></:col>
         <:col :let={user} label="username"><%= user.username %></:col>
-      </.table>
+      </.table_core>
   """
   attr :id, :string, required: true
   attr :rows, :list, required: true
@@ -468,7 +468,7 @@ defmodule CongaWeb.CoreComponents do
 
   slot :action, doc: "the slot for showing user actions in the last table column"
 
-  def table(assigns) do
+  def table_core(assigns) do
     assigns =
       with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
         assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)

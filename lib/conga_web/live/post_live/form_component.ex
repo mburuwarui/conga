@@ -1,6 +1,8 @@
 defmodule CongaWeb.PostLive.FormComponent do
   use CongaWeb, :live_component
-
+  import SaladUI.Button
+  import SaladUI.Input
+  import SaladUI.Table
   @impl true
   def render(assigns) do
     ~H"""

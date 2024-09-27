@@ -57,6 +57,15 @@ defmodule CongaWeb do
     end
   end
 
+  def demo_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {CongaWeb.Layouts, :demo}
+
+      unquote(html_helpers())
+    end
+  end
+
   def live_component do
     quote do
       use Phoenix.LiveComponent

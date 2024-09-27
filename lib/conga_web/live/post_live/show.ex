@@ -1,6 +1,10 @@
 defmodule CongaWeb.PostLive.Show do
   use CongaWeb, :live_view
 
+  import SaladUI.Input
+  import SaladUI.Button
+  import SaladUI.Table
+
   @impl true
   def render(assigns) do
     ~H"""

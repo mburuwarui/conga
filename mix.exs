@@ -71,7 +71,9 @@ defmodule Conga.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
       {:tigerbeetlex, github: "rbino/tigerbeetlex", submodules: true},
-      {:salad_ui, "~> 0.5.1"}
+      {:salad_ui, "~> 0.5.1"},
+      {:lucide_icons, "~> 1.1"},
+      {:faker, "~> 0.18.0"}
     ]
   end
 

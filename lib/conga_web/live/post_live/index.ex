@@ -1,5 +1,7 @@
 defmodule CongaWeb.PostLive.Index do
   use CongaWeb, :live_view
+  import SaladUI.Button
+  import SaladUI.Table
 
   @impl true
   def render(assigns) do

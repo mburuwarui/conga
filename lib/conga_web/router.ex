@@ -84,6 +84,10 @@ defmodule CongaWeb.Router do
       on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
       live "/posts", PostLive.Index, :index
       live "/posts/:id", PostLive.Show, :show
+
+      live "/dashboard-one", DemoLive.DashboardOne, :index
+      live "/dashboard-two", DemoLive.DashboardTwo
+      live "/dashboard-three", DemoLive.DashboardThree
     end
   end
 
