@@ -10,13 +10,12 @@ module.exports = {
     "./js/**/*.js",
     "../lib/conga_web.ex",
     "../lib/conga_web/**/*.*ex",
-    "../deps/ash_authentication_phoenix/**/*.*ex", // <-- Add this line
+    "../deps/ash_authentication_phoenix/**/*.*ex",
+    "../deps/salad_ui/lib/**/*.ex",
   ],
   theme: {
     extend: {
-      colors: {
-        brand: "#FD4F00",
-      },
+      colors: require("./tailwind.colors.json"),
     },
   },
   plugins: [
@@ -26,6 +25,8 @@ module.exports = {
     //
     //     <div class="phx-click-loading:animate-ping">
     //
+    require("@tailwindcss/typography"),
+    require("tailwindcss-animate"),
     plugin(({ addVariant }) =>
       addVariant("phx-no-feedback", [
         ".phx-no-feedback&",
