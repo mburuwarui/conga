@@ -251,7 +251,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                     Export
                   </span>
                 </.button>
-                <.link :if={@current_user} patch={~p"/posts/new"}>
+                <.link :if={@current_user} patch={~p"/dashboard/posts/new"}>
                   <.button size="sm" class="h-8 gap-1">
                     <Lucideicons.circle_plus class="h-3.5 w-3.5" />
                     <span class="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -270,17 +270,17 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                   </.card_description>
                 </.card_header>
                 <.card_content>
-                  <.table>
+                  <.table id="posts">
                     <.table_header>
                       <.table_row>
                         <.table_head class="hidden w-[100px] sm:table-cell"></.table_head>
-                        <.table_head>Name</.table_head>
-                        <.table_head>Status</.table_head>
+                        <.table_head>Title</.table_head>
+                        <.table_head>Body</.table_head>
                         <.table_head class="hidden md:table-cell">
-                          Price
+                          Category
                         </.table_head>
                         <.table_head class="hidden md:table-cell">
-                          Total Sales
+                          Reading Time
                         </.table_head>
                         <.table_head class="hidden md:table-cell">
                           Created at
@@ -299,18 +299,25 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                           <%= post.title %>
                         </.table_cell>
                         <.table_cell>
-                          <.badge variant="outline"><%= post.body %></.badge>
+                          <%= post.body %>
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
-                          $<%= post.category %>
+                          <.badge variant="outline" class="border-yellow-400">
+                            <%= post.category %>
+                          </.badge>
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
-                          <%= post.reading_time %>
+                          <%= post.reading_time %> minute
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
                           <%= post.inserted_at |> Calendar.strftime("%Y-%m-%d %I:%M:%S %p") %>
                         </.table_cell>
-                        <.table_cell>
+                        <.table_cell class=" sm:table-cell">
+                          <.link navigate={~p"/posts/#{post}"}>
+                            <Lucideicons.eye class="h-4 w-4 text-blue-500" />
+                          </.link>
+                        </.table_cell>
+                        <.table_cell :if={@current_user == post.user}>
                           <.dropdown_menu>
                             <.dropdown_menu_trigger>
                               <.button aria-haspopup="true" size="icon" variant="ghost">
@@ -324,9 +331,9 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                                 <.menu_item>
                                   <.link
                                     :if={@current_user == post.user}
-                                    patch={~p"/posts/#{post}/edit"}
+                                    patch={~p"/dashboard/posts/#{post}/edit"}
                                   >
-                                    <.icon name="hero-pencil" class="text-blue-500" />
+                                    <Lucideicons.pencil class="w-4 h-4 text-blue-500" />
                                   </.link>
                                 </.menu_item>
                                 <.menu_item>
@@ -337,7 +344,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                                     }
                                     data-confirm="Are you sure?"
                                   >
-                                    <.icon name="hero-trash" class="text-red-500" />
+                                    <.icon name="hero-trash" class="text-red-500 w-4 h-4" />
                                   </.link>
                                 </.menu_item>
                               </.menu>
@@ -352,7 +359,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                   :if={@live_action in [:new, :edit]}
                   id="post-modal"
                   show
-                  on_cancel={JS.patch(~p"/posts")}
+                  on_cancel={JS.patch(~p"/dashboard/posts")}
                 >
                   <.live_component
                     module={CongaWeb.PostLive.FormComponent}
@@ -361,7 +368,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                     current_user={@current_user}
                     action={@live_action}
                     post={@post}
-                    patch={~p"/posts"}
+                    patch={~p"/dashboard/posts"}
                   />
                 </.modal>
                 <.card_footer>

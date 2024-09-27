@@ -1,7 +1,7 @@
 defmodule CongaWeb.PostLive.Index do
   use CongaWeb, :live_view
   import SaladUI.Button
-  import SaladUI.Table
+  # import SaladUI.Table
 
   @impl true
   def render(assigns) do
@@ -18,7 +18,7 @@ defmodule CongaWeb.PostLive.Index do
       </:actions>
     </.header>
 
-    <.table
+    <.table_core
       id="posts"
       rows={@streams.posts}
       row_click={fn {_id, post} -> JS.navigate(~p"/posts/#{post}") end}
@@ -56,7 +56,7 @@ defmodule CongaWeb.PostLive.Index do
           <.icon name="hero-trash" class="text-red-500" />
         </.link>
       </:action>
-    </.table>
+    </.table_core>
 
     <.modal :if={@live_action in [:new, :edit]} id="post-modal" show on_cancel={JS.patch(~p"/posts")}>
       <.live_component

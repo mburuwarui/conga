@@ -1,8 +1,7 @@
 defmodule CongaWeb.PostLive.FormComponent do
   use CongaWeb, :live_component
   import SaladUI.Button
-  import SaladUI.Input
-  import SaladUI.Table
+  # import SaladUI.Input
   @impl true
   def render(assigns) do
     ~H"""
@@ -19,10 +18,10 @@ defmodule CongaWeb.PostLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:title]} label="Title" />
-        <.input field={@form[:body]} label="Body" />
-        <.input field={@form[:category]} label="Category" />
-        <.input field={@form[:visibility]} label="Visibility" />
+        <.input_core field={@form[:title]} label="Title" />
+        <.input_core field={@form[:body]} label="Body" />
+        <.input_core field={@form[:category]} label="Category" />
+        <.input_core field={@form[:visibility]} label="Visibility" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Post</.button>
         </:actions>

@@ -84,10 +84,6 @@ defmodule CongaWeb.Router do
       on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
       live "/posts", PostLive.Index, :index
       live "/posts/:id", PostLive.Show, :show
-
-      live "/dashboard-one", DemoLive.DashboardOne, :index
-      live "/dashboard-two", DemoLive.DashboardTwo
-      live "/dashboard-three", DemoLive.DashboardThree
     end
   end
 
@@ -110,6 +106,17 @@ defmodule CongaWeb.Router do
 
       live_dashboard "/dashboard", metrics: CongaWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+
+  scope "/dashboard", CongaWeb do
+    pipe_through :browser
+
+    ash_authentication_live_session :admin_dashboard,
+      on_mount: {CongaWeb.LiveUserAuth, :admins_only} do
+      live "/posts", DemoLive.DashboardOne, :index
+      live "/posts/new", DemoLive.DashboardOne, :new
+      live "/posts/:id/edit", DemoLive.DashboardOne, :edit
     end
   end
 end
