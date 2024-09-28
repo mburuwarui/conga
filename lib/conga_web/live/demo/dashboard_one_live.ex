@@ -1,5 +1,6 @@
 defmodule CongaWeb.DemoLive.DashboardOne do
   @moduledoc false
+  require Ash.Query
   use CongaWeb, :demo_view
 
   import SaladUI.Badge
@@ -141,7 +142,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                   <Lucideicons.shopping_cart class="h-5 w-5" /> Orders
                 </.link>
                 <.link href="#" class="flex items-center gap-4 px-2.5 text-foreground">
-                  <Lucideicons.package class="h-5 w-5" /> Products
+                  <Lucideicons.package class="h-5 w-5" /> Posts
                 </.link>
                 <.link
                   href="#"
@@ -169,12 +170,12 @@ defmodule CongaWeb.DemoLive.DashboardOne do
               <.breadcrumb_separator />
               <.breadcrumb_item>
                 <.breadcrumb_link>
-                  <.link href="#"></.link>Products
+                  <.link href="#"></.link>Posts
                 </.breadcrumb_link>
               </.breadcrumb_item>
               <.breadcrumb_separator />
               <.breadcrumb_item>
-                <.breadcrumb_page>All Products</.breadcrumb_page>
+                <.breadcrumb_page>All Posts</.breadcrumb_page>
               </.breadcrumb_item>
             </.breadcrumb_list>
           </.breadcrumb>
@@ -255,7 +256,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                   <.button size="sm" class="h-8 gap-1">
                     <Lucideicons.circle_plus class="h-3.5 w-3.5" />
                     <span class="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Add Product
+                      Add Post
                     </span>
                   </.button>
                 </.link>
@@ -264,9 +265,9 @@ defmodule CongaWeb.DemoLive.DashboardOne do
             <.tabs_content value="all">
               <.card>
                 <.card_header>
-                  <.card_title>Products</.card_title>
+                  <.card_title>Posts</.card_title>
                   <.card_description>
-                    Manage your products and view their sales performance.
+                    Manage your posts and view their sales performance.
                   </.card_description>
                 </.card_header>
                 <.card_content>
@@ -290,7 +291,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                         </.table_head>
                       </.table_row>
                     </.table_header>
-                    <.table_body>
+                    <.table_body phx-update="stream">
                       <.table_row :for={{id, post} <- @streams.posts} id={id}>
                         <.table_cell class="hidden sm:table-cell">
                           <.skeleton class="h-16 w-16" />
@@ -314,10 +315,10 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                         </.table_cell>
                         <.table_cell class=" sm:table-cell">
                           <.link navigate={~p"/posts/#{post}"}>
-                            <Lucideicons.eye class="h-4 w-4 text-blue-500" />
+                            <Lucideicons.eye class="h-5 w-5 text-blue-500" />
                           </.link>
                         </.table_cell>
-                        <.table_cell :if={@current_user == post.user}>
+                        <.table_cell>
                           <.dropdown_menu>
                             <.dropdown_menu_trigger>
                               <.button aria-haspopup="true" size="icon" variant="ghost">
@@ -327,24 +328,20 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                             </.dropdown_menu_trigger>
                             <.dropdown_menu_content align="end">
                               <.menu>
-                                <.menu_label>Actions</.menu_label>
-                                <.menu_item>
-                                  <.link
-                                    :if={@current_user == post.user}
-                                    patch={~p"/dashboard/posts/#{post}/edit"}
-                                  >
-                                    <Lucideicons.pencil class="w-4 h-4 text-blue-500" />
+                                <%!-- <.menu_label>Actions</.menu_label> --%>
+                                <.menu_item class="justify-center">
+                                  <.link patch={~p"/dashboard/posts/#{post}/edit"}>
+                                    <.icon name="hero-pencil-square" class="w-5 h-5 text-blue-500" />
                                   </.link>
                                 </.menu_item>
-                                <.menu_item>
+                                <.menu_item class="justify-center">
                                   <.link
-                                    :if={@current_user == post.user}
                                     phx-click={
                                       JS.push("delete", value: %{id: post.id}) |> hide("##{id}")
                                     }
                                     data-confirm="Are you sure?"
                                   >
-                                    <.icon name="hero-trash" class="text-red-500 w-4 h-4" />
+                                    <.icon name="hero-trash" class="text-red-500 w-5 h-5" />
                                   </.link>
                                 </.menu_item>
                               </.menu>
@@ -373,7 +370,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                 </.modal>
                 <.card_footer>
                   <div class="text-xs text-muted-foreground">
-                    Showing <strong>1-10</strong> of <strong>32</strong> products
+                    Showing <strong>1-10</strong> of <strong>32</strong> posts
                   </div>
                 </.card_footer>
               </.card>
@@ -390,8 +387,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
     current_user = socket.assigns.current_user
 
     posts =
-      Conga.Posts.Post
-      |> Ash.read!(actor: current_user)
+      Conga.Posts.Post.list_dashboard!(actor: current_user)
       |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
 
     {:ok,

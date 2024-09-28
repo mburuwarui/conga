@@ -50,6 +50,7 @@ defmodule Conga.Posts.Post do
     define :unbookmark
     define :bookmark
     define :inc_page_views
+    define :list_dashboard
   end
 
   actions do
@@ -130,6 +131,10 @@ defmodule Conga.Posts.Post do
 
     read :list_public do
       filter expr(visibility == :public)
+    end
+
+    read :list_dashboard do
+      prepare build(sort: [inserted_at: :desc], filter: [user_id: actor(:id)])
     end
   end
 
