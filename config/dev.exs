@@ -26,7 +26,8 @@ config :conga, CongaWeb.Endpoint,
   secret_key_base: "TMpPRPAlj9vCJ9ti4KaHqi6MxIgeUTptS4vgPc2F36/3Q2gfDOqjWgCnh4ddFIKZ",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:conga, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:conga, ~w(--watch)]}
+    tailwind: {Tailwind, :install_and_run, [:conga, ~w(--watch)]},
+    gleam: {GleamBuilder, :start_link, []}
   ]
 
 # ## SSL Support

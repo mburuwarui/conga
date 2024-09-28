@@ -73,7 +73,8 @@ defmodule Conga.MixProject do
       {:tigerbeetlex, github: "rbino/tigerbeetlex", submodules: true},
       {:salad_ui, "~> 0.5.1"},
       {:lucide_icons, "~> 1.1"},
-      {:faker, "~> 0.18.0"}
+      {:faker, "~> 0.18.0"},
+      {:file_system, "~> 1.0", only: :dev}
     ]
   end
 

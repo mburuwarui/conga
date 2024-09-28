@@ -191,7 +191,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
             <.dropdown_menu_trigger>
               <.button variant="outline" size="icon" class="overflow-hidden rounded-full">
                 <img
-                  src={~p"/images/avatar02.png"}
+                  src={~p"/images/logo.svg"}
                   width="{36}"
                   height="{36}"
                   alt="Avatar"
@@ -310,8 +310,12 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                         <.table_cell class="hidden md:table-cell">
                           <%= post.reading_time %>
                         </.table_cell>
-                        <.table_cell class="hidden md:table-cell">
-                          <%= post.inserted_at |> Calendar.strftime("%Y-%m-%d %I:%M:%S %p") %>
+                        <.table_cell
+                          phx-hook="LocalTime"
+                          id={"inserted_at-#{post.inserted_at}"}
+                          class="hidden md:table-cell invisible"
+                        >
+                          <%= DateTime.to_string(post.inserted_at) %>
                         </.table_cell>
                         <.table_cell class=" sm:table-cell">
                           <.link navigate={~p"/posts/#{post}"}>
@@ -425,7 +429,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
       post
       |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
 
-    {:noreply, stream_insert(socket, :posts, post)}
+    {:noreply, stream_insert(socket, :posts, post, at: 0)}
   end
 
   @impl true
