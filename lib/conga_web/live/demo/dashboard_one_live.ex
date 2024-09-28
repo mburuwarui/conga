@@ -291,7 +291,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                         </.table_head>
                       </.table_row>
                     </.table_header>
-                    <.table_body phx-update="stream">
+                    <.table_body phx-update="stream" class="text-zinc-700">
                       <.table_row :for={{id, post} <- @streams.posts} id={id}>
                         <.table_cell class="hidden sm:table-cell">
                           <.skeleton class="h-16 w-16" />
