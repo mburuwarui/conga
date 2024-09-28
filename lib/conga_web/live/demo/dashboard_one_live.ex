@@ -308,7 +308,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                           </.badge>
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
-                          <%= post.reading_time %> minute
+                          <%= post.reading_time %>
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
                           <%= post.inserted_at |> Calendar.strftime("%Y-%m-%d %I:%M:%S %p") %>
@@ -421,6 +421,10 @@ defmodule CongaWeb.DemoLive.DashboardOne do
 
   @impl true
   def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
+    post =
+      post
+      |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
+
     {:noreply, stream_insert(socket, :posts, post)}
   end
 

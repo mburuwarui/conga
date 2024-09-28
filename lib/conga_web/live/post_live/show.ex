@@ -316,9 +316,9 @@ defmodule CongaWeb.PostLive.Show do
           <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
             <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-400 w-5 h-5" />
           </.link>
-          <div :if={@current_user.id == @comment.user_id}>
+          <div :if={@current_user.id == @comment.user_id} class="flex gap-2">
             <.link patch={~p"/posts/#{@post}/comments/#{@comment}/edit"} phx-click={JS.push_focus()}>
-              <.icon name="hero-pencil" class="text-blue-400 w-5 h-5" />
+              <.icon name="hero-pencil-square" class="text-blue-400 w-5 h-5" />
             </.link>
             <.link
               data-confirm="Are you sure?"

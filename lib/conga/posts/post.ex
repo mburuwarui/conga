@@ -131,7 +131,7 @@ defmodule Conga.Posts.Post do
     end
 
     read :list_public do
-      filter expr(visibility == :public)
+      prepare build(sort: [inserted_at: :desc], filter: expr(visibility == :public))
     end
 
     read :list_dashboard do

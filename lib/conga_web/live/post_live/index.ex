@@ -42,14 +42,14 @@ defmodule CongaWeb.PostLive.Index do
           <.link navigate={~p"/posts/#{post}"}>Show</.link>
         </div>
 
-        <.link :if={@current_user == post.user} patch={~p"/posts/#{post}/edit"}>
+        <.link :if={@current_user.id == post.user_id} patch={~p"/posts/#{post}/edit"}>
           <.icon name="hero-pencil" class="text-blue-500" />
         </.link>
       </:action>
 
       <:action :let={{id, post}}>
         <.link
-          :if={@current_user == post.user}
+          :if={@current_user.id == post.user_id}
           phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
           data-confirm="Are you sure?"
         >

@@ -1,8 +1,6 @@
 defmodule CongaWeb.CommentLive.FormComponent do
   use CongaWeb, :live_component
   import SaladUI.Button
-  import SaladUI.Input
-  import SaladUI.Table
 
   @impl true
   def render(assigns) do
@@ -20,7 +18,7 @@ defmodule CongaWeb.CommentLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:content]} label="Content" />
+        <.input_core field={@form[:content]} label="Content" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Comment</.button>
         </:actions>
