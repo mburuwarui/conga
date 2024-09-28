@@ -50,6 +50,7 @@ defmodule Conga.Posts.Post do
     define :unbookmark
     define :bookmark
     define :inc_page_views
+    define :list_public
     define :list_dashboard
   end
 

@@ -77,8 +77,7 @@ defmodule CongaWeb.PostLive.Index do
     current_user = socket.assigns.current_user
 
     posts =
-      Conga.Posts.Post
-      |> Ash.read!(actor: current_user)
+      Conga.Posts.Post.list_public!(actor: current_user)
       |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
 
     {:ok,
