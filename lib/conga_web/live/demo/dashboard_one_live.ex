@@ -272,7 +272,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                 </.card_header>
                 <.card_content>
                   <.table id="posts">
-                    <.table_header>
+                    <.table_header class="text-zinc-200">
                       <.table_row>
                         <.table_head class="hidden w-[100px] sm:table-cell"></.table_head>
                         <.table_head>Title</.table_head>
@@ -440,21 +440,5 @@ defmodule CongaWeb.DemoLive.DashboardOne do
     Ash.destroy!(post, actor: socket.assigns.current_user)
 
     {:noreply, stream_delete(socket, :posts, post)}
-  end
-
-  def hello_world(%{hello: _hello, id: _id} = assigns) do
-    ~H"""
-    <time phx-hook="Hello" id={@id}>
-      <%= @hello %>
-    </time>
-    """
-  end
-
-  def local_time(%{date: _date, id: _id} = assigns) do
-    ~H"""
-    <time phx-hook="LocalTime" id={@id}>
-      <%= @date %>
-    </time>
-    """
   end
 end

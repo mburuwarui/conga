@@ -6,9 +6,6 @@ defmodule CongaWeb.PostLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <.hello_world id="hello_world" hello="Hello from Gleam" />
-    <.local_time id="my-date" date="2016-05-24T13:26:08.003Z" />
-
     <.header>
       Listing Posts
       <:actions>
@@ -122,21 +119,5 @@ defmodule CongaWeb.PostLive.Index do
     Ash.destroy!(post, actor: socket.assigns.current_user)
 
     {:noreply, stream_delete(socket, :posts, post)}
-  end
-
-  def hello_world(%{hello: _hello, id: _id} = assigns) do
-    ~H"""
-    <time phx-hook="Hello" id={@id}>
-      <%= @hello %>
-    </time>
-    """
-  end
-
-  def local_time(%{date: _date, id: _id} = assigns) do
-    ~H"""
-    <time phx-hook="LocalTime" id={@id}>
-      <%= @date %>
-    </time>
-    """
   end
 end
