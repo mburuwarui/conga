@@ -1,6 +1,6 @@
 defmodule CongaWeb.DemoLive.DashboardThree do
   @moduledoc false
-  use CongaWeb, :demo_view
+  use CongaWeb, :dash_view
 
   import CongaWeb.CoreComponents, only: [icon: 1]
   import SaladUI.Avatar

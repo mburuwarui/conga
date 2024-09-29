@@ -1,7 +1,7 @@
 defmodule CongaWeb.DemoLive.DashboardOne do
   @moduledoc false
   require Ash.Query
-  use CongaWeb, :demo_view
+  use CongaWeb, :dash_view
 
   import SaladUI.Badge
   import SaladUI.Breadcrumb

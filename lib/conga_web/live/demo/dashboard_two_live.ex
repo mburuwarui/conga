@@ -1,6 +1,6 @@
 defmodule CongaWeb.DemoLive.DashboardTwo do
   @moduledoc false
-  use CongaWeb, :demo_view
+  use CongaWeb, :dash_view
 
   import SaladUI.Badge
   import SaladUI.Breadcrumb

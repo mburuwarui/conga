@@ -57,10 +57,19 @@ defmodule CongaWeb do
     end
   end
 
-  def demo_view do
+  def dash_view do
     quote do
       use Phoenix.LiveView,
-        layout: {CongaWeb.Layouts, :demo}
+        layout: {CongaWeb.Layouts, :dash}
+
+      unquote(html_helpers())
+    end
+  end
+
+  def blog_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {CongaWeb.Layouts, :blog}
 
       unquote(html_helpers())
     end
