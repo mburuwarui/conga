@@ -22,17 +22,16 @@ defmodule CongaWeb.PostLive.Index do
       phx-update="stream"
       id="posts"
     >
-      <div :for={{id, post} <- @streams.posts} class="card" id={id}>
-        <div class="relative">
+      <div :for={{id, post} <- @streams.posts} class="card flex flex-col h-full" id={id}>
+        <div class="relative flex-shrink-0">
           <img
             class="object-cover object-center w-full h-64 rounded-lg lg:h-80"
             src="https://images.unsplash.com/photo-1597534458220-9fb4969f2df5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1374&q=80"
             alt=""
           />
-          <div class="absolute bottom-0 right-0 flex m-4 gap-1 text-sm">
-            <Lucideicons.eye class="h-4 w-4 text-zinc-600" /> <%= post.page_views %>
+          <div class="absolute bottom-0 right-0 flex m-4 gap-1 text-sm text-zinc-500">
+            <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
           </div>
-
           <.badge
             variant="outline"
             class="border-zinc-400 bg-amber-100 text-zinc-600 top-0 right-0 absolute flex m-4"
@@ -65,7 +64,6 @@ defmodule CongaWeb.PostLive.Index do
               </.menu>
             </.dropdown_menu_content>
           </.dropdown_menu>
-
           <div class="absolute bottom-0 flex p-3 bg-white dark:bg-gray-900">
             <img
               class="object-cover object-center w-10 h-10 rounded-full"
@@ -78,61 +76,26 @@ defmodule CongaWeb.PostLive.Index do
             </div>
           </div>
         </div>
-        <h1 class="mt-6 text-xl font-semibold text-gray-800 dark:text-white">
-          <%= post.title %>
-        </h1>
-        <hr class="w-32 my-6 text-blue-500" />
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          <%= post.body %>
-        </p>
-        <.link
-          navigate={~p"/posts/#{post}"}
-          class="inline-block mt-4 text-blue-500 underline hover:text-blue-400"
-        >
-          Read more
-        </.link>
+        <div class="flex flex-col flex-grow relative pt-6">
+          <div class="h-20 mb-2">
+            <!-- Fixed height for title area -->
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2">
+              <%= post.title %>
+            </h1>
+          </div>
+          <hr class="w-32 absolute top-[104px] left-0 border-t-1 border-blue-500" />
+          <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow mt-4">
+            <%= truncate(post.body, 20) %>
+          </p>
+          <.link
+            navigate={~p"/posts/#{post}"}
+            class="inline-block mt-4 text-blue-500 underline hover:text-blue-400"
+          >
+            Read more
+          </.link>
+        </div>
       </div>
     </div>
-
-    <.table_core
-      id="posts"
-      rows={@streams.posts}
-      row_click={fn {_id, post} -> JS.navigate(~p"/posts/#{post}") end}
-    >
-      <:col :let={{_id, post}} label="Id"><%= post.id %></:col>
-
-      <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
-
-      <:col :let={{_id, post}} label="Body"><%= post.body %></:col>
-
-      <:col :let={{_id, post}} label="Category"><%= post.category %></:col>
-
-      <:col :let={{_id, post}} label="Reading time"><%= post.reading_time %></:col>
-
-      <:col :let={{_id, post}} label="Visibility"><%= post.visibility %></:col>
-
-      <:col :let={{_id, post}} label="User"><%= post.user_id %></:col>
-
-      <:action :let={{_id, post}}>
-        <div class="sr-only">
-          <.link navigate={~p"/posts/#{post}"}>Show</.link>
-        </div>
-
-        <.link :if={@current_user.id == post.user_id} patch={~p"/posts/#{post}/edit"}>
-          <.icon name="hero-pencil" class="text-blue-500" />
-        </.link>
-      </:action>
-
-      <:action :let={{id, post}}>
-        <.link
-          :if={@current_user.id == post.user_id}
-          phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
-          data-confirm="Are you sure?"
-        >
-          <.icon name="hero-trash" class="text-red-500" />
-        </.link>
-      </:action>
-    </.table_core>
 
     <.modal :if={@live_action in [:new, :edit]} id="post-modal" show on_cancel={JS.patch(~p"/posts")}>
       <.live_component
@@ -195,7 +158,7 @@ defmodule CongaWeb.PostLive.Index do
 
   @impl true
   def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
-    {:noreply, stream_insert(socket, :posts, post)}
+    {:noreply, stream_insert(socket, :posts, post, at: 0)}
   end
 
   @impl true
@@ -206,5 +169,13 @@ defmodule CongaWeb.PostLive.Index do
     Ash.destroy!(post, actor: socket.assigns.current_user)
 
     {:noreply, stream_delete(socket, :posts, post)}
+  end
+
+  def truncate(text, max_words) do
+    text
+    |> String.split()
+    |> Enum.take(max_words)
+    |> Enum.join(" ")
+    |> Kernel.<>("...")
   end
 end
