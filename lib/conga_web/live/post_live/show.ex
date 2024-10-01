@@ -1,9 +1,7 @@
 defmodule CongaWeb.PostLive.Show do
   use CongaWeb, :live_view
 
-  import SaladUI.Input
   import SaladUI.Button
-  import SaladUI.Table
 
   @impl true
   def render(assigns) do
@@ -28,8 +26,6 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="Body"><%= @post.body %></:item>
 
-      <:item title="Category"><%= @post.category %></:item>
-
       <:item title="Reading time"><%= @post.reading_time %></:item>
 
       <:item title="View count"><%= @post.page_views %></:item>
@@ -46,6 +42,16 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="User"><%= @post.user_id %></:item>
     </.list>
+    <div :for={category <- @post.categories_join_assoc} class="flex gap-2 items-center">
+      <.icon name="hero-tag" class="text-blue-400" />
+      <span
+        :for={post_category <- @categories}
+        :if={category.category_id == post_category.id}
+        class="text-blue-400"
+      >
+        <%= post_category.name %>
+      </span>
+    </div>
 
     <.header class="my-8 justify-between">
       <%= if @current_user do %>
@@ -142,6 +148,7 @@ defmodule CongaWeb.PostLive.Show do
         :popularity_score,
         :comments,
         :bookmarks,
+        :categories_join_assoc,
         :likes,
         :user,
         liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
@@ -169,17 +176,22 @@ defmodule CongaWeb.PostLive.Show do
 
     IO.inspect(comments, label: "comments")
 
+    current_user = socket.assigns.current_user
+
+    categories = Conga.Posts.Category.list_all!(actor: current_user)
+
     socket
     |> assign(:page_title, "Show Post")
     |> assign(:post, post)
     |> assign(:comments, comments)
+    |> assign(:categories, categories)
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([:comments])
+      |> Ash.load!([:comments, :categories_join_assoc])
 
     socket
     |> assign(:page_title, "Edit Post")
@@ -190,7 +202,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(post_id, actor: socket.assigns.current_user)
-      |> Ash.load!([:comments])
+      |> Ash.load!([:comments, :categories_join_assoc])
 
     socket
     |> assign(:page_title, "New Comment")
@@ -207,7 +219,7 @@ defmodule CongaWeb.PostLive.Show do
 
     post =
       parent_comment.post
-      |> Ash.load!([:comments])
+      |> Ash.load!([:comments, :categories_join_assoc])
 
     socket
     |> assign(:page_title, "New Comment")
@@ -224,7 +236,7 @@ defmodule CongaWeb.PostLive.Show do
 
     post =
       comment.post
-      |> Ash.load!(:comments)
+      |> Ash.load!([:comments, :categories_join_assoc])
 
     socket
     |> assign(:page_title, "Edit Comment")

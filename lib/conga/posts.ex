@@ -6,5 +6,7 @@ defmodule Conga.Posts do
     resource Conga.Posts.Comment
     resource Conga.Posts.Like
     resource Conga.Posts.Bookmark
+    resource Conga.Posts.Category
+    resource Conga.Posts.PostCategory
   end
 end

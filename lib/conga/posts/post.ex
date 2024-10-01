@@ -45,6 +45,7 @@ defmodule Conga.Posts.Post do
   end
 
   code_interface do
+    define :create
     define :like
     define :dislike
     define :unbookmark
@@ -58,18 +59,45 @@ defmodule Conga.Posts.Post do
     defaults [:read, :destroy]
 
     create :create do
-      accept [:title, :body, :category, :visibility]
+      primary? true
+      accept [:title, :body, :visibility]
 
       argument :user_id, :uuid do
         allow_nil? false
       end
 
+      argument :categories, {:array, :map} do
+        allow_nil? false
+      end
+
+      argument :add_category, :map
+
       change manage_relationship(:user_id, :user, type: :append)
+
+      change manage_relationship(:categories,
+               type: :append_and_remove,
+               on_no_match: :create
+             )
+
+      change manage_relationship(:add_category, :categories, type: :create)
     end
 
     update :update do
       primary? true
-      accept [:title, :body, :category, :visibility]
+      accept [:title, :body, :visibility]
+    end
+
+    update :update_categories do
+      require_atomic? false
+
+      argument :categories, {:array, :map} do
+        allow_nil? false
+      end
+
+      change manage_relationship(:categories,
+               type: :append_and_remove,
+               on_no_match: :create
+             )
     end
 
     update :like do
@@ -131,7 +159,10 @@ defmodule Conga.Posts.Post do
     end
 
     read :list_public do
-      prepare build(sort: [inserted_at: :desc], filter: expr(visibility == :public))
+      prepare build(
+                sort: [inserted_at: :desc],
+                filter: expr(visibility == :public)
+              )
     end
 
     read :list_dashboard do
@@ -174,12 +205,6 @@ defmodule Conga.Posts.Post do
       description "The main content of the blog post"
     end
 
-    attribute :category, :string do
-      allow_nil? false
-      public? true
-      description "The category of the blog post"
-    end
-
     attribute :visibility, :atom do
       constraints one_of: [:public, :private, :friends]
       default :public
@@ -205,6 +230,13 @@ defmodule Conga.Posts.Post do
     has_many :comments, Conga.Posts.Comment
     has_many :likes, Conga.Posts.Like
     has_many :bookmarks, Conga.Posts.Bookmark
+
+    many_to_many :categories, Conga.Posts.Category do
+      through Conga.Posts.PostCategory
+      source_attribute_on_join_resource :post_id
+      destination_attribute_on_join_resource :category_id
+      public? true
+    end
   end
 
   calculations do

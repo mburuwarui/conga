@@ -20,7 +20,7 @@ defmodule CongaWeb.PostLive.FormComponent do
       >
         <.input_core field={@form[:title]} label="Title" />
         <.input_core field={@form[:body]} label="Body" />
-        <.input_core field={@form[:category]} label="Category" />
+        <%!-- <.input_core field={@form[:category]} label="Category" /> --%>
         <.input_core field={@form[:visibility]} label="Visibility" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Post</.button>
@@ -45,7 +45,15 @@ defmodule CongaWeb.PostLive.FormComponent do
 
   @impl true
   def handle_event("save", %{"post" => post_params}, socket) do
-    post_params = Map.put(post_params, "user_id", socket.assigns.current_user.id)
+    post_params =
+      Map.put(post_params, "user_id", socket.assigns.current_user.id)
+      |> Map.put("categories", [
+        %{"name" => "Article"}
+      ])
+
+    # |> Map.put("add_category", %{"name" => "Blog"})
+
+    IO.inspect(post_params, label: "post_params")
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: post_params) do
       {:ok, post} ->
@@ -71,6 +79,11 @@ defmodule CongaWeb.PostLive.FormComponent do
     form =
       if post do
         AshPhoenix.Form.for_update(post, :update,
+          as: "post",
+          actor: socket.assigns.current_user
+        )
+
+        AshPhoenix.Form.for_update(post, :update_categories,
           as: "post",
           actor: socket.assigns.current_user
         )
