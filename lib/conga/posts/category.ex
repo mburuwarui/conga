@@ -52,13 +52,13 @@ defmodule Conga.Posts.Category do
     end
 
     read :list_all do
-      prepare build(sort: [inserted_at: :desc], load: [:posts])
+      prepare build(sort: [inserted_at: :desc])
     end
   end
 
   policies do
     policy action_type(:read) do
-      authorize_if actor_present()
+      authorize_if always()
     end
 
     policy action_type(:create) do

@@ -163,9 +163,10 @@ defmodule CongaWeb.PostLive.Index do
         :user
       ])
 
-    IO.inspect(posts, label: "posts")
+    # IO.inspect(posts, label: "posts")
 
-    categories = Conga.Posts.Category.list_all!(actor: current_user)
+    categories = Conga.Posts.Category.list_all!()
+    IO.inspect(categories, label: "categories")
 
     {:ok,
      socket
