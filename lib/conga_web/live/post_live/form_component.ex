@@ -48,7 +48,7 @@ defmodule CongaWeb.PostLive.FormComponent do
     post_params =
       Map.put(post_params, "user_id", socket.assigns.current_user.id)
       |> Map.put("categories", [
-        %{"name" => "Article"}
+        %{"name" => "Other"}
       ])
 
     # |> Map.put("add_category", %{"name" => "Blog"})

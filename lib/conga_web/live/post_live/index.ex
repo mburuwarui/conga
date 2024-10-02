@@ -159,7 +159,6 @@ defmodule CongaWeb.PostLive.Index do
         :likes,
         :comments,
         :bookmarks,
-        :categories,
         :categories_join_assoc,
         :user
       ])
@@ -183,9 +182,15 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    post =
+      Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
+      |> Ash.load!([
+        :categories_join_assoc
+      ])
+
     socket
     |> assign(:page_title, "Edit Post")
-    |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user))
+    |> assign(:post, post)
   end
 
   defp apply_action(socket, :new, _params) do
@@ -202,7 +207,17 @@ defmodule CongaWeb.PostLive.Index do
 
   @impl true
   def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
-    {:noreply, stream_insert(socket, :posts, post, at: 0)}
+    categories = Conga.Posts.Category.list_all!(actor: socket.assigns.current_user)
+
+    post = post |> Ash.load!([:categories_join_assoc])
+
+    posts = socket.assigns.posts ++ [post]
+
+    {:noreply,
+     socket
+     |> stream_insert(:posts, post, at: 0)
+     |> assign(:categories, categories)
+     |> assign(:posts, posts)}
   end
 
   @impl true
@@ -212,7 +227,10 @@ defmodule CongaWeb.PostLive.Index do
 
     Ash.destroy!(post, actor: socket.assigns.current_user)
 
-    {:noreply, stream_delete(socket, :posts, post)}
+    {:noreply,
+     socket
+     |> stream_delete(:posts, post)
+     |> put_flash(:info, "Post deleted successfully.")}
   end
 
   def handle_event("filter_by_category", %{"category_id" => category_id}, socket) do

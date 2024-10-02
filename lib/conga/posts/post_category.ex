@@ -43,7 +43,13 @@ defmodule Conga.Posts.PostCategory do
   end
 
   actions do
-    defaults [:create, :read, :destroy]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      upsert? true
+      upsert_identity :unique_post_category
+    end
   end
 
   relationships do
@@ -58,5 +64,9 @@ defmodule Conga.Posts.PostCategory do
       primary_key? true
       allow_nil? false
     end
+  end
+
+  identities do
+    identity :unique_post_category, [:post_id, :category_id]
   end
 end

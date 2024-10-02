@@ -49,13 +49,6 @@ defmodule Conga.Posts.Category do
       upsert_identity :unique_name
 
       accept [:name]
-
-      argument :posts, {:array, :map}
-
-      change manage_relationship(:posts,
-               type: :append_and_remove,
-               on_no_match: :create
-             )
     end
 
     read :list_all do
