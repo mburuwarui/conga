@@ -66,9 +66,7 @@ defmodule CongaWeb.PostLive.Index do
             src={Faker.Avatar.image_url()}
             alt=""
           />
-          <div class="absolute bottom-0 right-0 flex m-4 gap-1 text-sm text-zinc-500">
-            <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
-          </div>
+
           <%= for category <- @categories do %>
             <.badge
               :for={post_category <- post.categories_join_assoc}
@@ -120,20 +118,35 @@ defmodule CongaWeb.PostLive.Index do
             </div>
           </div>
         </div>
-        <div class="flex flex-col flex-grow relative pt-6">
+        <div class="justify-start mt-4 ml-4 flex flex-row gap-5 items-center text-sm text-zinc-400">
+          <div class=" flex gap-1">
+            <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
+          </div>
+          <div class=" flex gap-1 items-center">
+            <Lucideicons.heart class="h-4 w-4" /> <%= post.total_likes %>
+          </div>
+          <div class=" flex gap-1 items-center">
+            <.icon name="hero-bookmark" class="h-4 w-4" /> <%= post.total_bookmarks %>
+          </div>
+          <div class=" flex gap-1 items-center">
+            <.icon name="hero-chat-bubble-oval-left" class="w-4 h-4" /> <%= post.total_comments %>
+          </div>
+        </div>
+        <div class="flex flex-col flex-grow relative pt-6 mb-4">
           <div class="h-20 mb-2">
             <!-- Fixed height for title area -->
             <h1 class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2">
               <%= post.title %>
             </h1>
           </div>
+
           <hr class="w-32 absolute top-[104px] left-0 border-t-1 border-blue-500" />
           <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow mt-4">
             <%= truncate(post.body, 20) %>
           </p>
           <.link
             navigate={~p"/posts/#{post}"}
-            class="inline-block mt-4 text-blue-500 underline hover:text-blue-400"
+            class="inline-block mt-2 text-blue-500 underline hover:text-blue-400"
           >
             Read more
           </.link>
@@ -275,6 +288,8 @@ defmodule CongaWeb.PostLive.Index do
       Conga.Posts.Post.list_public!(actor: current_user)
       |> Ash.load!([
         :total_likes,
+        :total_bookmarks,
+        :total_comments,
         :page_views,
         :reading_time,
         :likes,

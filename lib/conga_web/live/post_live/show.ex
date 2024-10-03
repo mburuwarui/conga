@@ -2,6 +2,8 @@ defmodule CongaWeb.PostLive.Show do
   use CongaWeb, :live_view
 
   import SaladUI.Button
+  import SaladUI.DropdownMenu
+  import SaladUI.Menu
 
   @impl true
   def render(assigns) do
@@ -192,6 +194,7 @@ defmodule CongaWeb.PostLive.Show do
     socket
     |> assign(:page_title, "Show Post")
     |> assign(:post, post)
+    |> stream(:comments, comments)
     |> assign(:comments, comments)
     |> assign(:categories, categories)
   end
@@ -316,7 +319,10 @@ defmodule CongaWeb.PostLive.Show do
     comment = Ash.get!(Conga.Posts.Comment, id, actor: socket.assigns.current_user)
     Ash.destroy!(comment, actor: socket.assigns.current_user)
 
-    {:noreply, stream_delete(socket, :comments, comment)}
+    {:noreply,
+     socket
+     |> stream_delete(:comments, comment)
+     |> put_flash(:info, "Post deleted successfully.")}
   end
 
   defp comment_tree(assigns) do
@@ -351,21 +357,42 @@ defmodule CongaWeb.PostLive.Show do
       </div>
       <div class="flex items-center justify-between gap-4 mb-8 text-sm text-gray-700">
         <%= @comment.content %>
-        <div :if={@current_user} class="flex gap-2">
+        <div :if={@current_user} class="flex gap-2 items-center">
           <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
-            <.icon name="hero-chat-bubble-left-ellipsis" class="text-blue-400 w-5 h-5" />
+            <Lucideicons.reply class="text-blue-400 w-5 h-5" />
           </.link>
-          <div :if={@current_user.id == @comment.user_id} class="flex gap-2">
-            <.link patch={~p"/posts/#{@post}/comments/#{@comment}/edit"} phx-click={JS.push_focus()}>
-              <.icon name="hero-pencil-square" class="text-blue-400 w-5 h-5" />
-            </.link>
-            <.link
-              data-confirm="Are you sure?"
-              phx-click={JS.push("delete", value: %{id: @comment.id})}
-            >
-              <.icon name="hero-trash" class="text-red-400 w-5 h-5" />
-            </.link>
-          </div>
+          <.dropdown_menu
+            :if={@current_user && @current_user.id == @comment.user_id}
+            class="flex gap-2"
+          >
+            <.dropdown_menu_trigger>
+              <.button aria-haspopup="true" size="icon" variant="ghost">
+                <Lucideicons.ellipsis class="h-4 w-4" />
+                <span class="sr-only">Toggle menu</span>
+              </.button>
+            </.dropdown_menu_trigger>
+            <.dropdown_menu_content align="end">
+              <.menu>
+                <.menu_label>Actions</.menu_label>
+                <.menu_item class="justify-center">
+                  <.link
+                    patch={~p"/posts/#{@post}/comments/#{@comment}/edit"}
+                    phx-click={JS.push_focus()}
+                  >
+                    <.icon name="hero-pencil-square" class="text-blue-400 w-5 h-5" />
+                  </.link>
+                </.menu_item>
+                <.menu_item class="justify-center">
+                  <.link
+                    data-confirm="Are you sure?"
+                    phx-click={JS.push("delete", value: %{id: @comment.id})}
+                  >
+                    <.icon name="hero-trash" class="text-red-400 w-5 h-5" />
+                  </.link>
+                </.menu_item>
+              </.menu>
+            </.dropdown_menu_content>
+          </.dropdown_menu>
         </div>
       </div>
       <%= render_slot(@inner_block) %>
