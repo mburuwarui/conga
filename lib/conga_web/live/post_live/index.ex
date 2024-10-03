@@ -16,7 +16,7 @@ defmodule CongaWeb.PostLive.Index do
             <.button>New Post</.button>
           </.link>
           <.link patch={~p"/search"}>
-            <.button class="hidden text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
+            <.button class="text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
               <div class="flex items-center pr-4 gap-2">
                 <Lucideicons.search class="h-4 w-4 " /> Find posts
               </div>
@@ -141,7 +141,7 @@ defmodule CongaWeb.PostLive.Index do
       </div>
     </div>
 
-    <.modal :if={@live_action in [:new, :edit]} id="post-modal" show on_cancel={JS.patch(~p"/posts")}>
+    <.modal :if={@live_action in [:new, :edit]} id="post-modal" show on_cancel={JS.patch(@patch)}>
       <.live_component
         module={CongaWeb.PostLive.FormComponent}
         id={(@post && @post.id) || :new}
@@ -157,7 +157,7 @@ defmodule CongaWeb.PostLive.Index do
       :if={@live_action == :search}
       id="search-post-modal"
       show
-      on_cancel={JS.patch(~p"/posts")}
+      on_cancel={JS.patch(@patch)}
     >
       <.live_component
         module={CongaWeb.SearchLive.SearchComponent}
@@ -203,12 +203,12 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :new, _params) do
-    posts = fetch_posts(socket.assigns.current_user)
+    patch = apply_patch(socket)
 
     socket
     |> assign(:page_title, "New Post")
     |> assign(:post, nil)
-    |> stream(:posts, posts)
+    |> assign(:patch, patch)
   end
 
   defp apply_action(socket, :index, _params) do
@@ -223,12 +223,12 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :search, _params) do
-    posts = fetch_posts(socket.assigns.current_user)
+    patch = apply_patch(socket)
 
     socket
     |> assign(:page_title, "Search")
     |> assign(:posts, nil)
-    |> stream(:posts, posts)
+    |> assign(:patch, patch)
   end
 
   defp apply_action(socket, :filter_by_category, %{"category" => category_id}) do
@@ -301,5 +301,12 @@ defmodule CongaWeb.PostLive.Index do
     |> Enum.take(max_words)
     |> Enum.join(" ")
     |> Kernel.<>("...")
+  end
+
+  defp apply_patch(socket) do
+    case socket.assigns.current_category do
+      nil -> ~p"/posts"
+      category_id -> ~p"/posts/category/#{category_id}"
+    end
   end
 end
