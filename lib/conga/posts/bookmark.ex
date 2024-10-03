@@ -19,6 +19,20 @@ defmodule Conga.Posts.Bookmark do
   postgres do
     table "bookmarks"
     repo Conga.Repo
+
+    references do
+      reference :user do
+        on_delete :delete
+      end
+
+      reference :post do
+        on_delete :delete
+      end
+
+      reference :comment do
+        on_delete :delete
+      end
+    end
   end
 
   resource do
@@ -60,10 +74,10 @@ defmodule Conga.Posts.Bookmark do
     end
 
     policy action_type(:read) do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if always()
     end
 
-    policy action_type([:update, :destroy]) do
+    policy action_type([:destroy]) do
       authorize_if relates_to_actor_via(:user)
     end
   end
@@ -83,6 +97,11 @@ defmodule Conga.Posts.Bookmark do
     belongs_to :post, Conga.Posts.Post do
       public? true
       allow_nil? false
+    end
+
+    belongs_to :comment, Conga.Posts.Comment do
+      public? true
+      allow_nil? true
     end
   end
 

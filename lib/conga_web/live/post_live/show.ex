@@ -194,7 +194,6 @@ defmodule CongaWeb.PostLive.Show do
     socket
     |> assign(:page_title, "Show Post")
     |> assign(:post, post)
-    |> stream(:comments, comments)
     |> assign(:comments, comments)
     |> assign(:categories, categories)
   end
@@ -316,13 +315,21 @@ defmodule CongaWeb.PostLive.Show do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    comment = Ash.get!(Conga.Posts.Comment, id, actor: socket.assigns.current_user)
+    comment =
+      Ash.get!(Conga.Posts.Comment, id, actor: socket.assigns.current_user)
+      |> Ash.load!([
+        :post,
+        :child_comments,
+        :parent_comment,
+        :user
+      ])
+
     Ash.destroy!(comment, actor: socket.assigns.current_user)
 
     {:noreply,
      socket
      |> stream_delete(:comments, comment)
-     |> put_flash(:info, "Post deleted successfully.")}
+     |> put_flash(:info, "Comment deleted successfully.")}
   end
 
   defp comment_tree(assigns) do

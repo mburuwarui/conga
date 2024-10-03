@@ -204,6 +204,8 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    patch = apply_patch(socket)
+
     post =
       Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
       |> Ash.load!([
@@ -213,6 +215,7 @@ defmodule CongaWeb.PostLive.Index do
     socket
     |> assign(:page_title, "Edit Post")
     |> assign(:post, post)
+    |> assign(:patch, patch)
   end
 
   defp apply_action(socket, :new, _params) do
@@ -226,6 +229,8 @@ defmodule CongaWeb.PostLive.Index do
 
   defp apply_action(socket, :index, _params) do
     posts = fetch_posts(socket.assigns.current_user)
+
+    IO.inspect(posts, label: "posts")
 
     socket
     |> assign(:page_title, "Listing Posts")
@@ -274,6 +279,13 @@ defmodule CongaWeb.PostLive.Index do
   def handle_event("delete", %{"id" => id}, socket) do
     post =
       Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
+      |> Ash.load!([
+        :likes,
+        :comments,
+        :bookmarks,
+        :categories_join_assoc,
+        :user
+      ])
 
     Ash.destroy!(post, actor: socket.assigns.current_user)
 

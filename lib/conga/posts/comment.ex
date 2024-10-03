@@ -162,10 +162,13 @@ defmodule Conga.Posts.Comment do
     end
 
     has_many :likes, Conga.Posts.Like
+
+    has_many :bookmarks, Conga.Posts.Bookmark
   end
 
   aggregates do
     count :like_count, :likes
+    count :bookmark_count, :bookmarks
   end
 
   pub_sub do
