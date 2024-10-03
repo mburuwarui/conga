@@ -15,9 +15,9 @@ defmodule CongaWeb.PostLive.Index do
           <.button>New Post</.button>
         </.link>
         <.link patch={~p"/search"}>
-          <.button class="hidden text-gray-500 bg-white hover:ring-gray-500 ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
+          <.button class="hidden text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
             <div class="flex items-center pr-4 gap-2">
-              <Lucideicons.search class="h-4 w-4 text-gray-400" /> Find posts
+              <Lucideicons.search class="h-4 w-4 " /> Find posts
             </div>
 
             <kbd class="ml-auto text-3xs opacity-80">

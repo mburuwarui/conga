@@ -270,7 +270,7 @@ defmodule CongaWeb.CoreComponents do
   def simple_search(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest} action="" novalidate="" role="search">
-      <div class="space-y-8 bg-white">
+      <div class="bg-white">
         <%= render_slot(@inner_block, f) %>
       </div>
     </.form>

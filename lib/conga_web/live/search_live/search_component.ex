@@ -23,15 +23,9 @@ defmodule CongaWeb.SearchLive.SearchComponent do
           placeholder="Search for posts"
           autofocus="true"
         />
-      </.simple_search>
-
-      <%= if @posts do %>
-        <.card
-          :for={post <- @posts}
-          class="shadow-none rounded-none border-none"
-          id="searchbox__results_list"
-        >
+        <.card :if={@posts} class="shadow-none rounded-none border-none" id="searchbox__results_list">
           <.link
+            :for={post <- @posts}
             navigate={~p"/posts/#{post}"}
             class="focus:outline-none focus:bg-slate-100 focus:text-sky-800"
           >
@@ -41,7 +35,7 @@ defmodule CongaWeb.SearchLive.SearchComponent do
             </.card_content>
           </.link>
         </.card>
-      <% end %>
+      </.simple_search>
     </div>
     """
   end
