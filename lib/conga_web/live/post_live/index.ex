@@ -63,7 +63,7 @@ defmodule CongaWeb.PostLive.Index do
         <div class="relative flex-shrink-0">
           <img
             class="object-cover object-center w-full h-64 rounded-lg lg:h-80"
-            src="https://images.unsplash.com/photo-1597534458220-9fb4969f2df5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1374&q=80"
+            src={Faker.Avatar.image_url()}
             alt=""
           />
           <div class="absolute bottom-0 right-0 flex m-4 gap-1 text-sm text-zinc-500">
@@ -111,12 +111,12 @@ defmodule CongaWeb.PostLive.Index do
           <div class="absolute bottom-0 flex p-3 bg-white dark:bg-gray-900">
             <img
               class="object-cover object-center w-10 h-10 rounded-full"
-              src="https://images.unsplash.com/photo-1531590878845-12627191e687?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+              src={Faker.Avatar.image_url()}
               alt=""
             />
             <div class="mx-4">
-              <h1 class="text-sm text-gray-700 dark:text-gray-200">Amelia. Anderson</h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Lead Developer</p>
+              <h1 class="text-sm text-gray-700 dark:text-gray-200"><%= Faker.Person.name() %></h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400"><%= Faker.Person.title() %></p>
             </div>
           </div>
         </div>
