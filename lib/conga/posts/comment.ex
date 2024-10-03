@@ -48,7 +48,16 @@ defmodule Conga.Posts.Comment do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:destroy]
+
+    read :read do
+      primary? true
+
+      prepare build(
+                sort: [inserted_at: :desc],
+                filter: expr(is_approved == true)
+              )
+    end
 
     create :create do
       primary? true

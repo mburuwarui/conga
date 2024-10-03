@@ -11,20 +11,22 @@ defmodule CongaWeb.PostLive.Index do
     <.header>
       Listing Posts
       <:actions>
-        <.link :if={@current_user} patch={~p"/posts/new"}>
-          <.button>New Post</.button>
-        </.link>
-        <.link patch={~p"/search"}>
-          <.button class="hidden text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
-            <div class="flex items-center pr-4 gap-2">
-              <Lucideicons.search class="h-4 w-4 " /> Find posts
-            </div>
+        <div class="flex flex-row gap-4">
+          <.link :if={@current_user} patch={~p"/posts/new"}>
+            <.button>New Post</.button>
+          </.link>
+          <.link patch={~p"/search"}>
+            <.button class="hidden text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
+              <div class="flex items-center pr-4 gap-2">
+                <Lucideicons.search class="h-4 w-4 " /> Find posts
+              </div>
 
-            <kbd class="ml-auto text-3xs opacity-80">
-              <kbd class="font-sans">⌘</kbd><kbd class="font-sans">K</kbd>
-            </kbd>
-          </.button>
-        </.link>
+              <kbd class="ml-auto text-3xs opacity-80">
+                <kbd class="font-sans">⌘</kbd><kbd class="font-sans">K</kbd>
+              </kbd>
+            </.button>
+          </.link>
+        </div>
       </:actions>
 
       <div class="mb-5">
@@ -201,9 +203,12 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :new, _params) do
+    posts = fetch_posts(socket.assigns.current_user)
+
     socket
     |> assign(:page_title, "New Post")
     |> assign(:post, nil)
+    |> stream(:posts, posts)
   end
 
   defp apply_action(socket, :index, _params) do

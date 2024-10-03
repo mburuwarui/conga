@@ -42,15 +42,24 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="User"><%= @post.user_id %></:item>
     </.list>
-    <div :for={category <- @post.categories_join_assoc} class="flex gap-2 items-center">
-      <.icon name="hero-tag" class="text-blue-400" />
-      <span
-        :for={post_category <- @categories}
-        :if={category.category_id == post_category.id}
-        class="text-blue-400"
-      >
-        <%= post_category.name %>
-      </span>
+
+    <div class="mt-4 flex flex-row gap-4">
+      <div :for={category <- @post.categories_join_assoc} class="flex">
+        <div
+          :for={post_category <- @categories}
+          :if={category.category_id == post_category.id}
+          class="text-blue-400"
+        >
+          <.link
+            navigate={~p"/posts/category/#{category.category_id}"}
+            class="flexw gap-2 items-center"
+          >
+            <.icon name="hero-tag" class="text-blue-400 w-4 h-4" />
+
+            <%= post_category.name %>
+          </.link>
+        </div>
+      </div>
     </div>
 
     <.header class="my-8 justify-between">
@@ -188,34 +197,48 @@ defmodule CongaWeb.PostLive.Show do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    current_user = socket.assigns.current_user
+
     post =
       Conga.Posts.Post
-      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Ash.get!(id, actor: current_user)
       |> Ash.load!([:comments, :categories_join_assoc])
+
+    categories = Conga.Posts.Category.list_all!(actor: current_user)
 
     socket
     |> assign(:page_title, "Edit Post")
     |> assign(:post, post)
+    |> assign(:categories, categories)
   end
 
   defp apply_action(socket, :new_comment, %{"id" => post_id}) do
+    current_user = socket.assigns.current_user
+
     post =
       Conga.Posts.Post
-      |> Ash.get!(post_id, actor: socket.assigns.current_user)
+      |> Ash.get!(post_id, actor: current_user)
       |> Ash.load!([:comments, :categories_join_assoc])
+
+    categories = Conga.Posts.Category.list_all!(actor: current_user)
 
     socket
     |> assign(:page_title, "New Comment")
     |> assign(:comment, nil)
     |> assign(:parent_comment, nil)
     |> assign(:post, post)
+    |> assign(:categories, categories)
   end
 
   defp apply_action(socket, :new_comment_child, %{"c_id" => id}) do
+    current_user = socket.assigns.current_user
+
     parent_comment =
       Conga.Posts.Comment
-      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Ash.get!(id, actor: current_user)
       |> Ash.load!([:post, :child_comments, :parent_comment])
+
+    categories = Conga.Posts.Category.list_all!(actor: current_user)
 
     post =
       parent_comment.post
@@ -226,6 +249,7 @@ defmodule CongaWeb.PostLive.Show do
     |> assign(:comment, nil)
     |> assign(:parent_comment, parent_comment)
     |> assign(:post, post)
+    |> assign(:categories, categories)
   end
 
   defp apply_action(socket, :edit_comment, %{"c_id" => id}) do
@@ -322,7 +346,10 @@ defmodule CongaWeb.PostLive.Show do
   defp comment(assigns) do
     ~H"""
     <div class="border-l-2 border-gray-200 pl-4">
-      <div class="flex items-center justify-between gap-4 pb-2 text-sm text-gray-700">
+      <div class="flex flex-row items-center gap-2">
+        <Lucideicons.user class="h-5 w-5" /> <span><%= Faker.Person.first_name() %></span>
+      </div>
+      <div class="flex items-center justify-between gap-4 mb-8 text-sm text-gray-700">
         <%= @comment.content %>
         <div :if={@current_user} class="flex gap-2">
           <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
