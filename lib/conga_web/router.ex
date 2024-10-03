@@ -84,6 +84,8 @@ defmodule CongaWeb.Router do
       on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
       live "/posts", PostLive.Index, :index
       live "/posts/:id", PostLive.Show, :show
+      live "/posts/category/:category", PostLive.Index, :filter_by_category
+      live "/search", PostLive.Index, :search
     end
   end
 

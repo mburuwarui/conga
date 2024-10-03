@@ -14,33 +14,40 @@ defmodule CongaWeb.PostLive.Index do
         <.link :if={@current_user} patch={~p"/posts/new"}>
           <.button>New Post</.button>
         </.link>
+        <.link patch={~p"/search"}>
+          <.button class="hidden text-gray-500 bg-white hover:ring-gray-500 ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
+            <div class="flex items-center pr-4 gap-2">
+              <Lucideicons.search class="h-4 w-4 text-gray-400" /> Find posts
+            </div>
+
+            <kbd class="ml-auto text-3xs opacity-80">
+              <kbd class="font-sans">⌘</kbd><kbd class="font-sans">K</kbd>
+            </kbd>
+          </.button>
+        </.link>
       </:actions>
 
       <div class="mb-5">
         <%!-- <h2 class="text-lg font-semibold mb-2">Filter by Category:</h2> --%>
         <div class="flex flex-wrap gap-2">
-          <button
-            :for={category <- @categories}
-            class={[
+          <.link :for={category <- @categories} patch={~p"/posts/category/#{category.id}"}>
+            <button class={[
               "px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
               @current_category == category.id && "bg-indigo-600 text-white",
               @current_category != category.id && "text-gray-700 bg-gray-200 hover:bg-gray-300"
-            ]}
-            phx-click="filter_by_category"
-            phx-value-category_id={category.id}
-          >
-            <%= category.name %>
-          </button>
-          <button
-            class={[
+            ]}>
+              <%= category.name %>
+            </button>
+          </.link>
+          <.link patch={~p"/posts"}>
+            <button class={[
               "px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
               @current_category == nil && "bg-indigo-600 text-white",
               @current_category != nil && "text-gray-700 bg-gray-200 hover:bg-gray-300"
-            ]}
-            phx-click="all_categories"
-          >
-            All Categories
-          </button>
+            ]}>
+              All Categories
+            </button>
+          </.link>
         </div>
       </div>
     </.header>
@@ -143,35 +150,34 @@ defmodule CongaWeb.PostLive.Index do
         patch={~p"/posts"}
       />
     </.modal>
+
+    <.search_modal
+      :if={@live_action == :search}
+      id="search-post-modal"
+      show
+      on_cancel={JS.patch(~p"/posts")}
+    >
+      <.live_component
+        module={CongaWeb.SearchLive.SearchComponent}
+        id={:search}
+        title={@page_title}
+        current_user={@current_user}
+        action={@live_action}
+        posts={@posts}
+        patch={~p"/posts"}
+      />
+    </.search_modal>
     """
   end
 
   @impl true
   def mount(_params, _session, socket) do
-    current_user = socket.assigns.current_user
-
-    posts =
-      Conga.Posts.Post.list_public!(actor: current_user)
-      |> Ash.load!([
-        :total_likes,
-        :page_views,
-        :reading_time,
-        :likes,
-        :comments,
-        :bookmarks,
-        :categories_join_assoc,
-        :user
-      ])
-
-    # IO.inspect(posts, label: "posts")
-
     categories = Conga.Posts.Category.list_all!()
     IO.inspect(categories, label: "categories")
 
     {:ok,
      socket
-     |> stream(:posts, posts)
-     |> assign(:posts, posts)
+     |> assign(:posts, [])
      |> assign_new(:current_user, fn -> nil end)
      |> assign(:current_category, nil)
      |> assign(:categories, categories)}
@@ -201,9 +207,34 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
+    posts = fetch_posts(socket.assigns.current_user)
+
     socket
     |> assign(:page_title, "Listing Posts")
     |> assign(:post, nil)
+    |> assign(:current_category, nil)
+    |> assign(:posts, posts)
+    |> stream(:posts, posts, reset: true)
+  end
+
+  defp apply_action(socket, :search, _params) do
+    posts = fetch_posts(socket.assigns.current_user)
+
+    socket
+    |> assign(:page_title, "Search")
+    |> assign(:posts, nil)
+    |> stream(:posts, posts)
+  end
+
+  defp apply_action(socket, :filter_by_category, %{"category" => category_id}) do
+    category = Enum.find(socket.assigns.categories, &(&1.id == category_id))
+    posts = fetch_posts(socket.assigns.current_user, category_id)
+
+    socket
+    |> assign(:page_title, "Category: #{category.name}")
+    |> assign(:current_category, category_id)
+    |> assign(:posts, posts)
+    |> stream(:posts, posts, reset: true)
   end
 
   @impl true
@@ -234,31 +265,29 @@ defmodule CongaWeb.PostLive.Index do
      |> put_flash(:info, "Post deleted successfully.")}
   end
 
-  def handle_event("filter_by_category", %{"category_id" => category_id}, socket) do
+  defp fetch_posts(current_user, category_id \\ nil) do
     posts =
-      socket.assigns.posts
-      |> Enum.filter(fn post ->
-        Enum.any?(post.categories_join_assoc, fn category ->
-          category.category_id == category_id
+      Conga.Posts.Post.list_public!(actor: current_user)
+      |> Ash.load!([
+        :total_likes,
+        :page_views,
+        :reading_time,
+        :likes,
+        :comments,
+        :bookmarks,
+        :categories_join_assoc,
+        :user
+      ])
+
+    if category_id do
+      Enum.filter(posts, fn post ->
+        Enum.any?(post.categories_join_assoc, fn cat ->
+          cat.category_id == category_id
         end)
       end)
-
-    IO.inspect(posts, label: "posts_by_category")
-
-    {:noreply,
-     socket
-     |> stream(:posts, posts, reset: true)
-     |> assign(:current_category, category_id)}
-  end
-
-  def handle_event("all_categories", _params, socket) do
-    posts =
-      socket.assigns.posts
-
-    {:noreply,
-     socket
-     |> stream(:posts, posts, reset: true)
-     |> assign(:current_category, nil)}
+    else
+      posts
+    end
   end
 
   def truncate(text, max_words) do

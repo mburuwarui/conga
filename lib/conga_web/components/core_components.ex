@@ -19,6 +19,8 @@ defmodule CongaWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   use Gettext, backend: CongaWeb.Gettext
 
+  use CongaWeb, :verified_routes
+
   @doc """
   Renders a modal.
 
@@ -78,6 +80,49 @@ defmodule CongaWeb.CoreComponents do
                   <.icon name="hero-x-mark-solid" class="h-5 w-5" />
                 </button>
               </div>
+              <div id={"#{@id}-content"}>
+                <%= render_slot(@inner_block) %>
+              </div>
+            </.focus_wrap>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :on_cancel, JS, default: %JS{}
+  slot :inner_block, required: true
+
+  def search_modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@show && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      class="relative z-50 hidden"
+    >
+      <div id={"#{@id}-bg"} class="fixed inset-0 bg-zinc-50/90 transition-opacity" aria-hidden="true" />
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        aria-labelledby={"#{@id}-title"}
+        aria-describedby={"#{@id}-description"}
+        role="dialog"
+        aria-modal="true"
+        tabindex="0"
+      >
+        <div class="flex min-h-full justify-center">
+          <div class="w-full min-h-12 max-w-2xl p-2 sm:p-4 lg:py-6 mt-32">
+            <.focus_wrap
+              id={"#{@id}-container"}
+              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+              phx-key="escape"
+              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-md bg-white p-1 shadow-lg ring-1 transition duration-75 ease-in-out"
+            >
               <div id={"#{@id}-content"}>
                 <%= render_slot(@inner_block) %>
               </div>
@@ -207,6 +252,26 @@ defmodule CongaWeb.CoreComponents do
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           <%= render_slot(action, f) %>
         </div>
+      </div>
+    </.form>
+    """
+  end
+
+  attr :for, :any, required: true, doc: "the datastructure for the form"
+  attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
+  attr :rest, :global,
+    include: ~w(autocomplete name rel action enctype method novalidate target multipart),
+    doc: "the arbitrary HTML attributes to apply to the form tag"
+
+  slot :inner_block, required: true
+  slot :actions, doc: "the slot for form actions, such as a submit button"
+
+  def simple_search(assigns) do
+    ~H"""
+    <.form :let={f} for={@for} as={@as} {@rest} action="" novalidate="" role="search">
+      <div class="space-y-8 bg-white">
+        <%= render_slot(@inner_block, f) %>
       </div>
     </.form>
     """
@@ -362,6 +427,40 @@ defmodule CongaWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  def input_core(%{type: "search"} = assigns) do
+    ~H"""
+    <div phx-feedback-for={@name} class="relative">
+      <.label for={@id}><%= @label %></.label>
+      <Lucideicons.search class="h-4 w-4 absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+      <input
+        type={@type}
+        name={@name}
+        id={@id}
+        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        class={[
+          "h-12 w-full border-none focus:ring-0 pl-11 pr-4 text-gray-800 placeholder-gray-400 sm:text-sm",
+          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
+          @errors == [] && "border-zinc-300 focus:border-zinc-400",
+          @errors != [] && "border-rose-400 focus:border-rose-400"
+        ]}
+        role="combobox"
+        aria-expanded="false"
+        aria-autocomplete="both"
+        aria-controls="searchbox__results_list"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        enterkeyhint="search"
+        spellcheck="false"
+        value=""
+        tabindex="0"
+        {@rest}
+      />
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """

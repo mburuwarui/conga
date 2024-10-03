@@ -46,6 +46,7 @@ defmodule Conga.Posts.Post do
 
   code_interface do
     define :create
+    define :read
     define :like
     define :dislike
     define :unbookmark
@@ -53,6 +54,7 @@ defmodule Conga.Posts.Post do
     define :inc_page_views
     define :list_public
     define :list_dashboard
+    define :search_posts
   end
 
   actions do
@@ -167,6 +169,18 @@ defmodule Conga.Posts.Post do
 
     read :list_dashboard do
       prepare build(sort: [inserted_at: :desc], filter: [user_id: actor(:id)])
+    end
+
+    read :search_posts do
+      argument :query, :string do
+        allow_nil? false
+      end
+
+      prepare build(
+                filter: [title: arg(:query)],
+                sort: [inserted_at: :desc],
+                limit: 5
+              )
     end
   end
 
