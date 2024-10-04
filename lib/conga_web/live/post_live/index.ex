@@ -72,7 +72,7 @@ defmodule CongaWeb.PostLive.Index do
                 :for={post_category <- post.categories_join_assoc}
                 :if={post_category.category_id == category.id}
                 variant="outline"
-                class="border-yellow-400 bg-white text-yellow-600 mb-2 justify-center"
+                class="border-white bg-white text-white bg-opacity-35 mb-2 justify-center"
               >
                 <%= category.name %>
               </.badge>
@@ -87,7 +87,7 @@ defmodule CongaWeb.PostLive.Index do
                 aria-haspopup="true"
                 size="icon"
                 variant="ghost"
-                class="text-white hover:text-black"
+                class="text-white hover:text-zinc-700"
               >
                 <Lucideicons.ellipsis class="h-6 w-6" />
                 <span class="sr-only">Toggle menu</span>
