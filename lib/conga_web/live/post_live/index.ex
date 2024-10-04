@@ -66,24 +66,30 @@ defmodule CongaWeb.PostLive.Index do
             src={Faker.Avatar.image_url()}
             alt=""
           />
-
-          <%= for category <- @categories do %>
-            <.badge
-              :for={post_category <- post.categories_join_assoc}
-              :if={post_category.category_id == category.id}
-              variant="outline"
-              class="border-zinc-400 bg-amber-100 text-zinc-600 top-0 right-0 absolute flex m-4"
-            >
-              <%= category.name %>
-            </.badge>
-          <% end %>
+          <div class="top-0 right-0 absolute m-4">
+            <div :for={category <- @categories} class="flex flex-col">
+              <.badge
+                :for={post_category <- post.categories_join_assoc}
+                :if={post_category.category_id == category.id}
+                variant="outline"
+                class="border-zinc-400 bg-white text-zinc-600 mb-2 justify-center"
+              >
+                <%= category.name %>
+              </.badge>
+            </div>
+          </div>
           <.dropdown_menu
             :if={@current_user && @current_user.id == post.user_id}
             class="absolute top-0 flex m-4"
           >
             <.dropdown_menu_trigger>
-              <.button aria-haspopup="true" size="icon" variant="ghost">
-                <Lucideicons.ellipsis class="h-4 w-4" />
+              <.button
+                aria-haspopup="true"
+                size="icon"
+                variant="ghost"
+                class="text-white hover:text-black"
+              >
+                <Lucideicons.ellipsis class="h-6 w-6" />
                 <span class="sr-only">Toggle menu</span>
               </.button>
             </.dropdown_menu_trigger>
