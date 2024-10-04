@@ -72,7 +72,7 @@ defmodule CongaWeb.PostLive.Index do
                 :for={post_category <- post.categories_join_assoc}
                 :if={post_category.category_id == category.id}
                 variant="outline"
-                class="border-zinc-400 bg-white text-zinc-600 mb-2 justify-center"
+                class="border-yellow-400 bg-white text-yellow-600 mb-2 justify-center"
               >
                 <%= category.name %>
               </.badge>
