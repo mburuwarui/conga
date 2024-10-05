@@ -64,41 +64,41 @@ defmodule CongaWeb.PostLive.Show do
       </div>
     </div>
 
-    <.header class="my-8 justify-between">
-      <%= if @current_user do %>
-        <%= if @post.liked_by_user do %>
-          <button phx-click="dislike" phx-value-id={@post.id}>
-            <.icon name="hero-heart-solid" class="text-red-400" />
-          </button>
+    <div class="flex my-8 justify-between">
+      <div class="flex gap-4">
+        <%= if @current_user do %>
+          <%= if @post.liked_by_user do %>
+            <button phx-click="dislike" phx-value-id={@post.id}>
+              <.icon name="hero-heart-solid" class="text-red-400" />
+            </button>
+          <% else %>
+            <button phx-click="like" phx-value-id={@post.id}>
+              <.icon name="hero-heart" class="text-red-300" />
+            </button>
+          <% end %>
+          <%= if @post.bookmarked_by_user do %>
+            <button phx-click="unbookmark" phx-value-id={@post.id}>
+              <.icon name="hero-bookmark-solid" class="text-blue-400" />
+            </button>
+          <% else %>
+            <button phx-click="bookmark" phx-value-id={@post.id}>
+              <.icon name="hero-bookmark" class="text-blue-500" />
+            </button>
+          <% end %>
         <% else %>
-          <button phx-click="like" phx-value-id={@post.id}>
-            <.icon name="hero-heart" class="text-red-300" />
-          </button>
-        <% end %>
-        <%= if @post.bookmarked_by_user do %>
-          <button phx-click="unbookmark" phx-value-id={@post.id}>
-            <.icon name="hero-bookmark-solid" class="text-blue-400" />
-          </button>
-        <% else %>
-          <button phx-click="bookmark" phx-value-id={@post.id}>
+          <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+            <.icon name="hero-heart" class="text-red-500" />
+          </.link>
+          <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
             <.icon name="hero-bookmark" class="text-blue-500" />
-          </button>
+          </.link>
         <% end %>
-      <% else %>
-        <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
-          <.icon name="hero-heart" class="text-red-500" />
-        </.link>
-        <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
-          <.icon name="hero-bookmark" class="text-blue-500" />
-        </.link>
-      <% end %>
+      </div>
 
-      <:actions>
-        <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
-          <.button>New Comment</.button>
-        </.link>
-      </:actions>
-    </.header>
+      <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
+        <.button>New Comment</.button>
+      </.link>
+    </div>
 
     <.comment_tree stream={@streams.comments} current_user={@current_user} post={@post} />
 
@@ -428,7 +428,7 @@ defmodule CongaWeb.PostLive.Show do
   defp comment(assigns) do
     ~H"""
     <div id={@id} class="border-l-2 border-gray-200 pl-4">
-      <div class="flex flex-row items-center gap-2">
+      <div class="flex items-center gap-2">
         <Lucideicons.user class="h-5 w-5" /> <span><%= Faker.Person.first_name() %></span>
       </div>
       <div class="flex items-center justify-between gap-4 mb-8 text-sm text-gray-700">

@@ -29,8 +29,7 @@ defmodule CongaWeb.PostLive.Index do
         </div>
       </:actions>
 
-      <div class="mb-5">
-        <%!-- <h2 class="text-lg font-semibold mb-2">Filter by Category:</h2> --%>
+      <div class="mb-5 gap-4 flex items-center">
         <div class="flex flex-wrap gap-2">
           <.link :for={category <- @categories} patch={~p"/posts/category/#{category.id}"}>
             <button class={[
@@ -51,6 +50,29 @@ defmodule CongaWeb.PostLive.Index do
             </button>
           </.link>
         </div>
+        <.dropdown_menu class="flex m-4">
+          <.dropdown_menu_trigger>
+            <.button aria-haspopup="true" variant="outline" class="items-center gap-2">
+              <.icon name="hero-bars-3-bottom-left" class="h-6 w-6" />
+              <span>Sort by</span>
+            </.button>
+          </.dropdown_menu_trigger>
+          <.dropdown_menu_content align="start">
+            <.menu>
+              <.menu_item class="justify-center">
+                <.link phx-click="sort_by_latest">
+                  Latest
+                </.link>
+              </.menu_item>
+
+              <.menu_item class="justify-center">
+                <.link phx-click="sort_by_popularity">
+                  Popular
+                </.link>
+              </.menu_item>
+            </.menu>
+          </.dropdown_menu_content>
+        </.dropdown_menu>
       </div>
     </.header>
 
@@ -124,18 +146,37 @@ defmodule CongaWeb.PostLive.Index do
             </div>
           </div>
         </div>
-        <div class="justify-start mt-4 ml-4 flex flex-row gap-5 items-center text-sm text-zinc-400">
-          <div class=" flex gap-1">
-            <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
+        <div class="flex justify-between mt-4 mx-4 ">
+          <div class="justify-start flex flex-row gap-5 items-center text-sm text-zinc-400">
+            <div class=" flex gap-1">
+              <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
+            </div>
+            <div class=" flex gap-1 items-center">
+              <Lucideicons.heart class="h-4 w-4" /> <%= post.like_count %>
+            </div>
+            <div class=" flex gap-1 items-center">
+              <.icon name="hero-bookmark" class="h-4 w-4" /> <%= post.bookmark_count %>
+            </div>
+            <div class=" flex gap-1 items-center">
+              <.icon name="hero-chat-bubble-oval-left" class="w-4 h-4" /> <%= post.comment_count %>
+            </div>
           </div>
-          <div class=" flex gap-1 items-center">
-            <Lucideicons.heart class="h-4 w-4" /> <%= post.like_count %>
-          </div>
-          <div class=" flex gap-1 items-center">
-            <.icon name="hero-bookmark" class="h-4 w-4" /> <%= post.bookmark_count %>
-          </div>
-          <div class=" flex gap-1 items-center">
-            <.icon name="hero-chat-bubble-oval-left" class="w-4 h-4" /> <%= post.comment_count %>
+          <div class="flex gap-4">
+            <%= if @current_user do %>
+              <%= if post.bookmarked_by_user do %>
+                <button phx-click="unbookmark" phx-value-id={post.id}>
+                  <.icon name="hero-bookmark-solid" class="text-blue-400" />
+                </button>
+              <% else %>
+                <button phx-click="bookmark" phx-value-id={post.id}>
+                  <.icon name="hero-bookmark" class="text-blue-500" />
+                </button>
+              <% end %>
+            <% else %>
+              <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+                <.icon name="hero-bookmark" class="text-blue-500" />
+              </.link>
+            <% end %>
           </div>
         </div>
         <div class="flex flex-col flex-grow relative pt-6 mb-4">
@@ -194,7 +235,7 @@ defmodule CongaWeb.PostLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     categories = Conga.Posts.Category.list_all!()
-    IO.inspect(categories, label: "categories")
+    # IO.inspect(categories, label: "categories")
 
     {:ok,
      socket
@@ -234,9 +275,9 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    posts = fetch_posts(socket.assigns.current_user)
+    posts = fetch_posts(socket, socket.assigns.current_user)
 
-    IO.inspect(posts, label: "posts")
+    # IO.inspect(posts, label: "posts")
 
     socket
     |> assign(:page_title, "Listing Posts")
@@ -257,7 +298,7 @@ defmodule CongaWeb.PostLive.Index do
 
   defp apply_action(socket, :filter_by_category, %{"category" => category_id}) do
     category = Enum.find(socket.assigns.categories, &(&1.id == category_id))
-    posts = fetch_posts(socket.assigns.current_user, category_id)
+    posts = fetch_posts(socket, socket.assigns.current_user, category_id)
 
     socket
     |> assign(:page_title, "Category: #{category.name}")
@@ -282,6 +323,47 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   @impl true
+  def handle_event("bookmark", %{"id" => id}, socket) do
+    Conga.Posts.Post
+    |> Ash.get!(id, actor: socket.assigns.current_user)
+    |> Conga.Posts.Post.bookmark!(actor: socket.assigns.current_user)
+    |> Map.put(:bookmarked_by_user, true)
+    |> Ash.load!([
+      :bookmark_count,
+      bookmarked_by_user: %{
+        user_id: socket.assigns.current_user && socket.assigns.current_user.id
+      }
+    ])
+
+    posts = fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
+
+    {:noreply,
+     socket
+     |> assign(:posts, posts)
+     |> stream(:posts, posts, reset: true)}
+  end
+
+  def handle_event("unbookmark", %{"id" => id}, socket) do
+    Conga.Posts.Post
+    |> Ash.get!(id, actor: socket.assigns.current_user)
+    |> Conga.Posts.Post.unbookmark!(actor: socket.assigns.current_user)
+    |> Map.put(:bookmarked_by_user, false)
+    |> Ash.load!([
+      :bookmark_count,
+      bookmarked_by_user: %{
+        user_id: socket.assigns.current_user && socket.assigns.current_user.id
+      }
+    ])
+
+    posts = fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
+
+    {:noreply,
+     socket
+     |> assign(:posts, posts)
+     |> stream(:posts, posts, reset: true)}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     post =
       Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
@@ -301,7 +383,30 @@ defmodule CongaWeb.PostLive.Index do
      |> put_flash(:info, "Post deleted successfully.")}
   end
 
-  defp fetch_posts(current_user, category_id \\ nil) do
+  @impl true
+  def handle_event("sort_by_popularity", _params, socket) do
+    posts =
+      fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
+      |> Enum.sort_by(& &1.popularity_score, &>=/2)
+
+    {:noreply,
+     socket
+     |> assign(:posts, posts)
+     |> stream(:posts, posts, reset: true)}
+  end
+
+  def handle_event("sort_by_latest", _params, socket) do
+    posts =
+      fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
+      |> Enum.sort_by(& &1.inserted_at, &>=/2)
+
+    {:noreply,
+     socket
+     |> assign(:posts, posts)
+     |> stream(:posts, posts, reset: true)}
+  end
+
+  defp fetch_posts(socket, current_user, category_id \\ nil) do
     posts =
       Conga.Posts.Post.list_public!(actor: current_user)
       |> Ash.load!([
@@ -309,22 +414,29 @@ defmodule CongaWeb.PostLive.Index do
         :comment_count,
         :bookmark_count,
         :page_views,
+        :popularity_score,
         :reading_time,
         :likes,
         :comments,
         :bookmarks,
         :categories_join_assoc,
-        :user
+        :user,
+        liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
+        bookmarked_by_user: %{
+          user_id: socket.assigns.current_user && socket.assigns.current_user.id
+        }
       ])
 
-    if category_id do
-      Enum.filter(posts, fn post ->
-        Enum.any?(post.categories_join_assoc, fn cat ->
-          cat.category_id == category_id
+    case category_id do
+      nil ->
+        posts
+
+      category_id ->
+        Enum.filter(posts, fn post ->
+          Enum.any?(post.categories_join_assoc, fn cat ->
+            cat.category_id == category_id
+          end)
         end)
-      end)
-    else
-      posts
     end
   end
 
