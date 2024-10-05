@@ -38,6 +38,8 @@ npm-debug.log
 # Ignore git.old
 .git.old
 
+.env
+
 y 
 
 y.pub 

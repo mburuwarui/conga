@@ -100,7 +100,7 @@ defmodule CongaWeb.PostLive.Show do
       </:actions>
     </.header>
 
-    <.comment_tree comments={@post.comments} current_user={@current_user} post={@post} />
+    <.comment_tree stream={@streams.comments} current_user={@current_user} post={@post} />
 
     <.back navigate={~p"/posts"}>Back to posts</.back>
 
@@ -151,24 +151,9 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!([
-        :total_likes,
-        :total_comments,
-        :total_bookmarks,
-        :reading_time,
-        :popularity_score,
-        :comments,
-        :bookmarks,
-        :categories_join_assoc,
-        :likes,
-        :user,
-        liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
-        bookmarked_by_user: %{
-          user_id: socket.assigns.current_user && socket.assigns.current_user.id
-        }
-      ])
+      |> Ash.load!(post_fields(socket))
 
-    IO.inspect(post, label: "post")
+    # IO.inspect(post, label: "post")
 
     # Only increment page views if it's not a reconnection
     unless connected?(socket) do
@@ -182,10 +167,10 @@ defmodule CongaWeb.PostLive.Show do
       post.comments
       |> Enum.map(fn comment ->
         comment
-        |> Ash.load!([:child_comments, :user])
+        |> Ash.load!([:child_comments, :user, :parent_comment])
       end)
 
-    IO.inspect(comments, label: "comments")
+    # IO.inspect(comments, label: "comments")
 
     current_user = socket.assigns.current_user
 
@@ -195,6 +180,7 @@ defmodule CongaWeb.PostLive.Show do
     |> assign(:page_title, "Show Post")
     |> assign(:post, post)
     |> assign(:comments, comments)
+    |> stream(:comments, comments, reset: true)
     |> assign(:categories, categories)
   end
 
@@ -210,6 +196,7 @@ defmodule CongaWeb.PostLive.Show do
 
     socket
     |> assign(:page_title, "Edit Post")
+    |> stream(:comments, post.comments)
     |> assign(:post, post)
     |> assign(:categories, categories)
   end
@@ -224,11 +211,14 @@ defmodule CongaWeb.PostLive.Show do
 
     categories = Conga.Posts.Category.list_all!(actor: current_user)
 
+    comments = post.comments
+
     socket
     |> assign(:page_title, "New Comment")
     |> assign(:comment, nil)
     |> assign(:parent_comment, nil)
     |> assign(:post, post)
+    |> stream(:comments, comments)
     |> assign(:categories, categories)
   end
 
@@ -246,9 +236,12 @@ defmodule CongaWeb.PostLive.Show do
       parent_comment.post
       |> Ash.load!([:comments, :categories_join_assoc])
 
+    comments = post.comments
+
     socket
     |> assign(:page_title, "New Comment")
     |> assign(:comment, nil)
+    |> stream(:comments, comments)
     |> assign(:parent_comment, parent_comment)
     |> assign(:post, post)
     |> assign(:categories, categories)
@@ -258,7 +251,7 @@ defmodule CongaWeb.PostLive.Show do
     comment =
       Conga.Posts.Comment
       |> Ash.get!(id, actor: socket.assigns.current_user)
-      |> Ash.load!(:post)
+      |> Ash.load!([:post, :parent_comment])
 
     post =
       comment.post
@@ -266,9 +259,43 @@ defmodule CongaWeb.PostLive.Show do
 
     socket
     |> assign(:page_title, "Edit Comment")
+    |> stream(:comments, post.comments)
     |> assign(:comment, comment)
     |> assign(:parent_comment, nil)
     |> assign(:post, post)
+  end
+
+  @impl true
+  def handle_info({CongaWeb.CommentLive.FormComponent, {:saved, comment}}, socket) do
+    categories = Conga.Posts.Category.list_all!(actor: socket.assigns.current_user)
+
+    comment =
+      comment |> Ash.load!([:user, :post, :child_comments, :parent_comment])
+
+    post = comment.post |> Ash.load!([:comments])
+
+    {:noreply,
+     socket
+     |> stream_insert(:comments, comment)
+     |> assign(comments: post.comments)
+     |> assign(:categories, categories)}
+  end
+
+  @impl true
+  def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
+    categories = Conga.Posts.Category.list_all!(actor: socket.assigns.current_user)
+
+    post =
+      post
+      |> Ash.load!(post_fields(socket))
+
+    comments = post.comments
+
+    {:noreply,
+     socket
+     |> stream(:comments, comments)
+     |> assign(:categories, categories)
+     |> assign(:post, post)}
   end
 
   @impl true
@@ -277,9 +304,14 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.like!(actor: socket.assigns.current_user)
       |> Map.put(:liked_by_user, true)
-      |> Ash.load!([:total_likes, :popularity_score])
+      |> Ash.load!([:total_likes, :comments, :popularity_score, :total_comments])
 
-    {:noreply, assign(socket, :post, post)}
+    comments = post.comments
+
+    {:noreply,
+     socket
+     |> assign(:post, post)
+     |> stream(:comments, comments)}
   end
 
   def handle_event("dislike", _params, socket) do
@@ -287,9 +319,14 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.dislike!(actor: socket.assigns.current_user)
       |> Map.put(:liked_by_user, false)
-      |> Ash.load!([:total_likes, :popularity_score])
+      |> Ash.load!([:total_likes, :comments, :popularity_score, :total_comments])
 
-    {:noreply, assign(socket, :post, post)}
+    comments = post.comments
+
+    {:noreply,
+     socket
+     |> assign(:post, post)
+     |> stream(:comments, comments)}
   end
 
   @impl true
@@ -298,9 +335,14 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.bookmark!(actor: socket.assigns.current_user)
       |> Map.put(:bookmarked_by_user, true)
-      |> Ash.load!([:total_bookmarks, :popularity_score])
+      |> Ash.load!([:total_bookmarks, :comments, :popularity_score])
 
-    {:noreply, assign(socket, :post, post)}
+    comments = post.comments
+
+    {:noreply,
+     socket
+     |> assign(:post, post)
+     |> stream(:comments, comments)}
   end
 
   def handle_event("unbookmark", _params, socket) do
@@ -308,57 +350,84 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.unbookmark!(actor: socket.assigns.current_user)
       |> Map.put(:bookmarked_by_user, false)
-      |> Ash.load!([:total_bookmarks, :popularity_score])
+      |> Ash.load!([:total_bookmarks, :comments, :popularity_score])
 
-    {:noreply, assign(socket, :post, post)}
+    comments = post.comments
+
+    {:noreply,
+     socket
+     |> assign(:post, post)
+     |> stream(:comments, comments)}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     comment =
       Ash.get!(Conga.Posts.Comment, id, actor: socket.assigns.current_user)
-      |> Ash.load!([
-        :post,
-        :child_comments,
-        :parent_comment,
-        :user
-      ])
+      |> Ash.load!([:post])
 
     Ash.destroy!(comment, actor: socket.assigns.current_user)
+
+    post = comment.post |> Ash.load!([:comments])
 
     {:noreply,
      socket
      |> stream_delete(:comments, comment)
+     |> assign(:comments, post.comments)
      |> put_flash(:info, "Comment deleted successfully.")}
+  end
+
+  defp post_fields(socket) do
+    [
+      :total_likes,
+      :total_comments,
+      :total_bookmarks,
+      :reading_time,
+      :popularity_score,
+      :comments,
+      :bookmarks,
+      :categories_join_assoc,
+      :likes,
+      :user,
+      liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
+      bookmarked_by_user: %{
+        user_id: socket.assigns.current_user && socket.assigns.current_user.id
+      }
+    ]
   end
 
   defp comment_tree(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <%= for comment <- root_comments(assigns.comments) do %>
-        <%= render_comment(assigns, comment) %>
+    <div class="space-y-4" phx-update="stream" id="comments">
+      <%= for {id, comment} <- @stream do %>
+        <%= if is_nil(comment.parent_comment_id) do %>
+          <%= render_comment(assigns, id, comment) %>
+        <% end %>
       <% end %>
     </div>
     """
   end
 
-  defp render_comment(assigns, comment) do
+  defp render_comment(assigns, id, comment) do
     assigns = assign(assigns, :comment, comment)
+    assigns = assign(assigns, :id, id)
 
     ~H"""
-    <.comment comment={@comment} current_user={@current_user} post={@post}>
-      <%= if has_child_comments?(@comments, @comment.id) do %>
-        <%= for child_comment <- get_child_comments(@comments, @comment.id) do %>
-          <%= render_comment(assigns, child_comment) %>
+    <.comment id={@id} comment={@comment} current_user={@current_user} post={@post}>
+      <div phx-update="stream" id="comments">
+        <%= for {child_id, child_comment} <- @stream do %>
+          <%= if child_comment.parent_comment_id == @comment.id do %>
+            <%= render_comment(assigns, child_id, child_comment) %>
+          <% end %>
         <% end %>
-      <% end %>
+      </div>
     </.comment>
     """
   end
 
   defp comment(assigns) do
     ~H"""
-    <div class="border-l-2 border-gray-200 pl-4">
+    <div id={@id} class="border-l-2 border-gray-200 pl-4">
       <div class="flex flex-row items-center gap-2">
         <Lucideicons.user class="h-5 w-5" /> <span><%= Faker.Person.first_name() %></span>
       </div>
@@ -405,17 +474,5 @@ defmodule CongaWeb.PostLive.Show do
       <%= render_slot(@inner_block) %>
     </div>
     """
-  end
-
-  defp root_comments(comments) do
-    Enum.filter(comments, &is_nil(&1.parent_comment_id))
-  end
-
-  defp get_child_comments(comments, parent_id) do
-    Enum.filter(comments, &(&1.parent_comment_id == parent_id))
-  end
-
-  defp has_child_comments?(comments, parent_id) do
-    !Enum.empty?(get_child_comments(comments, parent_id))
   end
 end
