@@ -57,14 +57,6 @@ defmodule CongaWeb.SearchLive.SearchComponent do
 
   @impl true
   def handle_event("search", %{"search" => %{"query" => query}}, socket) do
-    # posts = Conga.Posts.Post.search_posts!(query, actor: socket.assigns.current_user)
-    # posts =
-    #   Conga.Posts.Post
-    #   |> Ash.Query.filter(title: query)
-    #   |> Ash.Query.sort(inserted_at: :desc)
-    #   |> Ash.Query.limit(5)
-    #   |> Ash.read!(actor: socket.assigns.current_user)
-
     search_query = "%#{query}%"
 
     posts =

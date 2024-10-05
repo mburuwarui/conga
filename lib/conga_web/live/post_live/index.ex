@@ -146,18 +146,18 @@ defmodule CongaWeb.PostLive.Index do
             </div>
           </div>
         </div>
-        <div class="flex justify-between mt-4 mx-4 ">
+        <div class="flex justify-between mt-4 mr-4 ">
           <div class="justify-start flex flex-row gap-5 items-center text-sm text-zinc-400">
-            <div class=" flex gap-1">
+            <div :if={post.page_views > 0} class=" flex gap-1">
               <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
             </div>
-            <div class=" flex gap-1 items-center">
+            <div :if={post.like_count > 0} class=" flex gap-1 items-center">
               <Lucideicons.heart class="h-4 w-4" /> <%= post.like_count %>
             </div>
-            <div class=" flex gap-1 items-center">
+            <div :if={post.bookmark_count > 0} class=" flex gap-1 items-center">
               <.icon name="hero-bookmark" class="h-4 w-4" /> <%= post.bookmark_count %>
             </div>
-            <div class=" flex gap-1 items-center">
+            <div :if={post.comment_count > 0} class=" flex gap-1 items-center">
               <.icon name="hero-chat-bubble-oval-left" class="w-4 h-4" /> <%= post.comment_count %>
             </div>
           </div>
@@ -173,13 +173,16 @@ defmodule CongaWeb.PostLive.Index do
                 </button>
               <% end %>
             <% else %>
-              <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+              <.link phx-click={show_modal("sign-in")}>
                 <.icon name="hero-bookmark" class="text-blue-500" />
               </.link>
             <% end %>
           </div>
         </div>
-        <div class="flex flex-col flex-grow relative pt-6 mb-4">
+        <div class="flex flex-col flex-grow relative pt-2 mb-4">
+          <div class="text-xs text-zinc-500">
+            <%= Calendar.strftime(post.inserted_at, "%B %d, %Y") %>
+          </div>
           <div class="h-20 mb-2">
             <!-- Fixed height for title area -->
             <h1 class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2">
@@ -187,7 +190,7 @@ defmodule CongaWeb.PostLive.Index do
             </h1>
           </div>
 
-          <hr class="w-32 absolute top-[104px] left-0 border-t-1 border-blue-500" />
+          <hr class="w-32 absolute top-[110px] left-0 border-t-1 border-blue-500" />
           <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow mt-4">
             <%= truncate(post.body, 20) %>
           </p>
@@ -229,6 +232,20 @@ defmodule CongaWeb.PostLive.Index do
         patch={~p"/posts"}
       />
     </.search_modal>
+
+    <.sign_modal id="sign-in" on_cancel={hide_modal("sign-in")}>
+      <div class="flex flex-col gap-10">
+        <img src={~p"/images/logo.svg"} class="w-32 h-32 mx-auto" />
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white text-center">
+          Hey, 👋 sign up or sign in to interact.
+        </h2>
+        <.link patch={~p"/sign-in"}>
+          <.button class="w-full">
+            <.icon name="hero-user-circle" class="w-5 h-5 mr-2" /> Sign in with Conga
+          </.button>
+        </.link>
+      </div>
+    </.sign_modal>
     """
   end
 

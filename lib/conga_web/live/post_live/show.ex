@@ -86,10 +86,10 @@ defmodule CongaWeb.PostLive.Show do
             </button>
           <% end %>
         <% else %>
-          <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+          <.link phx-click={show_modal("sign-in")}>
             <.icon name="hero-heart" class="text-red-500" />
           </.link>
-          <.link patch={~p"/sign-in"} phx-click={JS.push_focus()}>
+          <.link phx-click={show_modal("sign-in")}>
             <.icon name="hero-bookmark" class="text-blue-500" />
           </.link>
         <% end %>
@@ -134,6 +134,20 @@ defmodule CongaWeb.PostLive.Show do
         patch={~p"/posts/#{@post}"}
       />
     </.modal>
+
+    <.sign_modal id="sign-in" on_cancel={hide_modal("sign-in")}>
+      <div class="flex flex-col gap-10">
+        <img src={~p"/images/logo.svg"} class="w-32 h-32 mx-auto" />
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white text-center">
+          Hey, 👋 sign up or sign in to interact.
+        </h2>
+        <.link patch={~p"/sign-in"}>
+          <.button class="w-full">
+            <.icon name="hero-user-circle" class="w-5 h-5 mr-2" /> Sign in with Conga
+          </.button>
+        </.link>
+      </div>
+    </.sign_modal>
     """
   end
 
