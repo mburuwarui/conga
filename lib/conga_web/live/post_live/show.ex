@@ -32,11 +32,11 @@ defmodule CongaWeb.PostLive.Show do
 
       <:item title="View count"><%= @post.page_views %></:item>
 
-      <:item title="Total likes"><%= @post.total_likes %></:item>
+      <:item title="Total likes"><%= @post.like_count %></:item>
 
-      <:item title="Total comments"><%= @post.total_comments %></:item>
+      <:item title="Total comments"><%= @post.comment_count %></:item>
 
-      <:item title="Total bookmarks"><%= @post.total_bookmarks %></:item>
+      <:item title="Total bookmarks"><%= @post.bookmark_count %></:item>
 
       <:item title="Popularity score"><%= @post.popularity_score %></:item>
 
@@ -304,7 +304,7 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.like!(actor: socket.assigns.current_user)
       |> Map.put(:liked_by_user, true)
-      |> Ash.load!([:total_likes, :comments, :popularity_score, :total_comments])
+      |> Ash.load!([:like_count, :comments, :popularity_score, :comment_count])
 
     comments = post.comments
 
@@ -319,7 +319,7 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.dislike!(actor: socket.assigns.current_user)
       |> Map.put(:liked_by_user, false)
-      |> Ash.load!([:total_likes, :comments, :popularity_score, :total_comments])
+      |> Ash.load!([:like_count, :comments, :popularity_score, :comment_count])
 
     comments = post.comments
 
@@ -335,7 +335,7 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.bookmark!(actor: socket.assigns.current_user)
       |> Map.put(:bookmarked_by_user, true)
-      |> Ash.load!([:total_bookmarks, :comments, :popularity_score])
+      |> Ash.load!([:bookmark_count, :comments, :popularity_score])
 
     comments = post.comments
 
@@ -350,7 +350,7 @@ defmodule CongaWeb.PostLive.Show do
       socket.assigns.post
       |> Conga.Posts.Post.unbookmark!(actor: socket.assigns.current_user)
       |> Map.put(:bookmarked_by_user, false)
-      |> Ash.load!([:total_bookmarks, :comments, :popularity_score])
+      |> Ash.load!([:bookmark_count, :comments, :popularity_score])
 
     comments = post.comments
 
@@ -379,9 +379,9 @@ defmodule CongaWeb.PostLive.Show do
 
   defp post_fields(socket) do
     [
-      :total_likes,
-      :total_comments,
-      :total_bookmarks,
+      :like_count,
+      :comment_count,
+      :bookmark_count,
       :reading_time,
       :popularity_score,
       :comments,

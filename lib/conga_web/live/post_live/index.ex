@@ -129,13 +129,13 @@ defmodule CongaWeb.PostLive.Index do
             <Lucideicons.eye class="h-4 w-4" /> <%= post.page_views %>
           </div>
           <div class=" flex gap-1 items-center">
-            <Lucideicons.heart class="h-4 w-4" /> <%= post.total_likes %>
+            <Lucideicons.heart class="h-4 w-4" /> <%= post.like_count %>
           </div>
           <div class=" flex gap-1 items-center">
-            <.icon name="hero-bookmark" class="h-4 w-4" /> <%= post.total_bookmarks %>
+            <.icon name="hero-bookmark" class="h-4 w-4" /> <%= post.bookmark_count %>
           </div>
           <div class=" flex gap-1 items-center">
-            <.icon name="hero-chat-bubble-oval-left" class="w-4 h-4" /> <%= post.total_comments %>
+            <.icon name="hero-chat-bubble-oval-left" class="w-4 h-4" /> <%= post.comment_count %>
           </div>
         </div>
         <div class="flex flex-col flex-grow relative pt-6 mb-4">
@@ -305,9 +305,9 @@ defmodule CongaWeb.PostLive.Index do
     posts =
       Conga.Posts.Post.list_public!(actor: current_user)
       |> Ash.load!([
-        :total_likes,
-        :total_bookmarks,
-        :total_comments,
+        :like_count,
+        :comment_count,
+        :bookmark_count,
         :page_views,
         :reading_time,
         :likes,

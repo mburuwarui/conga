@@ -254,10 +254,7 @@ defmodule Conga.Posts.Post do
   end
 
   calculations do
-    calculate :total_likes, :integer, expr(count(likes))
-    calculate :total_bookmarks, :integer, expr(count(bookmarks))
-    calculate :total_comments, :integer, expr(count(comments))
-    calculate :popularity_score, :float, expr(total_likes * 2 + total_comments + total_bookmarks)
+    calculate :popularity_score, :float, expr(like_count * 2 + comment_count + bookmark_count)
     calculate :reading_time, :integer, expr(string_length(body) / 200)
 
     calculate :liked_by_user, :boolean, expr(exists(likes, user_id: ^arg(:user_id))) do
