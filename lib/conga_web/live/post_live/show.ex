@@ -95,9 +95,13 @@ defmodule CongaWeb.PostLive.Show do
         <% end %>
       </div>
 
-      <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
-        <.button>New Comment</.button>
-      </.link>
+      <%= if @current_user do %>
+        <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
+          <.button>New Comment</.button>
+        </.link>
+      <% else %>
+        <.button phx-click={show_modal("sign-in")}>New Comment</.button>
+      <% end %>
     </div>
 
     <.comment_tree stream={@streams.comments} current_user={@current_user} post={@post} />
