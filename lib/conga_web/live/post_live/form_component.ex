@@ -90,13 +90,6 @@ defmodule CongaWeb.PostLive.FormComponent do
 
     IO.inspect(uploaded_files, label: "uploaded_files")
 
-    #   consume_uploaded_entries(socket, :post_picture, fn %{path: path}, _entry ->
-    #     dest = Path.join(Application.app_dir(:conga, "priv/static/uploads"), Path.basename(path))
-    #     # You will need to create `priv/static/uploads` for `File.cp!/2` to work.
-    #     File.cp!(path, dest)
-    #     {:ok, ~p"/uploads/#{Path.basename(dest)}"}
-    #   end)
-
     post_params =
       Map.put(post_params, "user_id", socket.assigns.current_user.id)
       |> Map.put("categories", [
