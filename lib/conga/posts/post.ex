@@ -68,6 +68,10 @@ defmodule Conga.Posts.Post do
         allow_nil? false
       end
 
+      argument :pictures, {:array, :map} do
+        allow_nil? false
+      end
+
       argument :categories, {:array, :map} do
         allow_nil? false
       end
@@ -81,12 +85,31 @@ defmodule Conga.Posts.Post do
                on_no_match: :create
              )
 
+      change manage_relationship(:pictures,
+               type: :create,
+               on_match: :ignore,
+               on_no_match: :create
+             )
+
       change manage_relationship(:add_category, :categories, type: :create)
+
+      change fn changeset, _ ->
+        IO.inspect(changeset, label: "Changeset before create")
+        changeset
+      end
     end
 
     update :update do
       primary? true
       accept [:title, :body, :visibility]
+    end
+
+    update :update_pictures do
+      require_atomic? false
+
+      argument :picture, :string
+
+      change manage_relationship(:picture, :pictures, type: :create)
     end
 
     update :update_categories do
@@ -244,6 +267,7 @@ defmodule Conga.Posts.Post do
     has_many :comments, Conga.Posts.Comment
     has_many :likes, Conga.Posts.Like
     has_many :bookmarks, Conga.Posts.Bookmark
+    has_many :pictures, Conga.Posts.Pictures
 
     many_to_many :categories, Conga.Posts.Category do
       through Conga.Posts.PostCategory

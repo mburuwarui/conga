@@ -74,7 +74,11 @@ defmodule Conga.MixProject do
       {:salad_ui, "~> 0.5.1"},
       {:lucide_icons, "~> 1.1"},
       {:faker, "~> 0.18.0"},
-      {:file_system, "~> 1.0", only: :dev}
+      {:file_system, "~> 1.0", only: :dev},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:aws_signature, "~> 0.3.2"},
+      {:nanoid, "~> 2.1"}
     ]
   end
 

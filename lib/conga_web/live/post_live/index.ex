@@ -82,10 +82,10 @@ defmodule CongaWeb.PostLive.Index do
       id="posts"
     >
       <div :for={{id, post} <- @streams.posts} class="card flex flex-col h-full" id={id}>
-        <div class="relative flex-shrink-0">
+        <div :for={picture <- post.pictures} class="relative flex-shrink-0">
           <img
             class="object-cover object-center w-full h-64 rounded-lg lg:h-80"
-            src={Faker.Avatar.image_url()}
+            src={picture.url}
             alt=""
           />
           <div class="top-0 right-0 absolute m-4">
@@ -446,6 +446,7 @@ defmodule CongaWeb.PostLive.Index do
         :likes,
         :comments,
         :bookmarks,
+        :pictures,
         :categories_join_assoc,
         :user,
         liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},

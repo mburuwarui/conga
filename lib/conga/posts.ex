@@ -8,5 +8,6 @@ defmodule Conga.Posts do
     resource Conga.Posts.Bookmark
     resource Conga.Posts.Category
     resource Conga.Posts.PostCategory
+    resource Conga.Posts.Pictures
   end
 end

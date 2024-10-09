@@ -22,6 +22,7 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 import Hooks from "../hooks";
+import Uploaders from "./uploaders";
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -29,6 +30,7 @@ let csrfToken = document
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   hooks: Hooks,
+  uploaders: Uploaders,
   params: { _csrf_token: csrfToken },
 });
 
