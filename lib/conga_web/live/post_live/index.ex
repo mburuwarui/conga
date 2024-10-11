@@ -235,7 +235,7 @@ defmodule CongaWeb.PostLive.Index do
 
     <.sign_modal id="sign-in" on_cancel={hide_modal("sign-in")}>
       <div class="flex flex-col gap-10">
-        <img src={~p"/images/logo.svg"} class="w-32 h-32 mx-auto" />
+        <img src={~p"/images/logo.jpg"} class="w-32 h-32 mx-auto rounded-full" />
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white text-center">
           Hey, 👋 sign up or sign in to interact.
         </h2>
@@ -333,8 +333,10 @@ defmodule CongaWeb.PostLive.Index do
       |> Ash.load!([
         :categories_join_assoc,
         :like_count,
+        :page_views,
         :bookmark_count,
         :comment_count,
+        :pictures,
         bookmarked_by_user: %{
           user_id: socket.assigns.current_user && socket.assigns.current_user.id
         }
@@ -344,50 +346,62 @@ defmodule CongaWeb.PostLive.Index do
 
     {:noreply,
      socket
-     |> stream_insert(:posts, post, at: 0)
+     |> stream_insert(:posts, post, at: 0, reset: true)
      |> assign(:categories, categories)
      |> assign(:posts, posts)}
   end
 
   @impl true
   def handle_event("bookmark", %{"id" => id}, socket) do
-    Conga.Posts.Post
-    |> Ash.get!(id, actor: socket.assigns.current_user)
-    |> Conga.Posts.Post.bookmark!(actor: socket.assigns.current_user)
-    |> Map.put(:bookmarked_by_user, true)
-    |> Ash.load!([
-      :bookmark_count,
-      bookmarked_by_user: %{
-        user_id: socket.assigns.current_user && socket.assigns.current_user.id
-      }
-    ])
+    post =
+      Conga.Posts.Post
+      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Conga.Posts.Post.bookmark!(actor: socket.assigns.current_user)
+      |> Map.put(:bookmarked_by_user, true)
+      |> Ash.load!([
+        :like_count,
+        :comment_count,
+        :bookmark_count,
+        :page_views,
+        :pictures,
+        :categories_join_assoc,
+        bookmarked_by_user: %{
+          user_id: socket.assigns.current_user && socket.assigns.current_user.id
+        }
+      ])
 
     posts = fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
 
     {:noreply,
      socket
      |> assign(:posts, posts)
-     |> stream(:posts, posts, reset: true)}
+     |> stream_insert(:posts, post, reset: true)}
   end
 
   def handle_event("unbookmark", %{"id" => id}, socket) do
-    Conga.Posts.Post
-    |> Ash.get!(id, actor: socket.assigns.current_user)
-    |> Conga.Posts.Post.unbookmark!(actor: socket.assigns.current_user)
-    |> Map.put(:bookmarked_by_user, false)
-    |> Ash.load!([
-      :bookmark_count,
-      bookmarked_by_user: %{
-        user_id: socket.assigns.current_user && socket.assigns.current_user.id
-      }
-    ])
+    post =
+      Conga.Posts.Post
+      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Conga.Posts.Post.unbookmark!(actor: socket.assigns.current_user)
+      |> Map.put(:bookmarked_by_user, false)
+      |> Ash.load!([
+        :like_count,
+        :comment_count,
+        :bookmark_count,
+        :page_views,
+        :pictures,
+        :categories_join_assoc,
+        bookmarked_by_user: %{
+          user_id: socket.assigns.current_user && socket.assigns.current_user.id
+        }
+      ])
 
     posts = fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
 
     {:noreply,
      socket
      |> assign(:posts, posts)
-     |> stream(:posts, posts, reset: true)}
+     |> stream_insert(:posts, post, reset: true)}
   end
 
   @impl true
@@ -399,6 +413,7 @@ defmodule CongaWeb.PostLive.Index do
         :comments,
         :bookmarks,
         :categories_join_assoc,
+        :pictures,
         :user
       ])
 
@@ -425,7 +440,8 @@ defmodule CongaWeb.PostLive.Index do
   def handle_event("sort_by_latest", _params, socket) do
     posts =
       fetch_posts(socket, socket.assigns.current_user, socket.assigns.current_category)
-      |> Enum.sort_by(& &1.inserted_at, &>=/2)
+
+    # |> Enum.sort_by(& &1.inserted_at, &>=/2)
 
     {:noreply,
      socket

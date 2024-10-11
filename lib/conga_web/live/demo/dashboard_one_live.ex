@@ -192,7 +192,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
             <.dropdown_menu_trigger>
               <.button variant="outline" size="icon" class="overflow-hidden rounded-full">
                 <img
-                  src={~p"/images/logo.svg"}
+                  src={~p"/images/logo.jpg"}
                   width="{36}"
                   height="{36}"
                   alt="Avatar"
@@ -213,6 +213,8 @@ defmodule CongaWeb.DemoLive.DashboardOne do
           </.dropdown_menu>
         </header>
         <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+          <.flash_group flash={@flash} />
+
           <.tabs default="all" id="tabs">
             <div class="flex items-center">
               <.tabs_list>
@@ -294,8 +296,15 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                     </.table_header>
                     <.table_body phx-update="stream" class="text-zinc-700">
                       <.table_row :for={{id, post} <- @streams.posts} id={id}>
-                        <.table_cell class="hidden sm:table-cell">
-                          <.skeleton class="h-16 w-16" />
+                        <.table_cell :for={picture <- post.pictures} class="hidden sm:table-cell">
+                          <.skeleton :if={!picture.url} class="h-16 w-16" />
+                          <img
+                            src={picture.url}
+                            width="{36}"
+                            height="{36}"
+                            alt="Avatar"
+                            class="hidden sm:block rounded-md"
+                          />
                         </.table_cell>
                         <.table_cell class="font-medium">
                           <%= post.title %>
@@ -304,9 +313,16 @@ defmodule CongaWeb.DemoLive.DashboardOne do
                           <%= post.body %>
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
-                          <.badge variant="outline" class="border-yellow-400">
-                            <%= post.category %>
-                          </.badge>
+                          <%= if first_category = Enum.at(post.categories_join_assoc, 0) do %>
+                            <div
+                              :for={post_category <- @categories}
+                              :if={first_category.category_id == post_category.id}
+                            >
+                              <.badge variant="outline" class="border-yellow-400">
+                                <%= post_category.name %>
+                              </.badge>
+                            </div>
+                          <% end %>
                         </.table_cell>
                         <.table_cell class="hidden md:table-cell">
                           <%= post.reading_time %>
@@ -393,7 +409,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
 
     posts =
       Conga.Posts.Post.list_dashboard!(actor: current_user)
-      |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
+      |> Ash.load!(CongaWeb.PostLive.Show.post_fields(socket))
 
     {:ok,
      socket
@@ -407,9 +423,14 @@ defmodule CongaWeb.DemoLive.DashboardOne do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    post =
+      Conga.Posts.Post
+      |> Ash.get!(id, actor: socket.assigns.current_user)
+      |> Ash.load!(CongaWeb.PostLive.Show.post_fields(socket))
+
     socket
     |> assign(:page_title, "Edit Post")
-    |> assign(:post, Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user))
+    |> assign(:post, post)
   end
 
   defp apply_action(socket, :new, _params) do
@@ -419,8 +440,12 @@ defmodule CongaWeb.DemoLive.DashboardOne do
   end
 
   defp apply_action(socket, :index, _params) do
+    current_user = socket.assigns.current_user
+    categories = Conga.Posts.Category.list_all!(actor: current_user)
+
     socket
     |> assign(:page_title, "Listing Posts")
+    |> assign(:categories, categories)
     |> assign(:post, nil)
   end
 
@@ -428,7 +453,7 @@ defmodule CongaWeb.DemoLive.DashboardOne do
   def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
     post =
       post
-      |> Ash.load!([:total_likes, :reading_time, :likes, :comments, :bookmarks, :user])
+      |> Ash.load!(CongaWeb.PostLive.Show.post_fields(socket))
 
     {:noreply, stream_insert(socket, :posts, post, at: 0)}
   end

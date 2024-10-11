@@ -13,10 +13,11 @@ defmodule CongaWeb.AuthOverrides do
 
   override Components.Banner do
     # set :text, "Debug: Custom banner should appear here"
-    set :image_url, "/images/logo.svg"
-    set :dark_image_url, "/images/logo.svg"
-    set :image_class, "w-32 h-auto"
+    set :image_url, "/images/logo.jpg"
+    set :dark_image_url, "/images/logo.jpg"
+    set :image_class, "w-32 h-auto rounded-full"
+    # set :dark_image_class, "w-32 h-auto rounded-full"
     set :root_class, "p-4 flex justify-center items-center"
-    set :href_url, "/"
+    set :href_url, "/posts"
   end
 end

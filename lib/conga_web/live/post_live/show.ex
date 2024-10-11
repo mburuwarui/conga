@@ -141,7 +141,7 @@ defmodule CongaWeb.PostLive.Show do
 
     <.sign_modal id="sign-in" on_cancel={hide_modal("sign-in")}>
       <div class="flex flex-col gap-10">
-        <img src={~p"/images/logo.svg"} class="w-32 h-32 mx-auto" />
+        <img src={~p"/images/logo.jpg"} class="w-32 h-32 mx-auto rounded-full" />
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white text-center">
           Hey, 👋 sign up or sign in to interact.
         </h2>
@@ -395,7 +395,7 @@ defmodule CongaWeb.PostLive.Show do
      |> put_flash(:info, "Comment deleted successfully.")}
   end
 
-  defp post_fields(socket) do
+  def post_fields(socket) do
     [
       :like_count,
       :comment_count,
@@ -403,6 +403,7 @@ defmodule CongaWeb.PostLive.Show do
       :reading_time,
       :popularity_score,
       :comments,
+      :pictures,
       :bookmarks,
       :categories_join_assoc,
       :likes,
