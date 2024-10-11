@@ -78,6 +78,12 @@ defmodule CongaWeb.Router do
       live "/posts/:id/comments/:c_id/edit", PostLive.Show, :edit_comment
       # live "/posts/:id/bookmarks/new", PostLive.Show, :new_bookmark
       # live "/posts/:id/bookmarks/:b_id/edit", PostLive.Show, :edit_bookmark
+
+      live "/profile", ProfileLive.Index, :index
+      live "/profile/new", ProfileLive.Index, :new
+      live "/profile/:id", ProfileLive.Show, :show
+      live "/profile/:id/edit", ProfileLive.Index, :edit
+      live "/profile/:id/show/edit", ProfileLive.Show, :edit
     end
 
     ash_authentication_live_session :authentication_optional,

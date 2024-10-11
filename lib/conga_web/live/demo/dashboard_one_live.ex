@@ -15,7 +15,6 @@ defmodule CongaWeb.DemoLive.DashboardOne do
   import SaladUI.Table
   import SaladUI.Tabs
   import SaladUI.Tooltip
-  import SaladUI.Dialog
 
   # @impl true
   # def mount(_params, _session, socket) do

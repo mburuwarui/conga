@@ -67,6 +67,7 @@ defmodule Conga.Accounts.User do
     has_many :comments, Conga.Posts.Comment
     has_many :likes, Conga.Posts.Like
     has_many :bookmarks, Conga.Posts.Bookmark
+    has_one :profile, Conga.Accounts.Profile
   end
 
   identities do

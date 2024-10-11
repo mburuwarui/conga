@@ -137,12 +137,14 @@ defmodule CongaWeb.PostLive.Index do
           <div class="absolute bottom-0 flex p-3 bg-white dark:bg-gray-900">
             <img
               class="object-cover object-center w-10 h-10 rounded-full"
-              src={Faker.Avatar.image_url()}
+              src={@profile.avatar}
               alt=""
             />
             <div class="mx-4">
-              <h1 class="text-sm text-gray-700 dark:text-gray-200"><%= Faker.Person.name() %></h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400"><%= Faker.Person.title() %></p>
+              <h1 class="text-sm text-gray-700 dark:text-gray-200">
+                <%= @profile.first_name %> <%= @profile.last_name %>
+              </h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400"><%= @profile.occupation %></p>
             </div>
           </div>
         </div>
@@ -252,6 +254,8 @@ defmodule CongaWeb.PostLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     categories = Conga.Posts.Category.list_all!()
+    current_user = socket.assigns.current_user
+    profiles = Conga.Accounts.Profile.read!(actor: current_user)
     # IO.inspect(categories, label: "categories")
 
     {:ok,
@@ -259,6 +263,7 @@ defmodule CongaWeb.PostLive.Index do
      |> assign(:posts, [])
      |> assign_new(:current_user, fn -> nil end)
      |> assign(:current_category, nil)
+     |> assign(:profiles, profiles)
      |> assign(:categories, categories)}
   end
 
@@ -292,13 +297,17 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    posts = fetch_posts(socket, socket.assigns.current_user)
+    current_user = socket.assigns.current_user
+    posts = fetch_posts(socket, current_user)
 
-    # IO.inspect(posts, label: "posts")
+    profile = Enum.find(socket.assigns.profiles, &(&1.user_id == current_user.id))
+
+    IO.inspect(posts, label: "posts")
 
     socket
     |> assign(:page_title, "Listing Posts")
     |> assign(:post, nil)
+    |> assign(:profile, profile)
     |> assign(:current_category, nil)
     |> assign(:posts, posts)
     |> stream(:posts, posts, reset: true)
