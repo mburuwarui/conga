@@ -9,73 +9,82 @@ defmodule CongaWeb.PostLive.Index do
   def render(assigns) do
     ~H"""
     <.header>
-      Listing Posts
-      <:actions>
-        <div class="flex flex-row gap-4">
-          <.link :if={@current_user} patch={~p"/posts/new"}>
-            <.button>New Post</.button>
-          </.link>
-          <.link patch={~p"/search"}>
-            <.button class="text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 h-8 w-full items-center gap-10 rounded-md pl-2 pr-3 text-sm ring-1 transition lg:flex justify-between focus:[&:not(:focus-visible)]:outline-none">
-              <div class="flex items-center pr-4 gap-2">
-                <Lucideicons.search class="h-4 w-4 " /> Find posts
-              </div>
+      <div class="w-full text-center mb-4 sm:mb-0">
+        <h1 class="text-2xl font-bold">Listing Posts</h1>
+      </div>
 
-              <kbd class="ml-auto text-3xs opacity-80">
+      <div class="py-4 flex sm:flex-row flex-col justify-between gap-4 items-center">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <.link
+              :for={category <- @categories}
+              patch={~p"/posts/category/#{category.id}"}
+              class="w-full sm:w-auto"
+            >
+              <button class={[
+                "w-full sm:w-auto px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                @current_category == category.id && "bg-indigo-600 text-white",
+                @current_category != category.id && "text-gray-700 bg-gray-200 hover:bg-gray-300"
+              ]}>
+                <%= category.name %>
+              </button>
+            </.link>
+            <.link patch={~p"/posts"} class="w-full sm:w-auto">
+              <button class={[
+                "w-full sm:w-auto px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                @current_category == nil && "bg-indigo-600 text-white",
+                @current_category != nil && "text-gray-700 bg-gray-200 hover:bg-gray-300"
+              ]}>
+                All Categories
+              </button>
+            </.link>
+          </div>
+
+          <.dropdown_menu class="w-full sm:w-auto">
+            <.dropdown_menu_trigger>
+              <.button
+                aria-haspopup="true"
+                variant="outline"
+                class="w-full sm:w-auto items-center gap-2"
+              >
+                <.icon name="hero-bars-3-bottom-left" class="h-6 w-6" />
+                <span>Sort by</span>
+              </.button>
+            </.dropdown_menu_trigger>
+            <.dropdown_menu_content align="start">
+              <.menu>
+                <.menu_item class="justify-center">
+                  <.link phx-click="sort_by_latest">
+                    Latest
+                  </.link>
+                </.menu_item>
+                <.menu_item class="justify-center">
+                  <.link phx-click="sort_by_popularity">
+                    Popular
+                  </.link>
+                </.menu_item>
+              </.menu>
+            </.dropdown_menu_content>
+          </.dropdown_menu>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <.link :if={@current_user} patch={~p"/posts/new"} class="w-full sm:w-auto">
+            <.button class="w-full sm:w-auto">New Post</.button>
+          </.link>
+          <.link patch={~p"/search"} class="w-full sm:w-auto">
+            <.button class="w-full sm:w-auto text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 items-center gap-10 rounded-md px-3 text-sm ring-1 transition focus:[&:not(:focus-visible)]:outline-none">
+              <div class="flex items-center gap-2">
+                <Lucideicons.search class="h-4 w-4" />
+                <span class="flex-grow text-left">Find posts</span>
+              </div>
+              <kbd class="hidden sm:inline-flex text-3xs opacity-80">
                 <kbd class="font-sans">⌘</kbd><kbd class="font-sans">K</kbd>
               </kbd>
             </.button>
           </.link>
         </div>
-      </:actions>
-
-      <div class="mb-5 gap-4 flex items-center">
-        <div class="flex flex-wrap gap-2">
-          <.link :for={category <- @categories} patch={~p"/posts/category/#{category.id}"}>
-            <button class={[
-              "px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-              @current_category == category.id && "bg-indigo-600 text-white",
-              @current_category != category.id && "text-gray-700 bg-gray-200 hover:bg-gray-300"
-            ]}>
-              <%= category.name %>
-            </button>
-          </.link>
-          <.link patch={~p"/posts"}>
-            <button class={[
-              "px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-              @current_category == nil && "bg-indigo-600 text-white",
-              @current_category != nil && "text-gray-700 bg-gray-200 hover:bg-gray-300"
-            ]}>
-              All Categories
-            </button>
-          </.link>
-        </div>
-        <.dropdown_menu class="flex m-4">
-          <.dropdown_menu_trigger>
-            <.button aria-haspopup="true" variant="outline" class="items-center gap-2">
-              <.icon name="hero-bars-3-bottom-left" class="h-6 w-6" />
-              <span>Sort by</span>
-            </.button>
-          </.dropdown_menu_trigger>
-          <.dropdown_menu_content align="start">
-            <.menu>
-              <.menu_item class="justify-center">
-                <.link phx-click="sort_by_latest">
-                  Latest
-                </.link>
-              </.menu_item>
-
-              <.menu_item class="justify-center">
-                <.link phx-click="sort_by_popularity">
-                  Popular
-                </.link>
-              </.menu_item>
-            </.menu>
-          </.dropdown_menu_content>
-        </.dropdown_menu>
       </div>
     </.header>
-
     <div
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"
       phx-update="stream"
