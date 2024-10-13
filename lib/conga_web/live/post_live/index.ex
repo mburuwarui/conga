@@ -9,8 +9,8 @@ defmodule CongaWeb.PostLive.Index do
   def render(assigns) do
     ~H"""
     <.header>
-      <div class="w-full text-center mb-4 sm:mb-0">
-        <h1 class="text-2xl font-bold">Listing Posts</h1>
+      <div class="w-full text-center mb-4 sm:mb-10">
+        <h1 class="text-4xl font-extrabold">Listing Posts</h1>
       </div>
 
       <div class="py-4 flex sm:flex-row flex-col justify-between gap-4 items-center">
