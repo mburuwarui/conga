@@ -256,7 +256,6 @@ defmodule CongaWeb.PostLive.Index do
     categories = Conga.Posts.Category.list_all!()
     current_user = socket.assigns.current_user
     profiles = Conga.Accounts.Profile.read!(actor: current_user)
-    # IO.inspect(categories, label: "categories")
 
     {:ok,
      socket
@@ -302,7 +301,7 @@ defmodule CongaWeb.PostLive.Index do
 
     profile = Enum.find(socket.assigns.profiles, &(&1.user_id == current_user.id))
 
-    IO.inspect(posts, label: "posts")
+    # IO.inspect(posts, label: "posts")
 
     socket
     |> assign(:page_title, "Listing Posts")

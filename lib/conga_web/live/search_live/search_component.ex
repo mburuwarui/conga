@@ -3,7 +3,6 @@ defmodule CongaWeb.SearchLive.SearchComponent do
   use CongaWeb, :live_component
 
   import SaladUI.Card
-  import SaladUI.Avatar
   import Ecto.Query, warn: false
   @impl true
   def render(assigns) do

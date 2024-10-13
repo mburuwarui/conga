@@ -119,19 +119,26 @@ defmodule CongaWeb.ProfileLive.FormComponent do
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
   defp assign_form(%{assigns: %{profile: profile}} = socket) do
-    # IO.inspect(profile, label: "assign_form_profile")
+    IO.inspect(profile, label: "assign_form_profile")
 
     form =
       if profile do
-        AshPhoenix.Form.for_update(profile, :update,
-          as: "profile",
-          actor: socket.assigns.current_user
-        )
+        if profile.avatar do
+          AshPhoenix.Form.for_update(profile, :update,
+            as: "profile",
+            actor: socket.assigns.current_user
+          )
+        else
+          AshPhoenix.Form.for_update(profile, :update,
+            as: "profile",
+            actor: socket.assigns.current_user
+          )
 
-        AshPhoenix.Form.for_update(profile, :update_avatar,
-          as: "profile",
-          actor: socket.assigns.current_user
-        )
+          AshPhoenix.Form.for_update(profile, :update_avatar,
+            as: "profile",
+            actor: socket.assigns.current_user
+          )
+        end
       else
         AshPhoenix.Form.for_create(Conga.Accounts.Profile, :create,
           as: "profile",
