@@ -237,7 +237,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(post_id, actor: current_user)
-      |> Ash.load!([:comments, :categories_join_assoc])
+      |> Ash.load!(post_fields(socket))
 
     categories = Conga.Posts.Category.list_all!(actor: current_user)
 
@@ -264,7 +264,7 @@ defmodule CongaWeb.PostLive.Show do
 
     post =
       parent_comment.post
-      |> Ash.load!([:comments, :categories_join_assoc])
+      |> Ash.load!(post_fields(socket))
 
     comments = post.comments
 
@@ -285,7 +285,7 @@ defmodule CongaWeb.PostLive.Show do
 
     post =
       comment.post
-      |> Ash.load!([:comments, :categories_join_assoc])
+      |> Ash.load!(post_fields(socket))
 
     socket
     |> assign(:page_title, "Edit Comment")
