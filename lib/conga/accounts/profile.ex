@@ -53,6 +53,8 @@ defmodule Conga.Accounts.Profile do
 
     create :create do
       primary? true
+      upsert? true
+      upsert_identity :unique_user
 
       accept [:first_name, :last_name, :occupation]
 
@@ -139,6 +141,10 @@ defmodule Conga.Accounts.Profile do
       public? true
       allow_nil? false
     end
+  end
+
+  identities do
+    identity :unique_user, [:user_id]
   end
 
   pub_sub do

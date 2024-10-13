@@ -9,8 +9,8 @@ defmodule CongaWeb.ProfileLive.Index do
     <.header>
       Listing profile
       <:actions>
-        <.link patch={~p"/profile/new"}>
-          <.button>New profile</.button>
+        <.link :if={is_nil(@profile)} patch={~p"/profile/new"}>
+          <.button>Add profile</.button>
         </.link>
       </:actions>
     </.header>
@@ -98,9 +98,11 @@ defmodule CongaWeb.ProfileLive.Index do
     profiles =
       Conga.Accounts.Profile.read!(actor: socket.assigns.current_user)
 
+    profile = Enum.find(profiles, &(&1.user_id == socket.assigns.current_user.id))
+
     socket
     |> assign(:page_title, "Listing profiles")
-    |> assign(:profile, nil)
+    |> assign(:profile, profile)
     |> stream(:profiles, profiles)
     |> assign(:profiles, profiles)
   end
@@ -115,6 +117,10 @@ defmodule CongaWeb.ProfileLive.Index do
     profile = Ash.get!(Conga.Accounts.Profile, id, actor: socket.assigns.current_user)
     Ash.destroy!(profile, actor: socket.assigns.current_user)
 
-    {:noreply, stream_delete(socket, :profiles, profile)}
+    {:noreply,
+     socket
+     |> stream_delete(:profiles, profile)
+     |> assign(:profile, nil)
+     |> put_flash(:info, "Profile deleted successfully.")}
   end
 end
