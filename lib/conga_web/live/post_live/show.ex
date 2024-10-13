@@ -8,63 +8,78 @@ defmodule CongaWeb.PostLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <.header>
-      Post <%= @post.title %>
-      <:subtitle>This is a post record from your database.</:subtitle>
-
+    <.header class="max-w-3xl mx-auto px-4">
       <:actions>
         <%= if @current_user == @post.user do %>
-          <.link patch={~p"/posts/#{@post}/show/edit"} phx-click={JS.push_focus()}>
-            <.icon name="hero-pencil" class="text-blue-400" />
+          <.link
+            patch={~p"/posts/#{@post}/show/edit"}
+            phx-click={JS.push_focus()}
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-zinc-600 bg-yellow-400 hover:bg-yellow-500"
+          >
+            <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> Edit Post
           </.link>
         <% end %>
       </:actions>
     </.header>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+      <div class="mb-8">
+        <%= for picture <- @post.pictures do %>
+          <img
+            src={picture.url}
+            alt={@post.title}
+            class="w-full h-64 object-cover rounded-lg shadow-md"
+          />
+        <% end %>
+      </div>
 
-    <.list>
-      <:item title="Id"><%= @post.id %></:item>
+      <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8"><%= @post.title %></h1>
 
-      <:item title="Title"><%= @post.title %></:item>
+      <div class="prose prose-lg max-w-none mb-8">
+        <%= MDEx.to_html!(@post.body) |> raw() %>
+      </div>
 
-      <:item title="Body"><%= @post.body %></:item>
+      <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-2">Post Details</h2>
+          <.list>
+            <:item title="Reading time"><%= @post.reading_time %> min</:item>
+            <:item title="View count"><%= @post.page_views %></:item>
+            <:item title="Total likes"><%= @post.like_count %></:item>
+            <:item title="Total comments"><%= @post.comment_count %></:item>
+          </.list>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-2">Additional Info</h2>
+          <.list>
+            <:item title="Total bookmarks"><%= @post.bookmark_count %></:item>
+            <:item title="Popularity score"><%= @post.popularity_score %></:item>
+            <:item title="Visibility"><%= @post.visibility %></:item>
+            <:item title="Author"><%= @profile && @profile.first_name %></:item>
+          </.list>
+        </div>
+      </div>
 
-      <:item title="Reading time"><%= @post.reading_time %></:item>
-
-      <:item title="View count"><%= @post.page_views %></:item>
-
-      <:item title="Total likes"><%= @post.like_count %></:item>
-
-      <:item title="Total comments"><%= @post.comment_count %></:item>
-
-      <:item title="Total bookmarks"><%= @post.bookmark_count %></:item>
-
-      <:item title="Popularity score"><%= @post.popularity_score %></:item>
-
-      <:item title="Visibility"><%= @post.visibility %></:item>
-
-      <:item title="User"><%= @post.user_id %></:item>
-    </.list>
-
-    <div class="mt-4 flex flex-row gap-4">
-      <div :for={category <- @post.categories_join_assoc} class="flex">
-        <div
-          :for={post_category <- @categories}
-          :if={category.category_id == post_category.id}
-          class="text-blue-400"
-        >
-          <.link
-            navigate={~p"/posts/category/#{category.category_id}"}
-            class="flexw gap-2 items-center"
-          >
-            <.icon name="hero-tag" class="text-blue-400 w-4 h-4" />
-
-            <%= post_category.name %>
-          </.link>
+      <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Categories</h2>
+        <div class="flex flex-wrap gap-2">
+          <%= for category <- @post.categories_join_assoc do %>
+            <%= for post_category <- @categories do %>
+              <%= if category.category_id == post_category.id do %>
+                <.link
+                  navigate={~p"/posts/category/#{category.category_id}"}
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition duration-150 ease-in-out"
+                >
+                  <.icon name="hero-tag" class="mr-1 w-4 h-4" />
+                  <%= post_category.name %>
+                </.link>
+              <% end %>
+            <% end %>
+          <% end %>
         </div>
       </div>
     </div>
 
-    <div class="flex my-8 justify-between">
+    <div class="flex my-8 justify-between max-w-3xl mx-auto p-4">
       <div class="flex gap-4">
         <%= if @current_user do %>
           <%= if @post.liked_by_user do %>
@@ -224,7 +239,7 @@ defmodule CongaWeb.PostLive.Show do
     post =
       Conga.Posts.Post
       |> Ash.get!(id, actor: current_user)
-      |> Ash.load!([:comments, :categories_join_assoc])
+      |> Ash.load!(post_fields(socket))
 
     categories = Conga.Posts.Category.list_all!(actor: current_user)
 
@@ -464,7 +479,7 @@ defmodule CongaWeb.PostLive.Show do
     ~H"""
     <div
       id={@id}
-      class="border-l-2 border-gray-200 pl-2 sm:pl-4 flex flex-col sm:flex-row items-start sm:space-y-0 sm:space-x-4 mt-4"
+      class="border-l-2 border-gray-200 pl-2 sm:pl-4 flex flex-col sm:flex-row items-start sm:space-y-0 sm:space-x-4 mt-4 max-w-3xl mx-auto"
     >
       <img
         :if={@comment.user_id == @profile.user_id}

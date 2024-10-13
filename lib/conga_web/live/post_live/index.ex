@@ -92,11 +92,13 @@ defmodule CongaWeb.PostLive.Index do
     >
       <div :for={{id, post} <- @streams.posts} class="card flex flex-col h-full" id={id}>
         <div :for={picture <- post.pictures} class="relative flex-shrink-0">
-          <img
-            class="object-cover object-center w-full h-64 rounded-lg lg:h-80"
-            src={picture.url}
-            alt=""
-          />
+          <.link navigate={~p"/posts/#{post}"}>
+            <img
+              class="object-cover object-center w-full h-64 rounded-lg lg:h-80"
+              src={picture.url}
+              alt=""
+            />
+          </.link>
           <div class="top-0 right-0 absolute m-4">
             <div :for={category <- @categories} class="flex flex-col">
               <.badge
@@ -145,7 +147,7 @@ defmodule CongaWeb.PostLive.Index do
           </.dropdown_menu>
           <div
             :for={profile <- @profiles}
-            :if={profile.user_id == post.user_id}
+            :if={profile && profile.user_id == post.user_id}
             class="absolute bottom-0 flex p-3 bg-white dark:bg-gray-900"
             a
           >
@@ -203,21 +205,23 @@ defmodule CongaWeb.PostLive.Index do
           </div>
           <div class="h-20 mb-2">
             <!-- Fixed height for title area -->
-            <h1 class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2">
-              <%= post.title %>
-            </h1>
+            <.link navigate={~p"/posts/#{post}"}>
+              <h1 class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2">
+                <%= post.title %>
+              </h1>
+            </.link>
           </div>
 
           <hr class="w-32 absolute top-[110px] left-0 border-t-1 border-blue-500" />
-          <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow mt-4">
-            <%= truncate(post.body, 20) %>
-          </p>
-          <.link
-            navigate={~p"/posts/#{post}"}
-            class="inline-block mt-2 text-blue-500 underline hover:text-blue-400"
-          >
-            Read more
-          </.link>
+          <%!--   <p class="text-sm text-gray-500 dark:text-gray-400 flex-grow mt-4"> --%>
+          <%!--     <%= truncate(post.body, 20) |> MDEx.to_html!() |> raw() %> --%>
+          <%!--   </p> --%>
+          <%!--   <.link --%>
+          <%!--     navigate={~p"/posts/#{post}"} --%>
+          <%!--     class="inline-block mt-2 text-blue-500 underline hover:text-blue-400" --%>
+          <%!--   > --%>
+          <%!--     Read more --%>
+          <%!--   </.link> --%>
         </div>
       </div>
     </div>
