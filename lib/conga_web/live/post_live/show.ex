@@ -104,7 +104,12 @@ defmodule CongaWeb.PostLive.Show do
       <% end %>
     </div>
 
-    <.comment_tree stream={@streams.comments} current_user={@current_user} post={@post} />
+    <.comment_tree
+      stream={@streams.comments}
+      current_user={@current_user}
+      post={@post}
+      profile={@profile}
+    />
 
     <.back navigate={~p"/posts"}>Back to posts</.back>
 
@@ -157,7 +162,11 @@ defmodule CongaWeb.PostLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    profiles = Conga.Accounts.Profile.read!(actor: socket.assigns.current_user)
+
+    {:ok,
+     socket
+     |> assign(:profiles, profiles)}
   end
 
   @impl true
@@ -194,12 +203,15 @@ defmodule CongaWeb.PostLive.Show do
 
     categories = Conga.Posts.Category.list_all!(actor: current_user)
 
+    profile = Enum.find(socket.assigns.profiles, &(&1.user_id == current_user.id))
+
     socket
     |> assign(:page_title, "Show Post")
     |> assign(:post, post)
     |> assign(:comments, comments)
     |> stream(:comments, comments, reset: true)
     |> assign(:categories, categories)
+    |> assign(:profile, profile)
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -432,7 +444,7 @@ defmodule CongaWeb.PostLive.Show do
     assigns = assign(assigns, :id, id)
 
     ~H"""
-    <.comment id={@id} comment={@comment} current_user={@current_user} post={@post}>
+    <.comment id={@id} comment={@comment} current_user={@current_user} post={@post} profile={@profile}>
       <div phx-update="stream" id="comments">
         <%= for {child_id, child_comment} <- @stream do %>
           <%= if child_comment.parent_comment_id == @comment.id do %>
@@ -446,51 +458,60 @@ defmodule CongaWeb.PostLive.Show do
 
   defp comment(assigns) do
     ~H"""
-    <div id={@id} class="border-l-2 border-gray-200 pl-4">
-      <div class="flex items-center gap-2">
-        <Lucideicons.user class="h-5 w-5" /> <span><%= Faker.Person.first_name() %></span>
-      </div>
-      <div class="flex items-center justify-between gap-4 mb-8 text-sm text-gray-700">
-        <%= @comment.content %>
-        <div :if={@current_user} class="flex gap-2 items-center">
-          <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
-            <Lucideicons.reply class="text-blue-400 w-5 h-5" />
-          </.link>
-          <.dropdown_menu
-            :if={@current_user && @current_user.id == @comment.user_id}
-            class="flex gap-2"
-          >
-            <.dropdown_menu_trigger>
-              <.button aria-haspopup="true" size="icon" variant="ghost">
-                <Lucideicons.ellipsis class="h-4 w-4" />
-                <span class="sr-only">Toggle menu</span>
-              </.button>
-            </.dropdown_menu_trigger>
-            <.dropdown_menu_content align="end">
-              <.menu>
-                <.menu_label>Actions</.menu_label>
-                <.menu_item class="justify-center">
-                  <.link
-                    patch={~p"/posts/#{@post}/comments/#{@comment}/edit"}
-                    phx-click={JS.push_focus()}
-                  >
-                    <.icon name="hero-pencil-square" class="text-blue-400 w-5 h-5" />
-                  </.link>
-                </.menu_item>
-                <.menu_item class="justify-center">
-                  <.link
-                    data-confirm="Are you sure?"
-                    phx-click={JS.push("delete", value: %{id: @comment.id})}
-                  >
-                    <.icon name="hero-trash" class="text-red-400 w-5 h-5" />
-                  </.link>
-                </.menu_item>
-              </.menu>
-            </.dropdown_menu_content>
-          </.dropdown_menu>
+    <div
+      id={@id}
+      class="border-l-2 border-gray-200 pl-2 sm:pl-4 flex flex-col sm:flex-row items-start sm:space-y-0 sm:space-x-4 mt-4"
+    >
+      <img
+        class="object-cover object-center w-10 h-10 sm:w-12 sm:h-12 rounded-full"
+        src={@profile.avatar}
+        alt=""
+      />
+      <div class="flex-grow w-full sm:w-auto">
+        <div class="flex sm:flex-row sm:items-center items-center justify-between mb-2">
+          <span class="font-semibold text-sm sm:text-base"><%= @profile.first_name %></span>
+          <div :if={@current_user} class="flex items-center space-x-2 mt-2 sm:mt-0">
+            <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
+              <Lucideicons.reply class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
+            </.link>
+            <.dropdown_menu :if={@current_user && @current_user.id == @comment.user_id}>
+              <.dropdown_menu_trigger>
+                <.button aria-haspopup="true" size="icon" variant="ghost" class="p-1 sm:p-2">
+                  <Lucideicons.ellipsis class="h-4 w-4" />
+                  <span class="sr-only">Toggle menu</span>
+                </.button>
+              </.dropdown_menu_trigger>
+              <.dropdown_menu_content align="end">
+                <.menu>
+                  <.menu_label>Actions</.menu_label>
+                  <.menu_item>
+                    <.link
+                      patch={~p"/posts/#{@post}/comments/#{@comment}/edit"}
+                      phx-click={JS.push_focus()}
+                      class="flex items-center space-x-2"
+                    >
+                      <.icon name="hero-pencil-square" class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
+                      <span class="text-sm sm:text-base">Edit</span>
+                    </.link>
+                  </.menu_item>
+                  <.menu_item>
+                    <.link
+                      data-confirm="Are you sure?"
+                      phx-click={JS.push("delete", value: %{id: @comment.id})}
+                      class="flex items-center space-x-2"
+                    >
+                      <.icon name="hero-trash" class="text-red-400 w-4 h-4 sm:w-5 sm:h-5" />
+                      <span class="text-sm sm:text-base">Delete</span>
+                    </.link>
+                  </.menu_item>
+                </.menu>
+              </.dropdown_menu_content>
+            </.dropdown_menu>
+          </div>
         </div>
+        <p class="text-xs sm:text-sm text-gray-700"><%= @comment.content %></p>
+        <%= render_slot(@inner_block) %>
       </div>
-      <%= render_slot(@inner_block) %>
     </div>
     """
   end
