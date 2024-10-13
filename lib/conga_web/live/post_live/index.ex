@@ -134,17 +134,24 @@ defmodule CongaWeb.PostLive.Index do
               </.menu>
             </.dropdown_menu_content>
           </.dropdown_menu>
-          <div class="absolute bottom-0 flex p-3 bg-white dark:bg-gray-900">
+          <div
+            :for={profile <- @profiles}
+            :if={profile.user_id == post.user_id}
+            class="absolute bottom-0 flex p-3 bg-white dark:bg-gray-900"
+            a
+          >
             <img
               class="object-cover object-center w-10 h-10 rounded-full"
-              src={@profile.avatar}
+              src={profile.avatar}
               alt=""
             />
             <div class="mx-4">
               <h1 class="text-sm text-gray-700 dark:text-gray-200">
-                <%= @profile.first_name %> <%= @profile.last_name %>
+                <%= profile.first_name %> <%= profile.last_name %>
               </h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400"><%= @profile.occupation %></p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                <%= profile.occupation %>
+              </p>
             </div>
           </div>
         </div>
@@ -254,15 +261,13 @@ defmodule CongaWeb.PostLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     categories = Conga.Posts.Category.list_all!()
-    current_user = socket.assigns.current_user
-    profiles = Conga.Accounts.Profile.read!(actor: current_user)
 
     {:ok,
      socket
      |> assign(:posts, [])
      |> assign_new(:current_user, fn -> nil end)
      |> assign(:current_category, nil)
-     |> assign(:profiles, profiles)
+     |> assign(:profiles, [])
      |> assign(:categories, categories)}
   end
 
@@ -299,14 +304,17 @@ defmodule CongaWeb.PostLive.Index do
     current_user = socket.assigns.current_user
     posts = fetch_posts(socket, current_user)
 
-    profile = Enum.find(socket.assigns.profiles, &(&1.user_id == current_user.id))
+    profiles =
+      Enum.map(posts, & &1.user)
+      |> Ash.load!([:profile])
+      |> Enum.map(& &1.profile)
 
-    # IO.inspect(posts, label: "posts")
+    IO.inspect(profiles, label: "profiles")
 
     socket
     |> assign(:page_title, "Listing Posts")
     |> assign(:post, nil)
-    |> assign(:profile, profile)
+    |> assign(:profiles, profiles)
     |> assign(:current_category, nil)
     |> assign(:posts, posts)
     |> stream(:posts, posts, reset: true)
@@ -478,6 +486,8 @@ defmodule CongaWeb.PostLive.Index do
           user_id: socket.assigns.current_user && socket.assigns.current_user.id
         }
       ])
+
+    # IO.inspect(posts, label: "fetched posts")
 
     case category_id do
       nil ->

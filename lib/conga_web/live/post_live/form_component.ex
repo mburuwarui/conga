@@ -19,7 +19,7 @@ defmodule CongaWeb.PostLive.FormComponent do
         phx-submit="save"
       >
         <.input_core field={@form[:title]} label="Title" />
-        <.input_core field={@form[:body]} label="Body" />
+        <.input_core field={@form[:body]} type="textarea" label="Body" />
         <%!-- <.input_core field={@form[:category]} label="Category" /> --%>
         <.input_core field={@form[:visibility]} label="Visibility" />
         <.live_file_input upload={@uploads.post_picture} />

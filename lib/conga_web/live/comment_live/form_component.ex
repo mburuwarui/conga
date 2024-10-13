@@ -18,7 +18,7 @@ defmodule CongaWeb.CommentLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input_core field={@form[:content]} label="Content" />
+        <.input_core field={@form[:content]} type="textarea" label="Content" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Comment</.button>
         </:actions>

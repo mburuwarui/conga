@@ -203,7 +203,11 @@ defmodule CongaWeb.PostLive.Show do
 
     categories = Conga.Posts.Category.list_all!(actor: current_user)
 
-    profile = Enum.find(socket.assigns.profiles, &(&1.user_id == current_user.id))
+    user =
+      post.user
+      |> Ash.load!([:profile])
+
+    IO.inspect(user, label: "user")
 
     socket
     |> assign(:page_title, "Show Post")
@@ -211,7 +215,7 @@ defmodule CongaWeb.PostLive.Show do
     |> assign(:comments, comments)
     |> stream(:comments, comments, reset: true)
     |> assign(:categories, categories)
-    |> assign(:profile, profile)
+    |> assign(:profile, user.profile)
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -463,13 +467,16 @@ defmodule CongaWeb.PostLive.Show do
       class="border-l-2 border-gray-200 pl-2 sm:pl-4 flex flex-col sm:flex-row items-start sm:space-y-0 sm:space-x-4 mt-4"
     >
       <img
+        :if={@comment.user_id == @profile.user_id}
         class="object-cover object-center w-10 h-10 sm:w-12 sm:h-12 rounded-full"
         src={@profile.avatar}
         alt=""
       />
       <div class="flex-grow w-full sm:w-auto">
         <div class="flex sm:flex-row sm:items-center items-center justify-between mb-2">
-          <span class="font-semibold text-sm sm:text-base"><%= @profile.first_name %></span>
+          <span :if={@comment.user_id == @profile.user_id} class="font-semibold text-sm sm:text-base">
+            <%= @profile.first_name %>
+          </span>
           <div :if={@current_user} class="flex items-center space-x-2 mt-2 sm:mt-0">
             <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
               <Lucideicons.reply class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />

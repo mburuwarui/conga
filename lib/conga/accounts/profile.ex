@@ -91,7 +91,7 @@ defmodule Conga.Accounts.Profile do
 
   policies do
     policy action_type(:read) do
-      authorize_if actor_present()
+      authorize_if always()
     end
 
     policy action_type(:create) do
