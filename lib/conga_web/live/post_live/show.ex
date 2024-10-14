@@ -2,6 +2,7 @@ defmodule CongaWeb.PostLive.Show do
   use CongaWeb, :live_view
 
   import SaladUI.Button
+  import SaladUI.Badge
   import SaladUI.DropdownMenu
   import SaladUI.Menu
 
@@ -40,13 +41,14 @@ defmodule CongaWeb.PostLive.Show do
 
       <div class="prose prose-lg max-w-none mb-8">
         <%= MDEx.to_html!(@post.body,
-          features: [syntax_highlight_theme: "monokai_pro"],
+          features: [syntax_highlight_theme: "dracula"],
           extension: [
             strikethrough: true,
             tagfilter: true,
             table: true,
             autolink: true,
             tasklist: true,
+            header_ids: "user-content-",
             footnotes: true,
             shortcodes: true
           ],
@@ -85,17 +87,19 @@ defmodule CongaWeb.PostLive.Show do
       </div>
 
       <div class="mb-8">
-        <h2 class="text-2xl font-semibold mb-4">Categories</h2>
+        <h2 class="text-xl font-semibold mb-4">Categories</h2>
         <div class="flex flex-wrap gap-2">
           <%= for category <- @post.categories_join_assoc do %>
             <%= for post_category <- @categories do %>
               <%= if category.category_id == post_category.id do %>
-                <.link
-                  navigate={~p"/posts/category/#{category.category_id}"}
-                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition duration-150 ease-in-out"
-                >
-                  <.icon name="hero-tag" class="mr-1 w-4 h-4" />
-                  <%= post_category.name %>
+                <.link navigate={~p"/posts/category/#{category.category_id}"}>
+                  <.badge
+                    variant="outline"
+                    class="border-yellow-400 bg-white text-yellow-500 bg-opacity-35 mb-2 justify-center"
+                  >
+                    <.icon name="hero-tag" class="mr-1 w-4 h-4" />
+                    <%= post_category.name %>
+                  </.badge>
                 </.link>
               <% end %>
             <% end %>
