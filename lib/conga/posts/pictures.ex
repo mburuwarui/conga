@@ -25,6 +25,10 @@ defmodule Conga.Posts.Pictures do
     repo Conga.Repo
 
     references do
+      reference :user do
+        on_delete :delete
+      end
+
       reference :post do
         on_delete :delete
       end

@@ -90,14 +90,16 @@ defmodule CongaWeb.PostLive.Index do
       phx-update="stream"
       id="posts"
     >
-      <div :for={{id, post} <- @streams.posts} class="card flex flex-col h-full" id={id}>
-        <div :for={picture <- post.pictures} class="relative flex-shrink-0">
-          <.link navigate={~p"/posts/#{post}"}>
+      <div :for={{id, post} <- @streams.posts} class="card flex flex-col h-full group" id={id}>
+        <div class="relative flex-shrink-0 overflow-hidden rounded-lg">
+          <.link :if={Enum.any?(post.pictures)} navigate={~p"/posts/#{post}"}>
             <img
-              class="object-cover object-center w-full h-64 rounded-lg lg:h-80"
-              src={picture.url}
+              class="object-cover object-center w-full h-64 rounded-lg lg:h-80 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:shadow-xl"
+              src={Enum.at(post.pictures, -1).url}
               alt=""
             />
+            <div class="absolute inset-0 bg-black bg-opacity-0 transition-opacity duration-300 group-hover:bg-opacity-20">
+            </div>
           </.link>
           <div class="top-0 right-0 absolute m-4">
             <div :for={category <- @categories} class="flex flex-col">
@@ -295,7 +297,10 @@ defmodule CongaWeb.PostLive.Index do
     post =
       Ash.get!(Conga.Posts.Post, id, actor: socket.assigns.current_user)
       |> Ash.load!([
-        :categories_join_assoc
+        :categories_join_assoc,
+        :categories,
+        :user,
+        :pictures
       ])
 
     socket
@@ -322,7 +327,7 @@ defmodule CongaWeb.PostLive.Index do
       |> Ash.load!([:profile])
       |> Enum.map(& &1.profile)
 
-    IO.inspect(profiles, label: "profiles")
+    # IO.inspect(profiles, label: "profiles")
 
     socket
     |> assign(:page_title, "Listing Posts")
@@ -493,6 +498,7 @@ defmodule CongaWeb.PostLive.Index do
         :bookmarks,
         :pictures,
         :categories_join_assoc,
+        :categories,
         :user,
         liked_by_user: %{user_id: socket.assigns.current_user && socket.assigns.current_user.id},
         bookmarked_by_user: %{

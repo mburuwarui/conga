@@ -20,8 +20,25 @@ defmodule CongaWeb.PostLive.FormComponent do
       >
         <.input_core field={@form[:title]} label="Title" />
         <.input_core field={@form[:body]} type="textarea" label="Body" />
-        <%!-- <.input_core field={@form[:category]} label="Category" /> --%>
         <.input_core field={@form[:visibility]} label="Visibility" />
+
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Categories</label>
+          <%= for category <- @available_categories do %>
+            <div class="flex items-center">
+              <.input_core
+                field={@form[:categories]}
+                type="checkbox"
+                checked={category.name in @selected_categories}
+                label={category.name}
+                phx-click="toggle_category"
+                phx-value-name={category.name}
+                phx-target={@myself}
+              />
+            </div>
+          <% end %>
+        </div>
+
         <.live_file_input upload={@uploads.post_picture} />
         <%= for entry <- @uploads.post_picture.entries do %>
           <article class="upload-entry">
@@ -30,10 +47,8 @@ defmodule CongaWeb.PostLive.FormComponent do
               <figcaption><%= entry.client_name %></figcaption>
             </figure>
 
-            <%!-- entry.progress will update automatically for in-flight entries --%>
             <progress value={entry.progress} max="100"><%= entry.progress %>%</progress>
 
-            <%!-- a regular click event whose handler will invoke Phoenix.LiveView.cancel_upload/3 --%>
             <button
               type="button"
               phx-click="cancel-upload"
@@ -43,7 +58,6 @@ defmodule CongaWeb.PostLive.FormComponent do
               &times;
             </button>
 
-            <%!-- Phoenix.Component.upload_errors/2 returns a list of error atoms --%>
             <%= for err <- upload_errors(@uploads.post_picture, entry) do %>
               <p class="alert alert-danger"><%= inspect(err) %></p>
             <% end %>
@@ -64,6 +78,8 @@ defmodule CongaWeb.PostLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign(:uploaded_files, [])
+     |> assign(:available_categories, Conga.Posts.Category.list_all!())
+     |> assign(:selected_categories, get_selected_categories(assigns.post))
      |> allow_upload(:post_picture,
        accept: ~w(.jpg .jpeg .png),
        max_entries: 1,
@@ -74,69 +90,93 @@ defmodule CongaWeb.PostLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"post" => post_params}, socket) do
-    {:noreply, assign(socket, form: AshPhoenix.Form.validate(socket.assigns.form, post_params))}
+    categories = Map.get(post_params, "categories", [])
+    categories = if is_list(categories), do: categories, else: [categories]
+
+    post_params =
+      post_params
+      |> Map.put("user_id", socket.assigns.current_user.id)
+      |> Map.put("categories", categories)
+
+    form =
+      socket.assigns.form
+      |> AshPhoenix.Form.validate(post_params)
+      |> AshPhoenix.Form.update_options(fn options ->
+        Keyword.put(options, :selected_categories, socket.assigns.selected_categories)
+      end)
+
+    IO.inspect(form, label: "validated_form")
+
+    {:noreply, assign(socket, form: form)}
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :post_picture, ref)}
   end
 
+  def handle_event("toggle_category", %{"name" => category_name}, socket) do
+    selected_categories =
+      if category_name in socket.assigns.selected_categories do
+        List.delete(socket.assigns.selected_categories, category_name)
+      else
+        [category_name | socket.assigns.selected_categories]
+      end
+
+    form =
+      AshPhoenix.Form.update_options(socket.assigns.form, fn options ->
+        Keyword.put(options, :selected_categories, selected_categories)
+      end)
+
+    {:noreply, assign(socket, selected_categories: selected_categories, form: form)}
+  end
+
   @impl true
-  def handle_event("save", %{"post" => post_params}, socket) do
+  def handle_event("save", %{"post" => params}, socket) do
     uploaded_files =
       consume_uploaded_entries(socket, :post_picture, fn %{key: key}, _entry ->
         {:ok, "#{System.get_env("CLOUDFLARE_PUBLIC_URL")}/#{key}"}
       end)
 
-    IO.inspect(uploaded_files, label: "uploaded_files")
-
     post_params =
-      Map.put(post_params, "user_id", socket.assigns.current_user.id)
-      |> Map.put("categories", [
-        %{"name" => "Podcast"},
-        %{"name" => "Blog"}
-      ])
-      # |> Map.put("add_category", %{"name" => "Blog"})
-      |> Map.put("pictures", [
-        %{"url" => List.first(uploaded_files)}
-      ])
+      params
+      |> Map.put("user_id", socket.assigns.current_user.id)
+      |> Map.put("categories", Enum.map(socket.assigns.selected_categories, &%{"name" => &1}))
+      |> Map.put("pictures", Enum.map(uploaded_files, &%{"url" => &1}))
 
-    IO.inspect(post_params, label: "post_params")
-
-    IO.inspect(List.first(uploaded_files), label: "uploaded_file")
+    IO.inspect(post_params, label: "post params")
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: post_params) do
       {:ok, post} ->
         notify_parent({:saved, post})
 
+        IO.inspect(post, label: "submitted post")
+
         socket =
           socket
-          |> put_flash(:info, "Post #{socket.assigns.form.source.type}d successfully")
+          |> put_flash(
+            :info,
+            "Post #{if socket.assigns.post, do: "updated", else: "created"} successfully"
+          )
           |> push_patch(to: socket.assigns.patch)
 
         {:noreply, socket}
 
       {:error, form} ->
-        {:noreply,
-         socket
-         # |> assign(:uploaded_files, uploaded_files)
-         |> assign(form: form)}
+        {:noreply, assign(socket, form: form)}
     end
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
   defp assign_form(%{assigns: %{post: post}} = socket) do
-    IO.inspect(post, label: "assign_form_post")
-
     form =
       if post do
-        AshPhoenix.Form.for_update(post, :update,
+        AshPhoenix.Form.for_update(post, :update_categories,
           as: "post",
           actor: socket.assigns.current_user
         )
 
-        AshPhoenix.Form.for_update(post, :update_categories,
+        AshPhoenix.Form.for_update(post, :update,
           as: "post",
           actor: socket.assigns.current_user
         )
@@ -167,7 +207,7 @@ defmodule CongaWeb.PostLive.FormComponent do
         "https://#{System.get_env("CLOUDFLARE_BUCKET_NAME")}.#{System.get_env("CLOUDFLARE_ACCOUNT_ID")}.r2.cloudflarestorage.com"
     }
 
-    IO.inspect(filename, label: "filename")
+    # IO.inspect(filename, label: "filename")
 
     {:ok, presigned_url} =
       Conga.S3Upload.presigned_put(config,
@@ -176,7 +216,7 @@ defmodule CongaWeb.PostLive.FormComponent do
         max_file_size: socket.assigns.uploads[entry.upload_config].max_file_size
       )
 
-    IO.inspect(presigned_url, label: "presigned_url")
+    # IO.inspect(presigned_url, label: "presigned_url")
 
     meta = %{
       uploader: "S3",
@@ -184,8 +224,16 @@ defmodule CongaWeb.PostLive.FormComponent do
       url: presigned_url
     }
 
-    IO.inspect(meta, label: "meta")
+    # IO.inspect(meta, label: "meta")
 
     {:ok, meta, socket}
+  end
+
+  defp get_selected_categories(nil), do: []
+  defp get_selected_categories(%{categories: %Ash.NotLoaded{}}), do: []
+
+  defp get_selected_categories(post) do
+    post.categories
+    |> Enum.map(& &1.name)
   end
 end

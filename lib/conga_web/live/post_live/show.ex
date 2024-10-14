@@ -9,7 +9,13 @@ defmodule CongaWeb.PostLive.Show do
   def render(assigns) do
     ~H"""
     <.header class="max-w-3xl mx-auto px-4">
-      <:actions>
+      <div class="flex justify-between items-center w-full">
+        <.link
+          navigate={~p"/posts"}
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
+        >
+          <.icon name="hero-arrow-left" class="mr-2 h-5 w-5" /> Back to posts
+        </.link>
         <%= if @current_user == @post.user do %>
           <.link
             patch={~p"/posts/#{@post}/show/edit"}
@@ -19,20 +25,18 @@ defmodule CongaWeb.PostLive.Show do
             <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> Edit Post
           </.link>
         <% end %>
-      </:actions>
+      </div>
     </.header>
     <div class="max-w-3xl mx-auto px-4 py-8">
-      <div class="mb-8">
-        <%= for picture <- @post.pictures do %>
-          <img
-            src={picture.url}
-            alt={@post.title}
-            class="w-full h-64 object-cover rounded-lg shadow-md"
-          />
-        <% end %>
+      <div :if={Enum.any?(@post.pictures)} class="mb-8">
+        <img
+          src={Enum.at(@post.pictures, -1).url}
+          alt={@post.title}
+          class="w-full h-64 object-cover rounded-lg shadow-md"
+        />
       </div>
 
-      <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8"><%= @post.title %></h1>
+      <h1 class="text-4xl font-extrabold text-center text-gray-900 my-14"><%= @post.title %></h1>
 
       <div class="prose prose-lg max-w-none mb-8">
         <%= MDEx.to_html!(@post.body) |> raw() %>
@@ -126,7 +130,9 @@ defmodule CongaWeb.PostLive.Show do
       profile={@profile}
     />
 
-    <.back navigate={~p"/posts"}>Back to posts</.back>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+      <.back navigate={~p"/posts"}>Back to posts</.back>
+    </div>
 
     <.modal :if={@live_action == :edit} id="post-modal" show on_cancel={JS.patch(~p"/posts/#{@post}")}>
       <.live_component
@@ -222,7 +228,7 @@ defmodule CongaWeb.PostLive.Show do
       post.user
       |> Ash.load!([:profile])
 
-    IO.inspect(user, label: "user")
+    # IO.inspect(user, label: "user")
 
     socket
     |> assign(:page_title, "Show Post")
@@ -436,6 +442,7 @@ defmodule CongaWeb.PostLive.Show do
       :comments,
       :pictures,
       :bookmarks,
+      :categories,
       :categories_join_assoc,
       :likes,
       :user,

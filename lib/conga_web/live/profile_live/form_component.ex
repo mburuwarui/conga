@@ -91,7 +91,8 @@ defmodule CongaWeb.ProfileLive.FormComponent do
     IO.inspect(uploaded_files, label: "uploaded_files")
 
     profile_params =
-      Map.put(profile_params, "user_id", socket.assigns.current_user.id)
+      profile_params
+      |> Map.put("user_id", socket.assigns.current_user.id)
       |> Map.put("profile_picture", List.first(uploaded_files))
 
     IO.inspect(profile_params, label: "profile_params")
@@ -123,22 +124,11 @@ defmodule CongaWeb.ProfileLive.FormComponent do
 
     form =
       if profile do
-        if profile.avatar do
-          AshPhoenix.Form.for_update(profile, :update,
-            as: "profile",
-            actor: socket.assigns.current_user
-          )
-        else
-          AshPhoenix.Form.for_update(profile, :update,
-            as: "profile",
-            actor: socket.assigns.current_user
-          )
-
-          AshPhoenix.Form.for_update(profile, :update_avatar,
-            as: "profile",
-            actor: socket.assigns.current_user
-          )
-        end
+        AshPhoenix.Form.for_update(profile, :update,
+          forms: [auto?: true],
+          as: "profile",
+          actor: socket.assigns.current_user
+        )
       else
         AshPhoenix.Form.for_create(Conga.Accounts.Profile, :create,
           as: "profile",

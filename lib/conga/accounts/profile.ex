@@ -74,10 +74,6 @@ defmodule Conga.Accounts.Profile do
       primary? true
 
       accept [:first_name, :last_name, :occupation]
-    end
-
-    update :update_avatar do
-      require_atomic? false
 
       argument :profile_picture, :string
 

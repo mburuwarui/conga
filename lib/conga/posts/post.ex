@@ -76,8 +76,6 @@ defmodule Conga.Posts.Post do
         allow_nil? false
       end
 
-      argument :add_category, :map
-
       change manage_relationship(:user_id, :user, type: :append)
 
       change manage_relationship(:categories,
@@ -90,13 +88,6 @@ defmodule Conga.Posts.Post do
                on_match: :ignore,
                on_no_match: :create
              )
-
-      change manage_relationship(:add_category, :categories, type: :create)
-
-      change fn changeset, _ ->
-        IO.inspect(changeset, label: "Changeset before create")
-        changeset
-      end
     end
 
     update :update do
@@ -107,17 +98,19 @@ defmodule Conga.Posts.Post do
     update :update_pictures do
       require_atomic? false
 
-      argument :picture, :string
+      argument :pictures, {:array, :map}
 
-      change manage_relationship(:picture, :pictures, type: :create)
+      change manage_relationship(:pictures,
+               type: :create,
+               on_match: :ignore,
+               on_no_match: :create
+             )
     end
 
     update :update_categories do
       require_atomic? false
 
-      argument :categories, {:array, :map} do
-        allow_nil? false
-      end
+      argument :categories, {:array, :map}
 
       change manage_relationship(:categories,
                type: :append_and_remove,
