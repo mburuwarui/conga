@@ -117,8 +117,6 @@ defmodule CongaWeb.PostLive.FormComponent do
         Keyword.put(options, :selected_categories, socket.assigns.selected_categories)
       end)
 
-    IO.inspect(form, label: "validated_form")
-
     {:noreply, assign(socket, form: form)}
   end
 
@@ -155,13 +153,9 @@ defmodule CongaWeb.PostLive.FormComponent do
       |> Map.put("categories", Enum.map(socket.assigns.selected_categories, &%{"name" => &1}))
       |> Map.put("pictures", Enum.map(uploaded_files, &%{"url" => &1}))
 
-    IO.inspect(post_params, label: "post params")
-
     case AshPhoenix.Form.submit(socket.assigns.form, params: post_params) do
       {:ok, post} ->
         notify_parent({:saved, post})
-
-        IO.inspect(post, label: "submitted post")
 
         socket =
           socket
@@ -184,13 +178,9 @@ defmodule CongaWeb.PostLive.FormComponent do
     form =
       if post do
         AshPhoenix.Form.for_update(post, :update,
-          # forms: [auto?: true],
           as: "post",
           actor: socket.assigns.current_user
         )
-
-        # |> AshPhoenix.Form.add_form([:categories])
-        # |> AshPhoenix.Form.add_form([:pictures])
       else
         AshPhoenix.Form.for_create(Conga.Posts.Post, :create,
           as: "post",
@@ -213,8 +203,6 @@ defmodule CongaWeb.PostLive.FormComponent do
         "https://#{System.get_env("CLOUDFLARE_BUCKET_NAME")}.#{System.get_env("CLOUDFLARE_ACCOUNT_ID")}.r2.cloudflarestorage.com"
     }
 
-    # IO.inspect(filename, label: "filename")
-
     {:ok, presigned_url} =
       Conga.S3Upload.presigned_put(config,
         key: key,
@@ -222,15 +210,11 @@ defmodule CongaWeb.PostLive.FormComponent do
         max_file_size: socket.assigns.uploads[entry.upload_config].max_file_size
       )
 
-    # IO.inspect(presigned_url, label: "presigned_url")
-
     meta = %{
       uploader: "S3",
       key: key,
       url: presigned_url
     }
-
-    # IO.inspect(meta, label: "meta")
 
     {:ok, meta, socket}
   end
