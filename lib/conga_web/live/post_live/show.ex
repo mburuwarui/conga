@@ -40,7 +40,7 @@ defmodule CongaWeb.PostLive.Show do
 
       <div class="prose prose-lg max-w-none mb-8">
         <%= MDEx.to_html!(@post.body,
-          features: [syntax_highlight_theme: "ayu_dark"],
+          features: [syntax_highlight_theme: "monokai_pro"],
           extension: [
             strikethrough: true,
             tagfilter: true,
@@ -57,8 +57,7 @@ defmodule CongaWeb.PostLive.Show do
           ],
           render: [
             github_pre_lang: true,
-            unsafe_: true,
-            escape: true
+            unsafe_: true
           ]
         )
         |> raw() %>
