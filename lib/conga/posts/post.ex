@@ -93,24 +93,17 @@ defmodule Conga.Posts.Post do
     update :update do
       primary? true
       accept [:title, :body, :visibility]
-    end
-
-    update :update_pictures do
       require_atomic? false
 
       argument :pictures, {:array, :map}
+
+      argument :categories, {:array, :map}
 
       change manage_relationship(:pictures,
                type: :create,
                on_match: :ignore,
                on_no_match: :create
              )
-    end
-
-    update :update_categories do
-      require_atomic? false
-
-      argument :categories, {:array, :map}
 
       change manage_relationship(:categories,
                type: :append_and_remove,

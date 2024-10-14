@@ -90,8 +90,20 @@ defmodule CongaWeb.PostLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"post" => post_params}, socket) do
-    categories = Map.get(post_params, "categories", [])
-    categories = if is_list(categories), do: categories, else: [categories]
+    categories =
+      case Map.get(post_params, "categories") do
+        nil -> []
+        categories when is_list(categories) -> categories
+        categories when is_binary(categories) -> [categories]
+        _ -> []
+      end
+      |> Enum.map(fn category ->
+        if is_binary(category) do
+          %{name: category}
+        else
+          category
+        end
+      end)
 
     post_params =
       post_params
@@ -171,20 +183,14 @@ defmodule CongaWeb.PostLive.FormComponent do
   defp assign_form(%{assigns: %{post: post}} = socket) do
     form =
       if post do
-        AshPhoenix.Form.for_update(post, :update_categories,
-          as: "post",
-          actor: socket.assigns.current_user
-        )
-
         AshPhoenix.Form.for_update(post, :update,
+          # forms: [auto?: true],
           as: "post",
           actor: socket.assigns.current_user
         )
 
-        AshPhoenix.Form.for_update(post, :update_pictures,
-          as: "post",
-          actor: socket.assigns.current_user
-        )
+        # |> AshPhoenix.Form.add_form([:categories])
+        # |> AshPhoenix.Form.add_form([:pictures])
       else
         AshPhoenix.Form.for_create(Conga.Posts.Post, :create,
           as: "post",
