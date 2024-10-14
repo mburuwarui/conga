@@ -39,7 +39,29 @@ defmodule CongaWeb.PostLive.Show do
       <h1 class="text-4xl font-extrabold text-center text-gray-900 my-14"><%= @post.title %></h1>
 
       <div class="prose prose-lg max-w-none mb-8">
-        <%= MDEx.to_html!(@post.body) |> raw() %>
+        <%= MDEx.to_html!(@post.body,
+          features: [syntax_highlight_theme: "ayu_dark"],
+          extension: [
+            strikethrough: true,
+            tagfilter: true,
+            table: true,
+            autolink: true,
+            tasklist: true,
+            footnotes: true,
+            shortcodes: true
+          ],
+          parse: [
+            smart: true,
+            relaxed_tasklist_matching: true,
+            relaxed_autolinks: true
+          ],
+          render: [
+            github_pre_lang: true,
+            unsafe_: true,
+            escape: true
+          ]
+        )
+        |> raw() %>
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-8">

@@ -268,7 +268,7 @@ defmodule Conga.Posts.Post do
               :float,
               expr(like_count * 2 + comment_count + bookmark_count + page_views)
 
-    calculate :reading_time, :integer, expr(string_length(body) / 200)
+    calculate :reading_time, :integer, expr(string_length(body) / 2000)
 
     calculate :liked_by_user, :boolean, expr(exists(likes, user_id: ^arg(:user_id))) do
       argument :user_id, :uuid do
