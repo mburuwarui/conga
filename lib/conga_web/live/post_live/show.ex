@@ -61,7 +61,8 @@ defmodule CongaWeb.PostLive.Show do
             github_pre_lang: true,
             unsafe_: true
           ]
-        ) %>
+        )
+        |> raw() %>
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-8">
