@@ -1,50 +1,52 @@
-# Conga App 🕺💃
+# Conga App 🌍🎉
 
-A groovy blog app that's got some serious moves!
+Karibu! Get ready for a blog app hotter than Nairobi's sunshine! 🌞
 
-## What's the vibe? 🌟
+## Mambo vipi? What's cool? 🔥
 
-- Blogging with style
-- Chat it up in real-time
-- VIP access for the cool cats
-- Bookmark your faves
-- Spy on your blog's popularity
-- API magic for tech wizards
-- Find stuff, like, super fast
-- Sell your digital goodies
-- Boss mode for admins
+- Blog like a champ 📝
+- Gumzo (chat) in real-time 💬
+- Hifadhi (save) your faves 🖤
+- Check who's loving your vibe 📊
+- Tech magic for the watu wa kompyuta 🧙‍♂️
+- Tafuta (search) faster than matatu on Thika Road 🚐💨
+- Sell your digital mali 💸
+- Admin mode for the big kahunas 😎
 
-## Built with 🛠️
+## Tumejenga na (We built with) 🛠️
 
-- Phoenix: The rising star of web frameworks
-- LiveView: Real-time magic, no JavaScript headaches
-- Ash: Like a Swiss Army knife for your app
-- PostgreSQL: Where your data comes to party
+- Phoenix: Faster than a cheetah 🐆
+- LiveView: Smoother than Kenyan tea ☕
+- Ash: Flexible like a Maasai warrior 🦁
+- PostgreSQL: Stores data like an elephant's memory 🐘
 
-## Wanna dance? 🕺
+## Ready to dance? Let's go! 💃🕺
 
-1. Get the right shoes (Elixir, Erlang, PostgreSQL)
-2. Grab the music: `git clone https://github.com/mburuwarui/conga.git`
-3. Hit the dance floor: `cd conga`
+1. Get your gear (Elixir, Erlang, PostgreSQL)
+2. Grab the beats: `git clone https://github.com/mburuwarui/conga.git`
+3. Step into the club: `cd conga`
 4. Warm up: `mix deps.get`
 5. Set the stage: `mix ash.setup`
-6. Drop the beat: `mix phx.server`
+6. Blast the music: `mix phx.server`
 
-Now strut your stuff at `http://localhost:4000`!
+Now show your moves at `http://localhost:4000`!
 
-## The secret sauce 🤫
+## Our secret recipe 🤫
 
-We've got some cool moves called "Ash resources" - they're like the choreography for our app. They make the posts pop, comments fly, and users groove!
+We've got moves called "Ash resources" - they're the heartbeat of our app. They make everything flow like the Tana River! 🏞️
 
-## Show off your moves 🌐
+## Flex your tech muscles 💪
 
-- REST API: Swagger at it at `http://localhost:4000/api/json/swaggerui`
+- REST API: Swagger it up at `http://localhost:4000/api/json/swaggerui`
 - GraphQL: Play at `http://localhost:4000/gql/playground`
 
-## Keep it fresh 🧪
+## Keep it fresh like sukuma wiki 🥬
 
-Before you hit the stage, make sure your moves are on point:
+Before you hit the stage, make sure you're on point:
 
 ```elixir
 mix test
+
 ```
+
+Sasa, let's make some noise! 🎉🥁 Twende kazi! 🚀
