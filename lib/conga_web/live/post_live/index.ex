@@ -131,17 +131,20 @@ defmodule CongaWeb.PostLive.Index do
             <.dropdown_menu_content align="start">
               <.menu>
                 <.menu_label>Actions</.menu_label>
-                <.menu_item class="justify-center">
-                  <.link patch={~p"/posts/#{post}/edit"}>
-                    <.icon name="hero-pencil-square" class="w-5 h-5 text-blue-500" />
+                <.menu_item>
+                  <.link patch={~p"/posts/#{post}/edit"} class="flex items-center space-x-2">
+                    <.icon name="hero-pencil-square" class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
+                    <span class="text-sm sm:text-base">Edit</span>
                   </.link>
                 </.menu_item>
-                <.menu_item class="justify-center">
+                <.menu_item>
                   <.link
                     phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
                     data-confirm="Are you sure?"
+                    class="flex items-center space-x-2"
                   >
-                    <.icon name="hero-trash" class="text-red-500 w-5 h-5" />
+                    <.icon name="hero-trash" class="text-red-400 w-4 h-4 sm:w-5 sm:h-5" />
+                    <span class="text-sm sm:text-base">Delete</span>
                   </.link>
                 </.menu_item>
               </.menu>
