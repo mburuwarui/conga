@@ -48,7 +48,7 @@ defmodule CongaWeb.PostLive.Show do
             table: true,
             autolink: true,
             tasklist: true,
-            header_ids: "user-content-",
+            header_ids: "post-",
             footnotes: true,
             shortcodes: true
           ],
@@ -61,8 +61,7 @@ defmodule CongaWeb.PostLive.Show do
             github_pre_lang: true,
             unsafe_: true
           ]
-        )
-        |> raw() %>
+        ) %>
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-8">
