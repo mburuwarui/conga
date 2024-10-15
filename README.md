@@ -8,7 +8,7 @@ Karibu! Get ready for a blog app hotter than Nairobi's sunshine! 🌞
 - Gumzo (chat) in real-time 💬
 - Hifadhi (save) your faves 🖤
 - Check who's loving your vibe 📊
-- Tech magic for the watu wa kompyuta 🧙‍♂️
+- Tech magic for wasee wa kompyuta 🧙‍♂️
 - Tafuta (search) faster than matatu on Thika Road 🚐💨
 - Sell your digital mali 💸
 - Admin mode for the big kahunas 😎
