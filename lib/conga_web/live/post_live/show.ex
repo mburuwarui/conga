@@ -160,7 +160,7 @@ defmodule CongaWeb.PostLive.Show do
         </div>
       </div>
       <div class="lg:w-1/5 hidden lg:block">
-        <div class="sticky top-60">
+        <div class="sticky top-60 pl-4">
           <h2 class="text-2xl font-bold mb-4">Table of Contents</h2>
           <ul class="toc-list" id="toc-list" phx-hook="TableOfContents">
             <!-- TOC items will be dynamically inserted here -->
@@ -658,7 +658,7 @@ defmodule CongaWeb.PostLive.Show do
               </.tooltip_content>
             </.tooltip>
           </.dropdown_menu_trigger>
-          <.dropdown_menu_content side="top">
+          <.dropdown_menu_content side="top" align="end">
             <.menu class="">
               <.menu_label>Share</.menu_label>
               <.menu_separator />
