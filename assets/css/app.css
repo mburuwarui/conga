@@ -60,3 +60,15 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+.toc-list {
+  @apply space-y-2;
+}
+
+.toc-list a {
+  @apply block py-1 text-sm transition-all duration-200 ease-in-out;
+}
+
+.toc-list a:hover {
+  @apply text-zinc-900 transform translate-x-1;
+}

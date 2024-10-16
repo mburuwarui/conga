@@ -9,154 +9,199 @@ defmodule CongaWeb.PostLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <.header class="max-w-3xl mx-auto px-4">
-      <div class="flex justify-between items-center w-full">
-        <.link
-          navigate={~p"/posts"}
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
-        >
-          <.icon name="hero-arrow-left" class="mr-2 h-5 w-5" /> Back to posts
-        </.link>
-        <%= if @current_user == @post.user do %>
-          <.link
-            patch={~p"/posts/#{@post}/show/edit"}
-            phx-click={JS.push_focus()}
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-zinc-600 bg-yellow-400 hover:bg-yellow-500"
-          >
-            <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> Edit Post
-          </.link>
-        <% end %>
-      </div>
-    </.header>
-    <div class="max-w-3xl mx-auto px-4 py-8">
-      <div :if={Enum.any?(@post.pictures)} class="mb-8">
-        <img
-          src={Enum.at(@post.pictures, -1).url}
-          alt={@post.title}
-          class="w-full h-64 object-cover rounded-lg shadow-md"
-        />
-      </div>
-
-      <h1 class="text-4xl font-extrabold text-center text-gray-900 my-14"><%= @post.title %></h1>
-
-      <div class="prose prose-lg max-w-none mb-8">
-        <%= MDEx.to_html!(@post.body,
-          features: [syntax_highlight_theme: "dracula"],
-          extension: [
-            strikethrough: true,
-            tagfilter: true,
-            table: true,
-            autolink: true,
-            tasklist: true,
-            header_ids: "post-",
-            footnotes: true,
-            shortcodes: true
-          ],
-          parse: [
-            smart: true,
-            relaxed_tasklist_matching: true,
-            relaxed_autolinks: true
-          ],
-          render: [
-            github_pre_lang: true,
-            unsafe_: true
-          ]
-        )
-        |> raw() %>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4 mb-8">
-        <div class="bg-white p-4 rounded-lg shadow">
-          <h2 class="text-xl font-semibold mb-2">Post Details</h2>
-          <.list>
-            <:item title="Reading time"><%= @post.reading_time %> min</:item>
-            <:item title="View count"><%= @post.page_views %></:item>
-            <:item title="Total likes"><%= @post.like_count %></:item>
-            <:item title="Total comments"><%= @post.comment_count %></:item>
-          </.list>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-          <h2 class="text-xl font-semibold mb-2">Additional Info</h2>
-          <.list>
-            <:item title="Total bookmarks"><%= @post.bookmark_count %></:item>
-            <:item title="Popularity score"><%= @post.popularity_score %></:item>
-            <:item title="Visibility"><%= @post.visibility %></:item>
-            <:item title="Author"><%= @profile && @profile.first_name %></:item>
-          </.list>
-        </div>
-      </div>
-
-      <div class="mb-8">
-        <h2 class="text-xl font-semibold mb-4">Categories</h2>
-        <div class="flex flex-wrap gap-2">
-          <%= for category <- @post.categories_join_assoc do %>
-            <%= for post_category <- @categories do %>
-              <%= if category.category_id == post_category.id do %>
-                <.link navigate={~p"/posts/category/#{category.category_id}"}>
-                  <.badge
-                    variant="outline"
-                    class="border-yellow-400 bg-white text-yellow-500 bg-opacity-35 mb-2 justify-center"
-                  >
-                    <.icon name="hero-tag" class="mr-1 w-4 h-4" />
-                    <%= post_category.name %>
-                  </.badge>
-                </.link>
+    <div class="flex flex-col md:flex-row justify-center">
+      <div class="lg:w-1/5 flex justify-end items-start">
+        <div class="sticky top-60">
+          <div class="flex gap-4">
+            <%= if @current_user do %>
+              <%= if @post.liked_by_user do %>
+                <button phx-click="dislike" phx-value-id={@post.id}>
+                  <.icon name="hero-heart-solid" class="text-red-400" />
+                </button>
+              <% else %>
+                <button phx-click="like" phx-value-id={@post.id}>
+                  <.icon name="hero-heart" class="text-red-300" />
+                </button>
               <% end %>
+              <%= if @post.bookmarked_by_user do %>
+                <button phx-click="unbookmark" phx-value-id={@post.id}>
+                  <.icon name="hero-bookmark-solid" class="text-blue-400" />
+                </button>
+              <% else %>
+                <button phx-click="bookmark" phx-value-id={@post.id}>
+                  <.icon name="hero-bookmark" class="text-blue-500" />
+                </button>
+              <% end %>
+            <% else %>
+              <.link phx-click={show_modal("sign-in")}>
+                <.icon name="hero-heart" class="text-red-500" />
+              </.link>
+              <.link phx-click={show_modal("sign-in")}>
+                <.icon name="hero-bookmark" class="text-blue-500" />
+              </.link>
             <% end %>
-          <% end %>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="lg:w-3/5">
+        <.header class="max-w-3xl mx-auto">
+          <div class="flex justify-between items-center w-full">
+            <.link
+              navigate={~p"/posts"}
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
+            >
+              <.icon name="hero-arrow-left" class="mr-2 h-5 w-5" /> Back to posts
+            </.link>
+            <%= if @current_user == @post.user do %>
+              <.link
+                patch={~p"/posts/#{@post}/show/edit"}
+                phx-click={JS.push_focus()}
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-zinc-600 bg-yellow-400 hover:bg-yellow-500"
+              >
+                <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> Edit Post
+              </.link>
+            <% end %>
+          </div>
+        </.header>
+        <div class="max-w-3xl mx-auto py-8">
+          <div :if={Enum.any?(@post.pictures)} class="mb-8">
+            <img
+              src={Enum.at(@post.pictures, -1).url}
+              alt={@post.title}
+              class="w-full h-64 object-cover rounded-lg shadow-md"
+            />
+          </div>
 
-    <div class="flex my-8 justify-between max-w-3xl mx-auto p-4">
-      <div class="flex gap-4">
-        <%= if @current_user do %>
-          <%= if @post.liked_by_user do %>
-            <button phx-click="dislike" phx-value-id={@post.id}>
-              <.icon name="hero-heart-solid" class="text-red-400" />
-            </button>
+          <h1 class="text-4xl font-extrabold text-center text-gray-900 my-14"><%= @post.title %></h1>
+
+          <div class="prose prose-lg max-w-none mb-8">
+            <%= MDEx.to_html!(@post.body,
+              features: [syntax_highlight_theme: "dracula"],
+              extension: [
+                strikethrough: true,
+                tagfilter: true,
+                table: true,
+                autolink: true,
+                tasklist: true,
+                header_ids: "post-",
+                footnotes: true,
+                shortcodes: true
+              ],
+              parse: [
+                smart: true,
+                relaxed_tasklist_matching: true,
+                relaxed_autolinks: true
+              ],
+              render: [
+                github_pre_lang: true,
+                unsafe_: true
+              ]
+            )
+            |> raw() %>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-lg shadow">
+              <h2 class="text-xl font-semibold mb-2">Post Details</h2>
+              <.list>
+                <:item title="Reading time"><%= @post.reading_time %> min</:item>
+                <:item title="View count"><%= @post.page_views %></:item>
+                <:item title="Total likes"><%= @post.like_count %></:item>
+                <:item title="Total comments"><%= @post.comment_count %></:item>
+              </.list>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+              <h2 class="text-xl font-semibold mb-2">Additional Info</h2>
+              <.list>
+                <:item title="Total bookmarks"><%= @post.bookmark_count %></:item>
+                <:item title="Popularity score"><%= @post.popularity_score %></:item>
+                <:item title="Visibility"><%= @post.visibility %></:item>
+                <:item title="Author"><%= @profile && @profile.first_name %></:item>
+              </.list>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Categories</h2>
+            <div class="flex flex-wrap gap-2">
+              <%= for category <- @post.categories_join_assoc do %>
+                <%= for post_category <- @categories do %>
+                  <%= if category.category_id == post_category.id do %>
+                    <.link navigate={~p"/posts/category/#{category.category_id}"}>
+                      <.badge
+                        variant="outline"
+                        class="border-yellow-400 bg-white text-yellow-500 bg-opacity-35 mb-2 justify-center"
+                      >
+                        <.icon name="hero-tag" class="mr-1 w-4 h-4" />
+                        <%= post_category.name %>
+                      </.badge>
+                    </.link>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex my-8 justify-between max-w-3xl mx-auto p-4">
+          <div class="flex gap-4 sticky top-32">
+            <%= if @current_user do %>
+              <%= if @post.liked_by_user do %>
+                <button phx-click="dislike" phx-value-id={@post.id}>
+                  <.icon name="hero-heart-solid" class="text-red-400" />
+                </button>
+              <% else %>
+                <button phx-click="like" phx-value-id={@post.id}>
+                  <.icon name="hero-heart" class="text-red-300" />
+                </button>
+              <% end %>
+              <%= if @post.bookmarked_by_user do %>
+                <button phx-click="unbookmark" phx-value-id={@post.id}>
+                  <.icon name="hero-bookmark-solid" class="text-blue-400" />
+                </button>
+              <% else %>
+                <button phx-click="bookmark" phx-value-id={@post.id}>
+                  <.icon name="hero-bookmark" class="text-blue-500" />
+                </button>
+              <% end %>
+            <% else %>
+              <.link phx-click={show_modal("sign-in")}>
+                <.icon name="hero-heart" class="text-red-500" />
+              </.link>
+              <.link phx-click={show_modal("sign-in")}>
+                <.icon name="hero-bookmark" class="text-blue-500" />
+              </.link>
+            <% end %>
+          </div>
+
+          <%= if @current_user do %>
+            <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
+              <.button>New Comment</.button>
+            </.link>
           <% else %>
-            <button phx-click="like" phx-value-id={@post.id}>
-              <.icon name="hero-heart" class="text-red-300" />
-            </button>
+            <.button phx-click={show_modal("sign-in")}>New Comment</.button>
           <% end %>
-          <%= if @post.bookmarked_by_user do %>
-            <button phx-click="unbookmark" phx-value-id={@post.id}>
-              <.icon name="hero-bookmark-solid" class="text-blue-400" />
-            </button>
-          <% else %>
-            <button phx-click="bookmark" phx-value-id={@post.id}>
-              <.icon name="hero-bookmark" class="text-blue-500" />
-            </button>
-          <% end %>
-        <% else %>
-          <.link phx-click={show_modal("sign-in")}>
-            <.icon name="hero-heart" class="text-red-500" />
-          </.link>
-          <.link phx-click={show_modal("sign-in")}>
-            <.icon name="hero-bookmark" class="text-blue-500" />
-          </.link>
-        <% end %>
+        </div>
+
+        <.comment_tree
+          stream={@streams.comments}
+          current_user={@current_user}
+          post={@post}
+          profile={@profile}
+        />
+
+        <div class="max-w-3xl mx-auto px-4 py-8">
+          <.back navigate={~p"/posts"}>Back to posts</.back>
+        </div>
       </div>
-
-      <%= if @current_user do %>
-        <.link patch={~p"/posts/#{@post}/comments/new"} phx-click={JS.push_focus()}>
-          <.button>New Comment</.button>
-        </.link>
-      <% else %>
-        <.button phx-click={show_modal("sign-in")}>New Comment</.button>
-      <% end %>
-    </div>
-
-    <.comment_tree
-      stream={@streams.comments}
-      current_user={@current_user}
-      post={@post}
-      profile={@profile}
-    />
-
-    <div class="max-w-3xl mx-auto px-4 py-8">
-      <.back navigate={~p"/posts"}>Back to posts</.back>
+      <div class="lg:w-1/5 hidden lg:block">
+        <div class="sticky top-60">
+          <h2 class="text-2xl font-bold mb-4">Table of Contents</h2>
+          <ul class="toc-list" id="toc-list" phx-hook="TableOfContents">
+            <!-- TOC items will be dynamically inserted here -->
+          </ul>
+        </div>
+      </div>
     </div>
 
     <.modal :if={@live_action == :edit} id="post-modal" show on_cancel={JS.patch(~p"/posts/#{@post}")}>
