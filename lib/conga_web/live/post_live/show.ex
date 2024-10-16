@@ -768,7 +768,12 @@ defmodule CongaWeb.PostLive.Show do
           </span>
           <div :if={@current_user} class="flex items-center space-x-2 mt-2 sm:mt-0">
             <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
-              <Lucideicons.reply class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <.tooltip>
+                <Lucideicons.reply class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
+                <.tooltip_content class="bg-primary text-white">
+                  <p>Reply</p>
+                </.tooltip_content>
+              </.tooltip>
             </.link>
             <.dropdown_menu :if={@current_user && @current_user.id == @comment.user_id}>
               <.dropdown_menu_trigger>
