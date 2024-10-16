@@ -5,44 +5,14 @@ defmodule CongaWeb.PostLive.Show do
   import SaladUI.Badge
   import SaladUI.DropdownMenu
   import SaladUI.Menu
+  import SaladUI.Separator
+  import SaladUI.Tooltip
 
   @impl true
   def render(assigns) do
     ~H"""
     <div class="flex flex-col md:flex-row justify-center">
-      <div class="lg:w-1/5 flex justify-end items-start">
-        <div class="sticky top-60">
-          <div class="flex gap-4">
-            <%= if @current_user do %>
-              <%= if @post.liked_by_user do %>
-                <button phx-click="dislike" phx-value-id={@post.id}>
-                  <.icon name="hero-heart-solid" class="text-red-400" />
-                </button>
-              <% else %>
-                <button phx-click="like" phx-value-id={@post.id}>
-                  <.icon name="hero-heart" class="text-red-300" />
-                </button>
-              <% end %>
-              <%= if @post.bookmarked_by_user do %>
-                <button phx-click="unbookmark" phx-value-id={@post.id}>
-                  <.icon name="hero-bookmark-solid" class="text-blue-400" />
-                </button>
-              <% else %>
-                <button phx-click="bookmark" phx-value-id={@post.id}>
-                  <.icon name="hero-bookmark" class="text-blue-500" />
-                </button>
-              <% end %>
-            <% else %>
-              <.link phx-click={show_modal("sign-in")}>
-                <.icon name="hero-heart" class="text-red-500" />
-              </.link>
-              <.link phx-click={show_modal("sign-in")}>
-                <.icon name="hero-bookmark" class="text-blue-500" />
-              </.link>
-            <% end %>
-          </div>
-        </div>
-      </div>
+      <div class="lg:w-1/5 flex justify-end items-start"></div>
       <div class="lg:w-3/5">
         <.header class="max-w-3xl mx-auto">
           <div class="flex justify-between items-center w-full">
@@ -73,6 +43,146 @@ defmodule CongaWeb.PostLive.Show do
           </div>
 
           <h1 class="text-4xl font-extrabold text-center text-gray-900 my-14"><%= @post.title %></h1>
+
+          <div class="flex justify-between items-end">
+            <div :if={@profile && @profile.user_id == @post.user_id} class="flex">
+              <img
+                class="object-cover object-center w-10 h-10 rounded-full"
+                src={@profile.avatar}
+                alt=""
+              />
+              <div class="mx-4">
+                <h1 class="text-sm text-gray-700 dark:text-gray-200">
+                  <%= @profile.first_name %> <%= @profile.last_name %>
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <%= @profile.occupation %>
+                </p>
+              </div>
+            </div>
+
+            <div class="text-sm text-gray-700 dark:text-gray-200 flex flex-col items-end">
+              <%= @post.reading_time %> min read
+              <div
+                phx-hook="LocalTime"
+                id={"inserted_at-#{@post.inserted_at}"}
+                class="hidden md:block invisible text-sm text-gray-700"
+              >
+                <%= DateTime.to_string(@post.inserted_at) %>
+              </div>
+            </div>
+          </div>
+
+          <.separator class="my-4" />
+
+          <div class="flex justify-between mx-2">
+            <div class="flex gap-4">
+              <%= if @current_user do %>
+                <div class="flex gap-1 items-end">
+                  <%= if @post.liked_by_user do %>
+                    <button phx-click="dislike" phx-value-id={@post.id}>
+                      <.icon name="hero-heart-solid" class="text-red-400" />
+                    </button>
+                  <% else %>
+                    <button phx-click="like" phx-value-id={@post.id}>
+                      <.icon name="hero-heart" class="text-red-300" />
+                    </button>
+                  <% end %>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.like_count %>
+                  </p>
+                </div>
+                <div class="flex gap-1 items-end">
+                  <%= if @post.bookmarked_by_user do %>
+                    <button phx-click="unbookmark" phx-value-id={@post.id}>
+                      <.icon name="hero-bookmark-solid" class="text-blue-400" />
+                    </button>
+                  <% else %>
+                    <button phx-click="bookmark" phx-value-id={@post.id}>
+                      <.icon name="hero-bookmark" class="text-blue-500" />
+                    </button>
+                  <% end %>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.bookmark_count %>
+                  </p>
+                </div>
+              <% else %>
+                <div class="flex gap-1 items-end">
+                  <.link phx-click={show_modal("sign-in")}>
+                    <.icon name="hero-heart" class="text-red-500" />
+                  </.link>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.like_count %>
+                  </p>
+                </div>
+                <div class="flex gap-1 items-end">
+                  <.link phx-click={show_modal("sign-in")}>
+                    <.icon name="hero-bookmark" class="text-blue-500" />
+                  </.link>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.bookmark_count %>
+                  </p>
+                </div>
+              <% end %>
+              <div
+                :if={@post.page_views > 0}
+                class="flex gap-1 text-sm text-gray-500 dark:text-gray-200 items-end"
+              >
+                <.icon name="hero-eye" class="text-yellow-500" />
+                <%= @post.page_views %>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <.dropdown_menu>
+                <.dropdown_menu_trigger>
+                  <.tooltip>
+                    <.icon name="hero-arrow-up-on-square" class="text-yellow-500 cursor-pointer" />
+                    <.tooltip_content class="bg-primary text-white">
+                      <p>Share</p>
+                    </.tooltip_content>
+                  </.tooltip>
+                </.dropdown_menu_trigger>
+                <.dropdown_menu_content side="top">
+                  <.menu class="">
+                    <.menu_label>Share</.menu_label>
+                    <.menu_separator />
+                    <.menu_group>
+                      <.menu_item>
+                        <img src="/images/x.svg" class="mr-2 h-4 w-4" />
+                        <span>Twitter</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/linkedin.svg" class="mr-2 h-4 w-4" />
+                        <span>LinkedIn</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/reddit.svg" class="mr-2 h-4 w-4" />
+                        <span>Reddit</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/facebook.svg" class="mr-2 h-4 w-4" />
+                        <span>Facebook</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/whatsapp.svg" class="mr-2 h-4 w-4" />
+                        <span>Whatsapp</span>
+                      </.menu_item>
+                    </.menu_group>
+                    <.menu_separator />
+                    <.menu_group>
+                      <.menu_item>
+                        <.icon name="hero-link" class="mr-2 h-4 w-4" />
+                        <span>Permalink</span>
+                      </.menu_item>
+                    </.menu_group>
+                  </.menu>
+                </.dropdown_menu_content>
+              </.dropdown_menu>
+            </div>
+          </div>
+
+          <.separator class="mt-4 mb-20" />
 
           <div class="prose prose-lg max-w-none mb-8">
             <%= MDEx.to_html!(@post.body,
@@ -143,35 +253,122 @@ defmodule CongaWeb.PostLive.Show do
           </div>
         </div>
 
-        <div class="flex my-8 justify-between max-w-3xl mx-auto p-4">
-          <div class="flex gap-4 sticky top-32">
-            <%= if @current_user do %>
-              <%= if @post.liked_by_user do %>
-                <button phx-click="dislike" phx-value-id={@post.id}>
-                  <.icon name="hero-heart-solid" class="text-red-400" />
-                </button>
+        <div class="max-w-3xl mx-auto">
+          <.separator class="my-4" />
+
+          <div class="flex justify-between mx-2">
+            <div class="flex gap-4">
+              <%= if @current_user do %>
+                <div class="flex gap-1 items-end">
+                  <%= if @post.liked_by_user do %>
+                    <button phx-click="dislike" phx-value-id={@post.id}>
+                      <.icon name="hero-heart-solid" class="text-red-400" />
+                    </button>
+                  <% else %>
+                    <button phx-click="like" phx-value-id={@post.id}>
+                      <.icon name="hero-heart" class="text-red-300" />
+                    </button>
+                  <% end %>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.like_count %>
+                  </p>
+                </div>
+                <div class="flex gap-1 items-end">
+                  <%= if @post.bookmarked_by_user do %>
+                    <button phx-click="unbookmark" phx-value-id={@post.id}>
+                      <.icon name="hero-bookmark-solid" class="text-blue-400" />
+                    </button>
+                  <% else %>
+                    <button phx-click="bookmark" phx-value-id={@post.id}>
+                      <.icon name="hero-bookmark" class="text-blue-500" />
+                    </button>
+                  <% end %>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.bookmark_count %>
+                  </p>
+                </div>
               <% else %>
-                <button phx-click="like" phx-value-id={@post.id}>
-                  <.icon name="hero-heart" class="text-red-300" />
-                </button>
+                <div class="flex gap-1 items-end">
+                  <.link phx-click={show_modal("sign-in")}>
+                    <.icon name="hero-heart" class="text-red-500" />
+                  </.link>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.like_count %>
+                  </p>
+                </div>
+                <div class="flex gap-1 items-end">
+                  <.link phx-click={show_modal("sign-in")}>
+                    <.icon name="hero-bookmark" class="text-blue-500" />
+                  </.link>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= @post.bookmark_count %>
+                  </p>
+                </div>
               <% end %>
-              <%= if @post.bookmarked_by_user do %>
-                <button phx-click="unbookmark" phx-value-id={@post.id}>
-                  <.icon name="hero-bookmark-solid" class="text-blue-400" />
-                </button>
-              <% else %>
-                <button phx-click="bookmark" phx-value-id={@post.id}>
-                  <.icon name="hero-bookmark" class="text-blue-500" />
-                </button>
-              <% end %>
-            <% else %>
-              <.link phx-click={show_modal("sign-in")}>
-                <.icon name="hero-heart" class="text-red-500" />
-              </.link>
-              <.link phx-click={show_modal("sign-in")}>
-                <.icon name="hero-bookmark" class="text-blue-500" />
-              </.link>
-            <% end %>
+              <div
+                :if={@post.page_views > 0}
+                class="flex gap-1 text-sm text-gray-500 dark:text-gray-200 items-end"
+              >
+                <.icon name="hero-eye" class="text-yellow-500" />
+                <%= @post.page_views %>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <.dropdown_menu>
+                <.dropdown_menu_trigger>
+                  <.tooltip>
+                    <.icon name="hero-arrow-up-on-square" class="text-yellow-500 cursor-pointer" />
+                    <.tooltip_content class="bg-primary text-white">
+                      <p>Share</p>
+                    </.tooltip_content>
+                  </.tooltip>
+                </.dropdown_menu_trigger>
+                <.dropdown_menu_content side="top">
+                  <.menu class="">
+                    <.menu_label>Share</.menu_label>
+                    <.menu_separator />
+                    <.menu_group>
+                      <.menu_item>
+                        <img src="/images/x.svg" class="mr-2 h-4 w-4" />
+                        <span>Twitter</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/linkedin.svg" class="mr-2 h-4 w-4" />
+                        <span>LinkedIn</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/reddit.svg" class="mr-2 h-4 w-4" />
+                        <span>Reddit</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/facebook.svg" class="mr-2 h-4 w-4" />
+                        <span>Facebook</span>
+                      </.menu_item>
+                      <.menu_item>
+                        <img src="/images/whatsapp.svg" class="mr-2 h-4 w-4" />
+                        <span>Whatsapp</span>
+                      </.menu_item>
+                    </.menu_group>
+                    <.menu_separator />
+                    <.menu_group>
+                      <.menu_item>
+                        <.icon name="hero-link" class="mr-2 h-4 w-4" />
+                        <span>Permalink</span>
+                      </.menu_item>
+                    </.menu_group>
+                  </.menu>
+                </.dropdown_menu_content>
+              </.dropdown_menu>
+            </div>
+          </div>
+
+          <.separator class="mt-4 mb-20" />
+        </div>
+
+        <div class="flex my-8 justify-between max-w-3xl mx-auto items-end">
+          <div class="">
+            <%= @post.comment_count %> Comments
           </div>
 
           <%= if @current_user do %>
