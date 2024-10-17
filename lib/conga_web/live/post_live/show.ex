@@ -588,10 +588,10 @@ defmodule CongaWeb.PostLive.Show do
 
   defp post_actions(assigns) do
     ~H"""
-    <.separator class="my-4" />
+    <.separator class="my-2" />
 
     <div class="flex justify-between mx-2">
-      <div class="flex gap-4">
+      <div class="flex gap-4 items-center">
         <%= if @current_user do %>
           <div class="flex gap-1 items-end">
             <%= if @post.liked_by_user do %>
@@ -648,7 +648,14 @@ defmodule CongaWeb.PostLive.Show do
         </div>
       </div>
 
-      <div class="flex gap-4">
+      <div class="flex gap-4 items-center">
+        <a
+          href={"https://livebook.dev/run?url=http%3A%2F%2Flocalhost%3A4000%2Fposts%2F#{@post.id}.livemd"}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img src="https://livebook.dev/badge/v1/gray.svg" alt="Run in Livebook" />
+        </a>
         <.dropdown_menu>
           <.dropdown_menu_trigger>
             <.tooltip>
@@ -697,7 +704,7 @@ defmodule CongaWeb.PostLive.Show do
       </div>
     </div>
 
-    <.separator class="mt-4 mb-20" />
+    <.separator class="mt-2 mb-20" />
     """
   end
 end
