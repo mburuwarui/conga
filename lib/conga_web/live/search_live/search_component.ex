@@ -20,7 +20,7 @@ defmodule CongaWeb.SearchLive.SearchComponent do
           field={@form[:query]}
           type="search"
           id="search-input"
-          placeholder="Search for posts"
+          placeholder="Search for notebooks"
           autofocus="true"
         />
         <.card :if={@posts} class="shadow-none rounded-none border-none" id="searchbox__results_list">

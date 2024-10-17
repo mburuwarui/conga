@@ -10,5 +10,7 @@ defmodule CongaWeb.Layouts do
   """
   use CongaWeb, :html
 
+  import SaladUI.Tooltip
+
   embed_templates "layouts/*"
 end

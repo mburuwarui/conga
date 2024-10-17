@@ -15,20 +15,17 @@ defmodule CongaWeb.PostLive.Show do
       <div class="lg:w-1/5 flex justify-end items-start"></div>
       <div class="lg:w-3/5">
         <.header class="max-w-3xl mx-auto">
-          <div class="flex justify-between items-center w-full">
-            <.link
-              navigate={~p"/posts"}
-              class="inline-flex items-center px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
-            >
-              <.icon name="hero-arrow-left" class="mr-2 h-5 w-5" /> Back to posts
-            </.link>
+          <div class="flex justify-between items-baseline w-full">
+            <div class="px-4 py-2 hover:text-yellow-900">
+              <.back navigate={~p"/posts"}>Back to notebooks</.back>
+            </div>
             <%= if @current_user == @post.user do %>
               <.link
                 patch={~p"/posts/#{@post}/show/edit"}
                 phx-click={JS.push_focus()}
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-zinc-600 bg-yellow-400 hover:bg-yellow-500"
               >
-                <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> Edit Post
+                <.icon name="hero-pencil-square" class="mr-2 h-5 w-5" /> Edit
               </.link>
             <% end %>
           </div>
@@ -155,8 +152,8 @@ defmodule CongaWeb.PostLive.Show do
           profile={@profile}
         />
 
-        <div class="max-w-3xl mx-auto py-8">
-          <.back navigate={~p"/posts"}>Back to posts</.back>
+        <div class="max-w-3xl mx-auto py-8 hover:text-yellow-900">
+          <.back navigate={~p"/posts"}>Back to notebooks</.back>
         </div>
       </div>
       <div class="lg:w-1/5 hidden lg:block">
@@ -285,7 +282,7 @@ defmodule CongaWeb.PostLive.Show do
     categories = Conga.Posts.Category.list_all!(actor: current_user)
 
     socket
-    |> assign(:page_title, "Edit Post")
+    |> assign(:page_title, "Edit Notebook")
     |> stream(:comments, post.comments)
     |> assign(:post, post)
     |> assign(:categories, categories)

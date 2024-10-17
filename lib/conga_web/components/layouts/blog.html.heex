@@ -9,23 +9,44 @@
       <%!-- </p> --%>
     </div>
     <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/mburu_warui" class="hover:text-zinc-700">
-        @mburu_warui
-      </a>
-      <a href="https://github.com/mburuwarui/conga" class="hover:text-zinc-700">
-        GitHub
-      </a>
+      <.tooltip>
+        <a href="https://twitter.com/mburu_warui" class="flex items-center hover:text-yellow-700">
+          <img src="/images/x.svg" class="mr-2 h-4 w-4" />
+        </a>
+        <.tooltip_content side="bottom" class="bg-primary text-white">
+          <p>Twitter</p>
+        </.tooltip_content>
+      </.tooltip>
+      <.tooltip>
+        <a
+          href="https://github.com/mburuwarui/conga"
+          class="flex items-center hover:text-yellow-700"
+        >
+          <img src="/images/github-light.svg" class="mr-2 h-5 w-5" />
+        </a>
+        <.tooltip_content side="bottom" class="bg-primary text-white">
+          <p>GitHub</p>
+        </.tooltip_content>
+      </.tooltip>
+      <.tooltip>
+        <a href="https://huggingface.co/Joste" class="flex items-center hover:text-yellow-700">
+          <img src="/images/hugging_face.svg" class="mr-2 h-5 w-5" />
+        </a>
+        <.tooltip_content side="bottom" class="bg-primary text-white">
+          <p>Hugging Face</p>
+        </.tooltip_content>
+      </.tooltip>
       <%= if assigns[:current_user] do %>
         <.link
           navigate={~p"/sign-out"}
-          class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
+          class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-yellow-200/80"
         >
           Sign Out <span aria-hidden="true">&rarr;</span>
         </.link>
       <% else %>
         <.link
           navigate={~p"/sign-in"}
-          class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
+          class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-yellow-200/80"
         >
           Sign In <span aria-hidden="true">&rarr;</span>
         </.link>

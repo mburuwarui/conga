@@ -10,7 +10,7 @@ defmodule CongaWeb.PostLive.Index do
     ~H"""
     <.header>
       <div class="w-full text-center mb-4 sm:mb-10">
-        <h1 class="text-4xl font-extrabold">Listing Posts</h1>
+        <h1 class="text-4xl font-extrabold">Notebooks</h1>
       </div>
 
       <div class="py-4 flex sm:flex-row flex-col justify-between gap-4 items-center">
@@ -69,13 +69,15 @@ defmodule CongaWeb.PostLive.Index do
         </div>
         <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <.link :if={@current_user} patch={~p"/posts/new"} class="w-full sm:w-auto">
-            <.button class="w-full sm:w-auto">New Post</.button>
+            <.button class="w-full sm:w-auto">
+              <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> New Notebook
+            </.button>
           </.link>
           <.link patch={~p"/search"} class="w-full sm:w-auto">
             <.button class="w-full sm:w-auto text-gray-500 bg-white hover:ring-gray-500 hover:text-white ring-gray-300 items-center gap-10 rounded-md px-3 text-sm ring-1 transition focus:[&:not(:focus-visible)]:outline-none">
               <div class="flex items-center gap-2">
                 <Lucideicons.search class="h-4 w-4" />
-                <span class="flex-grow text-left">Find posts</span>
+                <span class="flex-grow text-left">Find notebooks</span>
               </div>
               <kbd class="hidden sm:inline-flex text-3xs opacity-80">
                 <kbd class="font-sans">⌘</kbd><kbd class="font-sans">K</kbd>
@@ -307,7 +309,7 @@ defmodule CongaWeb.PostLive.Index do
       ])
 
     socket
-    |> assign(:page_title, "Edit Post")
+    |> assign(:page_title, "Edit Notebook")
     |> assign(:post, post)
     |> assign(:patch, patch)
   end
@@ -316,7 +318,7 @@ defmodule CongaWeb.PostLive.Index do
     patch = apply_patch(socket)
 
     socket
-    |> assign(:page_title, "New Post")
+    |> assign(:page_title, "New Notebook")
     |> assign(:post, nil)
     |> assign(:patch, patch)
   end
@@ -333,7 +335,7 @@ defmodule CongaWeb.PostLive.Index do
     # IO.inspect(profiles, label: "profiles")
 
     socket
-    |> assign(:page_title, "Listing Posts")
+    |> assign(:page_title, "Listing Notebooks")
     |> assign(:post, nil)
     |> assign(:profiles, profiles)
     |> assign(:current_category, nil)
