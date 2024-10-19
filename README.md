@@ -1,52 +1,150 @@
-# Conga App 🌍🎉
+# Conga
 
-Karibu! Get ready for a blog app hotter than Nairobi's sunshine! 🌞
+# Building Real-time Apps with BEAM, Phoenix LiveView, and Ash Framework
 
-## Mambo vipi? What's cool? 🔥
+## The BEAM: Erlang's Secret Weapon
 
-- Blog like a champ 📝
-- Gumzo (chat) in real-time 💬
-- Hifadhi (save) your faves 🖤
-- Check who's loving your vibe 📊
-- Tech magic for wasee wa kompyuta 🧙‍♂️
-- Tafuta (search) faster than matatu on Thika Road 🚐💨
-- Sell your digital mali 💸
-- Admin mode for the big kahunas 😎
+The BEAM (Bogdan/Björn's Erlang Abstract Machine) is the virtual machine at the heart of the Erlang runtime system. It's designed to excel at concurrency and distributed computing, making it perfect for building scalable, fault-tolerant applications.
 
-## Tumejenga na (We built with) 🛠️
+### Key BEAM Principles
 
-- Phoenix: Faster than a cheetah 🐆
-- LiveView: Smoother than Kenyan tea ☕
-- Ash: Flexible like a Maasai warrior 🦁
-- PostgreSQL: Stores data like an elephant's memory 🐘
+1. **Lightweight Processes**: Not OS processes, but incredibly efficient Erlang processes.
+2. **Message Passing**: Processes communicate via asynchronous message passing, avoiding shared state.
+3. **Fault Tolerance**: Processes can monitor each other and restart if failures occur.
+4. **Soft Real-time**: Predictable latency and garbage collection.
 
-## Ready to dance? Let's go! 💃🕺
+## Phoenix LiveView: Real-time for the Masses
 
-1. Get your gear (Elixir, Erlang, PostgreSQL)
-2. Grab the beats: `git clone https://github.com/mburuwarui/conga.git`
-3. Step into the club: `cd conga`
-4. Warm up: `mix deps.get`
-5. Set the stage: `mix ash.setup`
-6. Blast the music: `mix phx.server`
+Phoenix LiveView leverages the BEAM's concurrency model to provide real-time updates to web applications with minimal effort.
 
-Now show your moves at `http://localhost:4000`!
+### How LiveView Shines
 
-## Our secret recipe 🤫
+- **WebSocket-based**: Establishes a persistent connection for instant updates.
+- **Server-rendered**: Reduces JavaScript complexity on the client.
+- **Seamless State Management**: Keeps server and client state in sync effortlessly.
 
-We've got moves called "Ash resources" - they're the heartbeat of our app. They make everything flow like the Tana River! 🏞️
+## Ash Framework: Streamlined Application Design
 
-## Flex your tech muscles 💪
+Ash Framework provides a declarative way to define resources and their interactions, perfectly complementing the BEAM's principles.
 
-- REST API: Swagger it up at `http://localhost:4000/api/json/swaggerui`
-- GraphQL: Play at `http://localhost:4000/gql/playground`
+### Ash Framework Benefits
 
-## Keep it fresh like sukuma wiki 🥬
+- **Declarative Resource Definitions**: Clearly specify entities and their relationships.
+- **Built-in APIs**: Automatically generate REST and GraphQL APIs.
+- **Extensible**: Add custom actions and behaviors as needed.
 
-Before you hit the stage, make sure you're on point:
+## Putting It All Together
+
+By combining these technologies, you can build a real-time application that:
+
+1. Utilizes BEAM's concurrency for handling many simultaneous connections.
+2. Employs LiveView for instant UI updates without complex client-side code.
+3. Uses Ash Framework to define a clear domain model and streamline API creation.
+
+### Example: Real-time Chat Application
 
 ```elixir
-mix test
+defmodule MyApp.Chats.Chat do
+  use Ash.Resource,
+    data_layer: AshPostgres.DataLayer
 
+      postgres do
+    table "profiles"
+    repo MyApp.Repo
+  end
+
+  actions do
+     defaults [:create, :update, :read, :destroy]
+  end
+
+  attributes do
+    uuid_primary_key :id
+    attribute :mesage, :string
+    timestamps()
+  end
+end
+
+defmodule MyApp.ChatLive do
+  use MyAppWeb, :live_component
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.simple_form
+          for={@form}
+          id="chat-form"
+          phx-target={@myself}
+          phx-change="validate"
+          phx-submit="save"
+        >
+          <.input field={@form[:message]} label="Message" />
+          <:actions>
+            <.button phx-disable-with="Saving...">Save Chat</.button>
+          </:actions>
+        </.simple_form>
+      </div>
+      """
+    end
+
+  @impl true
+  def update(assigns, socket) do
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign_form()}
+  end
+
+  @impl true
+  def handle_event("validate", %{"message" => message_params}, socket) do
+    {:noreply,
+     assign(socket, form: AshPhoenix.Form.validate(socket.assigns.form, message_params))}
+  end
+
+  @impl true
+  def handle_event("save", %{"message" => message_params}, socket) do
+
+    case AshPhoenix.Form.submit(socket.assigns.form, params: message_params) do
+      {:ok, message} ->
+        notify_parent({:saved, message})
+
+        socket =
+          socket
+          |> put_flash(:info, "Message #{socket.assigns.form.source.type}d successfully")
+          |> push_patch(to: socket.assigns.patch)
+
+        {:noreply, socket}
+
+      {:error, form} ->
+        {:noreply,
+         socket
+         |> assign(form: form)}
+    end
+  end
+
+  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  defp assign_form(%{assigns: %{meesage: message}} = socket) do
+    IO.inspect(message, label: "assign_form_message")
+
+    form =
+      if message do
+        AshPhoenix.Form.for_update(message, :update,
+          as: "message",
+          actor: socket.assigns.current_user
+        )
+      else
+        AshPhoenix.Form.for_create(MyApp.Chats.Chat, :create,
+          as: "message",
+          actor: socket.assigns.current_user
+        )
+      end
+
+    assign(socket, form: to_form(form))
+  end
+
+end
 ```
 
-Sasa, let's make some noise! 🎉🥁 Twende kazi! 🚀
+This example demonstrates how the BEAM's concurrency model, Phoenix LiveView's real-time capabilities, and Ash Framework's resource definitions come together to create a responsive, real-time chat application with minimal code.
+
+By embracing these technologies and principles, you can build scalable, real-time applications that leverage the full power of the BEAM ecosystem.
