@@ -68,7 +68,10 @@ defmodule CongaWeb.Router do
     # <-- add these lines
 
     ash_authentication_live_session :authentication_required,
-      on_mount: {CongaWeb.LiveUserAuth, :live_user_required} do
+      on_mount: [
+        {CongaWeb.LiveUserAuth, :live_user_required},
+        {CongaWeb.SaveRequestUri, :save_request_uri}
+      ] do
       live "/posts/new", PostLive.Index, :new
       live "/posts/:id/edit", PostLive.Index, :edit
       live "/posts/:id/show/edit", PostLive.Show, :edit
@@ -88,7 +91,10 @@ defmodule CongaWeb.Router do
     end
 
     ash_authentication_live_session :authentication_optional,
-      on_mount: {CongaWeb.LiveUserAuth, :live_user_optional} do
+      on_mount: [
+        {CongaWeb.LiveUserAuth, :live_user_optional},
+        {CongaWeb.SaveRequestUri, :save_request_uri}
+      ] do
       live "/posts", PostLive.Index, :index
       live "/posts/:id", PostLive.Show, :show
       live "/posts/category/:category", PostLive.Index, :filter_by_category

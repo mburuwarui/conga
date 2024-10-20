@@ -70,7 +70,7 @@ defmodule CongaWeb.PostLive.Show do
             </div>
           </div>
 
-          <.post_actions post={@post} current_user={@current_user} />
+          <.post_actions post={@post} current_user={@current_user} current_uri={@current_uri} />
 
           <div class="prose prose-lg max-w-none mb-8">
             <%= MDEx.to_html!(@post.body,
@@ -123,7 +123,7 @@ defmodule CongaWeb.PostLive.Show do
         </div>
 
         <div class="max-w-3xl mx-auto">
-          <.post_actions post={@post} current_user={@current_user} />
+          <.post_actions post={@post} current_user={@current_user} current_uri={@current_uri} />
         </div>
 
         <div class="flex my-8 justify-between max-w-3xl mx-auto items-end">
@@ -536,7 +536,7 @@ defmodule CongaWeb.PostLive.Show do
             <.link patch={~p"/posts/#{@post}/comments/#{@comment}/new"} phx-click={JS.push_focus()}>
               <.tooltip>
                 <Lucideicons.reply class="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
-                <.tooltip_content class="bg-primary text-white">
+                <.tooltip_content class="bg-primary text-white" side="left">
                   <p>Reply</p>
                 </.tooltip_content>
               </.tooltip>
@@ -668,31 +668,72 @@ defmodule CongaWeb.PostLive.Show do
               <.menu_separator />
               <.menu_group>
                 <.menu_item>
-                  <img src="/images/x.svg" class="mr-2 h-4 w-4" />
-                  <span>Twitter</span>
+                  <a
+                    href={"https://twitter.com/intent/tweet?url=#{URI.encode_www_form("#{CongaWeb.Endpoint.url()}#{@current_uri}")}&text=#{URI.encode_www_form(@post.title)}"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center"
+                  >
+                    <img src="/images/x.svg" class="mr-2 h-4 w-4" />
+                    <span>Twitter</span>
+                  </a>
                 </.menu_item>
                 <.menu_item>
-                  <img src="/images/linkedin.svg" class="mr-2 h-4 w-4" />
-                  <span>LinkedIn</span>
+                  <a
+                    href={"https://www.linkedin.com/shareArticle?mini=true&url=#{URI.encode_www_form("#{CongaWeb.Endpoint.url()}#{@current_uri}")}&title=#{URI.encode_www_form(@post.title)}"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center"
+                  >
+                    <img src="/images/linkedin.svg" class="mr-2 h-4 w-4" />
+                    <span>LinkedIn</span>
+                  </a>
                 </.menu_item>
                 <.menu_item>
-                  <img src="/images/reddit.svg" class="mr-2 h-4 w-4" />
-                  <span>Reddit</span>
+                  <a
+                    href={"https://www.reddit.com/submit?url=#{URI.encode_www_form("#{CongaWeb.Endpoint.url()}#{@current_uri}")}&title=#{URI.encode_www_form(@post.title)}"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center"
+                  >
+                    <img src="/images/reddit.svg" class="mr-2 h-4 w-4" />
+                    <span>Reddit</span>
+                  </a>
                 </.menu_item>
                 <.menu_item>
-                  <img src="/images/facebook.svg" class="mr-2 h-4 w-4" />
-                  <span>Facebook</span>
+                  <a
+                    href={"https://www.facebook.com/sharer/sharer.php?u=#{URI.encode_www_form("#{CongaWeb.Endpoint.url()}#{@current_uri}")}"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center"
+                  >
+                    <img src="/images/facebook.svg" class="mr-2 h-4 w-4" />
+                    <span>Facebook</span>
+                  </a>
                 </.menu_item>
                 <.menu_item>
-                  <img src="/images/whatsapp.svg" class="mr-2 h-4 w-4" />
-                  <span>Whatsapp</span>
+                  <a
+                    href={"https://api.whatsapp.com/send?text=#{URI.encode_www_form(@post.title)}%20#{URI.encode_www_form("#{CongaWeb.Endpoint.url()}#{@current_uri}")}"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center"
+                  >
+                    <img src="/images/whatsapp.svg" class="mr-2 h-4 w-4" />
+                    <span>WhatsApp</span>
+                  </a>
                 </.menu_item>
               </.menu_group>
               <.menu_separator />
               <.menu_group>
                 <.menu_item>
-                  <.icon name="hero-link" class="mr-2 h-4 w-4" />
-                  <span>Permalink</span>
+                  <button
+                    phx-click="copy-permalink"
+                    phx-value-url={@current_uri}
+                    class="flex items-center"
+                  >
+                    <.icon name="hero-link" class="mr-2 h-4 w-4" />
+                    <span>Copy Permalink</span>
+                  </button>
                 </.menu_item>
               </.menu_group>
             </.menu>
