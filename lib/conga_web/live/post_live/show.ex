@@ -587,7 +587,7 @@ defmodule CongaWeb.PostLive.Show do
     ~H"""
     <.separator class="my-2" />
 
-    <div class="flex justify-between mx-2">
+    <div class="flex justify-between mx-2 gap-4">
       <div class="flex gap-4 items-center">
         <%= if @current_user do %>
           <div class="flex gap-1 items-end">

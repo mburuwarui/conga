@@ -51,7 +51,7 @@ defmodule CongaWeb.PostLive.Index do
                 <span>Sort by</span>
               </.button>
             </.dropdown_menu_trigger>
-            <.dropdown_menu_content align="start">
+            <.dropdown_menu_content align="center">
               <.menu>
                 <.menu_item class="justify-center">
                   <.link phx-click="sort_by_latest">
