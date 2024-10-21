@@ -141,7 +141,7 @@ defmodule CongaWeb.ProfileLive.FormComponent do
 
   defp presign_upload(entry, socket) do
     filename = "#{entry.client_name}"
-    key = "public/#{Nanoid.generate()}-#{filename}"
+    key = "public/profile_pictures/#{Nanoid.generate()}-#{filename}"
 
     config = %{
       region: "auto",

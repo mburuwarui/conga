@@ -202,7 +202,7 @@ defmodule CongaWeb.PostLive.FormComponent do
 
   defp presign_picture_upload(entry, socket) do
     filename = "#{entry.client_name}"
-    key = "public/#{Nanoid.generate()}-#{filename}"
+    key = "public/post_pictures/#{Nanoid.generate()}-#{filename}"
 
     config = %{
       region: "auto",
@@ -241,7 +241,7 @@ defmodule CongaWeb.PostLive.FormComponent do
   defp generate_and_upload_livemd(post) do
     livemd_content = generate_livemd_content(post)
     filename = "#{post.id}.livemd"
-    key = "public/livemd/#{filename}"
+    key = "public/notebooks/#{filename}"
 
     config = %{
       region: "auto",
