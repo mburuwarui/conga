@@ -164,7 +164,7 @@ defmodule CongaWeb.PostLive.FormComponent do
             actor: socket.assigns.current_user
           )
 
-        notify_parent({:saved, updated_post})
+        notify_parent({:saved, post})
 
         socket =
           socket

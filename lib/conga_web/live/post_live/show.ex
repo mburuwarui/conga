@@ -732,7 +732,7 @@ defmodule CongaWeb.PostLive.Show do
                     class="flex items-center"
                   >
                     <.icon name="hero-link" class="mr-2 h-4 w-4" />
-                    <span>Copy Permalink</span>
+                    <span>Permalink</span>
                   </button>
                 </.menu_item>
               </.menu_group>
