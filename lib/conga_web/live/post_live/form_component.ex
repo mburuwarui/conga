@@ -77,13 +77,13 @@ defmodule CongaWeb.PostLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:uploaded_files, [])
      |> assign(:available_categories, Conga.Posts.Category.list_all!())
      |> assign(:selected_categories, get_selected_categories(assigns.post))
+     |> assign(:uploaded_files, [])
      |> allow_upload(:post_picture,
        accept: ~w(.jpg .jpeg .png),
        max_entries: 1,
-       external: &presign_upload/2
+       external: &presign_picture_upload/2
      )
      |> assign_form()}
   end
@@ -155,7 +155,16 @@ defmodule CongaWeb.PostLive.FormComponent do
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: post_params) do
       {:ok, post} ->
-        notify_parent({:saved, post})
+        # Generate and upload .livemd file after successful post creation/update
+        livemd_url = generate_and_upload_livemd(post)
+
+        # Update the case statement to handle the direct return of the updated post
+        updated_post =
+          Conga.Posts.Post.update!(post, %{livemd_url: livemd_url},
+            actor: socket.assigns.current_user
+          )
+
+        notify_parent({:saved, updated_post})
 
         socket =
           socket
@@ -191,7 +200,7 @@ defmodule CongaWeb.PostLive.FormComponent do
     assign(socket, form: to_form(form))
   end
 
-  defp presign_upload(entry, socket) do
+  defp presign_picture_upload(entry, socket) do
     filename = "#{entry.client_name}"
     key = "public/#{Nanoid.generate()}-#{filename}"
 
@@ -202,6 +211,8 @@ defmodule CongaWeb.PostLive.FormComponent do
       url:
         "https://#{System.get_env("CLOUDFLARE_BUCKET_NAME")}.#{System.get_env("CLOUDFLARE_ACCOUNT_ID")}.r2.cloudflarestorage.com"
     }
+
+    IO.inspect(entry.client_type, label: "client_type")
 
     {:ok, presigned_url} =
       Conga.S3Upload.presigned_put(config,
@@ -225,5 +236,44 @@ defmodule CongaWeb.PostLive.FormComponent do
   defp get_selected_categories(post) do
     post.categories
     |> Enum.map(& &1.name)
+  end
+
+  defp generate_and_upload_livemd(post) do
+    livemd_content = generate_livemd_content(post)
+    filename = "#{post.id}.livemd"
+    key = "public/livemd/#{filename}"
+
+    config = %{
+      region: "auto",
+      access_key_id: System.get_env("CLOUDFLARE_R2_ACCESS_KEY_ID"),
+      secret_access_key: System.get_env("CLOUDFLARE_R2_SECRET_ACCESS_KEY"),
+      url:
+        "https://#{System.get_env("CLOUDFLARE_BUCKET_NAME")}.#{System.get_env("CLOUDFLARE_ACCOUNT_ID")}.r2.cloudflarestorage.com"
+    }
+
+    {:ok, presigned_url} =
+      Conga.S3Upload.presigned_put(config,
+        key: key,
+        content_type: "text/markdown",
+        max_file_size: 10_000_000
+      )
+
+    HTTPoison.put(presigned_url, livemd_content, [{"Content-Type", "text/markdown"}])
+
+    "#{System.get_env("CLOUDFLARE_PUBLIC_URL")}/#{key}"
+  end
+
+  def generate_livemd_content(post) do
+    """
+    # #{post.title}
+
+    #{post.body}
+
+    ## Categories
+    #{Enum.map_join(post.categories, ", ", & &1.name)}
+
+    ## Pictures
+    #{Enum.map_join(post.pictures, "\n", fn picture -> "![](#{picture.url})" end)}
+    """
   end
 end

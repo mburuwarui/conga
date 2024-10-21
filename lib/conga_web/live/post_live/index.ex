@@ -364,11 +364,11 @@ defmodule CongaWeb.PostLive.Index do
   end
 
   @impl true
-  def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
+  def handle_info({CongaWeb.PostLive.FormComponent, {:saved, updated_post}}, socket) do
     categories = Conga.Posts.Category.list_all!(actor: socket.assigns.current_user)
 
     post =
-      post
+      updated_post
       |> Ash.load!([
         :categories_join_assoc,
         :like_count,

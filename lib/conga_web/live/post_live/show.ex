@@ -369,11 +369,11 @@ defmodule CongaWeb.PostLive.Show do
   end
 
   @impl true
-  def handle_info({CongaWeb.PostLive.FormComponent, {:saved, post}}, socket) do
+  def handle_info({CongaWeb.PostLive.FormComponent, {:saved, updated_post}}, socket) do
     categories = Conga.Posts.Category.list_all!(actor: socket.assigns.current_user)
 
     post =
-      post
+      updated_post
       |> Ash.load!(post_fields(socket))
 
     comments = post.comments
@@ -647,7 +647,7 @@ defmodule CongaWeb.PostLive.Show do
 
       <div class="flex gap-4 items-center">
         <a
-          href={"https://livebook.dev/run?url=http%3A%2F%2Flocalhost%3A4000%2Fposts%2F#{@post.id}.livemd"}
+          href={"https://livebook.dev/run?url=#{URI.encode_www_form(@post.livemd_url)}"}
           target="_blank"
           rel="noopener noreferrer"
         >

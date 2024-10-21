@@ -32,4 +32,46 @@ defmodule Conga.S3Upload do
 
     {:ok, url}
   end
+
+  def presigned_get(config, opts) do
+    key = Keyword.fetch!(opts, :key)
+    expires_in = Keyword.get(opts, :expires_in, @one_hour_seconds)
+    uri = "#{config.url}/#{URI.encode(key)}"
+
+    url =
+      :aws_signature.sign_v4_query_params(
+        config.access_key_id,
+        config.secret_access_key,
+        config.region,
+        "s3",
+        :calendar.universal_time(),
+        "GET",
+        uri,
+        ttl: expires_in,
+        uri_encode_path: false
+      )
+
+    {:ok, url}
+  end
+
+  def presigned_delete(config, opts) do
+    key = Keyword.fetch!(opts, :key)
+    expires_in = Keyword.get(opts, :expires_in, @one_hour_seconds)
+    uri = "#{config.url}/#{URI.encode(key)}"
+
+    url =
+      :aws_signature.sign_v4_query_params(
+        config.access_key_id,
+        config.secret_access_key,
+        config.region,
+        "s3",
+        :calendar.universal_time(),
+        "DELETE",
+        uri,
+        ttl: expires_in,
+        uri_encode_path: false
+      )
+
+    {:ok, url}
+  end
 end

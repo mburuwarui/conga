@@ -47,6 +47,7 @@ defmodule Conga.Posts.Post do
   code_interface do
     define :create
     define :read
+    define :update
     define :like
     define :dislike
     define :unbookmark
@@ -92,7 +93,7 @@ defmodule Conga.Posts.Post do
 
     update :update do
       primary? true
-      accept [:title, :body, :visibility]
+      accept [:title, :body, :visibility, :livemd_url]
       require_atomic? false
 
       argument :pictures, {:array, :map}
@@ -239,6 +240,12 @@ defmodule Conga.Posts.Post do
       default 0
       public? true
       description "The number of views for the post"
+    end
+
+    attribute :livemd_url, :string do
+      allow_nil? true
+      public? true
+      description "The URL of the livemd file"
     end
 
     timestamps()
