@@ -155,11 +155,9 @@ defmodule CongaWeb.PostLive.FormComponent do
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: post_params) do
       {:ok, post} ->
-        # Generate and upload .livemd file after successful post creation/update
         livemd_url = generate_and_upload_livemd(post)
 
-        # Update the case statement to handle the direct return of the updated post
-        updated_post =
+        _updated_post =
           Conga.Posts.Post.update!(post, %{livemd_url: livemd_url},
             actor: socket.assigns.current_user
           )
