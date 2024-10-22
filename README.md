@@ -65,6 +65,75 @@ Imagine a future where:
 
 _"In the future, the most valuable currency won't be Bitcoin – it'll be executable knowledge."_
 
+# Conga: The Future of Computational Currency 🎵
+
+## Strategic Vision Document
+
+### Core Insight
+
+Livebook notebooks are poised to become a new form of digital currency, backed by inherent computational value rather than artificial scarcity.
+
+### Value Proposition Analysis
+
+#### 1. Value Mechanics
+
+- Unlike NFTs or cryptocurrencies, notebooks have inherent utility
+- Their value is tied to real problem-solving capability
+- They can be verified and validated objectively
+
+#### 2. Market Potential
+
+- As AI and automation grow, ready-made solutions become more valuable
+- Companies will increasingly seek battle-tested notebooks
+- The network effect could create a self-sustaining economy
+
+#### 3. Technical Foundation
+
+- TigerBeetle provides the robust financial infrastructure needed
+- BEAM's concurrency model could handle global trading
+- Ash Framework provides the perfect structure for complex value relationships
+
+#### 4. Unique Differentiators
+
+- First platform to treat notebooks as tradeable assets
+- Built-in mechanisms for value appreciation through collaboration
+- Natural scarcity of high-quality solutions
+
+### Future Development Paths
+
+#### Immediate Focus Areas
+
+1. Value Assessment Mechanisms
+
+   - Quality metrics
+   - Usage statistics
+   - Community validation
+
+2. Trading Dynamics
+
+   - Market making mechanisms
+   - Price discovery
+   - Liquidity provision
+
+3. Growth Potential
+
+   - Network effect strategies
+   - Community building
+   - Enterprise adoption
+
+4. Technical Architecture
+   - Scaling considerations
+   - Security implications
+   - Integration capabilities
+
+### Why This Matters
+
+In a world increasingly driven by automation and AI, executable knowledge in the form of validated, production-ready notebooks will become as valuable as traditional currencies. Conga is positioning itself at the forefront of this transformation, creating the infrastructure for the knowledge economy of tomorrow.
+
+---
+
+_"Building the future where computational solutions are the new currency."_
+
 ## What's Cooking 🚀
 
 - 📚 A marketplace for premium Livebook notebooks
