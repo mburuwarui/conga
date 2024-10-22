@@ -726,15 +726,17 @@ defmodule CongaWeb.PostLive.Show do
               <.menu_separator />
               <.menu_group>
                 <.menu_item>
-                  <button
-                    phx-click="copy-permalink"
-                    phx-value-url={@current_uri}
-                    class="flex items-center"
-                  >
+                  <button id="copy" phx-hook="Copy" data-to="#permalink-url" class="flex items-center">
                     <.icon name="hero-link" class="mr-2 h-4 w-4" />
                     <span>Permalink</span>
                   </button>
                 </.menu_item>
+                <input
+                  type="text"
+                  id="permalink-url"
+                  value={"#{CongaWeb.Endpoint.url()}#{@current_uri}"}
+                  class="hidden"
+                />
               </.menu_group>
             </.menu>
           </.dropdown_menu_content>
