@@ -1,10 +1,69 @@
 # 🎵 Conga
 
-> Building the Livebook marketplace we all wished existed. #BuildInPublic
+> The Future of Computational Currency: Why Notebooks Matter 🚀
 
-## The Dream
+## Why Notebooks Could Become Currency
 
-Ever tried finding that perfect Livebook notebook for your ML project? Yeah, me too. That's why I'm building Conga - where brilliant minds can share (and earn from) their Livebook notebooks.
+### 1. Inherent Value Proposition
+
+- **Executable Knowledge**: Unlike traditional digital assets, notebooks contain actual, runnable solutions
+- **Practical Utility**: Each notebook solves real-world problems
+- **Verifiable Output**: Results can be validated and reproduced
+- **Composable Wealth**: Notebooks can be combined to create more valuable solutions
+
+### 2. Market Dynamics
+
+- **Supply & Demand**
+  - Limited supply of high-quality solutions
+  - Growing demand for automated data processing
+  - Network effect of collaborative improvements
+- **Value Storage**
+  - Notebooks don't depreciate like traditional code
+  - Can appreciate as they're refined and validated
+  - Community contributions increase worth
+
+### 3. Future Implications
+
+```mermaid
+graph TD
+    A[Notebook Creation] --> B[Value Verification]
+    B --> C[Market Trading]
+    C --> D[Value Appreciation]
+    D --> E[Currency Status]
+    E --> A
+```
+
+## Why Conga is Positioned for This Future
+
+1. **First-Mover Advantage**
+
+   - Building infrastructure for notebook trading
+   - Establishing value metrics
+   - Creating market mechanisms
+
+2. **BEAM/TigerBeetle Foundation**
+
+   - Ready for high-frequency trading
+   - Built-in double-entry accounting
+   - Scalable for global adoption
+
+3. **Community-Driven Value**
+   - Collaborative improvements
+   - Peer review system
+   - Value consensus mechanisms
+
+## The Vision
+
+Imagine a future where:
+
+- Data scientists trade solutions like stocks
+- Companies maintain notebook portfolios
+- Value is measured in practical impact
+- Knowledge truly becomes liquid capital
+
+---
+
+_"In the future, the most valuable currency won't be Bitcoin – it'll be executable knowledge."_
 
 ## What's Cooking 🚀
 
