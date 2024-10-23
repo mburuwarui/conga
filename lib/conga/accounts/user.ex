@@ -3,8 +3,7 @@ defmodule Conga.Accounts.User do
     otp_app: :conga,
     domain: Conga.Accounts,
     data_layer: AshPostgres.DataLayer,
-    # If using policies, enable the policy authorizer:
-    # authorizers: [Ash.Policy.Authorizer],
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshAuthentication, AshGraphql.Resource, AshJsonApi.Resource]
 
   json_api do
@@ -15,6 +14,14 @@ defmodule Conga.Accounts.User do
 
       get :read
       post :create
+    end
+  end
+
+  graphql do
+    type :user
+
+    queries do
+      get :get_user, :read
     end
   end
 
@@ -32,21 +39,28 @@ defmodule Conga.Accounts.User do
     end
   end
 
-  graphql do
-    type :user
-
-    queries do
-      get :get_user, :read
-    end
-  end
-
   postgres do
     table "users"
     repo Conga.Repo
   end
 
   actions do
-    defaults [:read, :destroy, create: [], update: []]
+    defaults [:read, :destroy, create: []]
+
+    update :update do
+      accept [:email, :role]
+    end
+  end
+
+  policies do
+    bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+
+    policy action_type(:update) do
+      authorize_if actor_present()
+      # authorize_if relates_to_actor_via(:user)
+    end
   end
 
   attributes do
@@ -58,6 +72,13 @@ defmodule Conga.Accounts.User do
     end
 
     attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
+
+    attribute :role, :atom do
+      constraints one_of: [:admin, :author, :user]
+      default :user
+      public? true
+      description "The role of the user"
+    end
 
     timestamps()
   end
@@ -73,11 +94,4 @@ defmodule Conga.Accounts.User do
   identities do
     identity :unique_email, [:email]
   end
-
-  # If using policies, add the following bypass:
-  # policies do
-  #   bypass AshAuthentication.Checks.AshAuthenticationInteraction do
-  #     authorize_if always()
-  #   end
-  # end
 end
