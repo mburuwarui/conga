@@ -12,6 +12,9 @@ defmodule CongaWeb.ProfileLive.Index do
         <.link :if={is_nil(@profile)} patch={~p"/profile/new"}>
           <.button>Add profile</.button>
         </.link>
+        <.link phx-click="update_admin">
+          <.button>Update role</.button>
+        </.link>
       </:actions>
     </.header>
 
@@ -122,5 +125,18 @@ defmodule CongaWeb.ProfileLive.Index do
      |> stream_delete(:profiles, profile)
      |> assign(:profile, nil)
      |> put_flash(:info, "Profile deleted successfully.")}
+  end
+
+  def handle_event("update_admin", _params, socket) do
+    Conga.Accounts.User
+    |> Ash.get!(socket.assigns.current_user.id, actor: socket.assigns.current_user)
+    |> Conga.Accounts.User.update_author!(actor: socket.assigns.current_user)
+
+    profiles = socket.assigns.profiles
+
+    {:noreply,
+     socket
+     |> stream(:profiles, profiles)
+     |> put_flash(:info, "Role updated successfully.")}
   end
 end

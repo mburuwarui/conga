@@ -197,20 +197,26 @@ defmodule Conga.Posts.Post do
   policies do
     policy action_type(:read) do
       authorize_if expr(visibility == :public)
-      authorize_if relates_to_actor_via(:user)
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :author)
+      authorize_if actor_attribute_equals(:role, :user)
     end
 
     policy action_type(:update) do
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :author)
       authorize_if actor_present()
       # authorize_if relates_to_actor_via(:user)
     end
 
     policy action_type(:destroy) do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :author)
     end
 
     policy action_type(:create) do
-      authorize_if actor_present()
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :author)
     end
   end
 

@@ -68,7 +68,11 @@ defmodule CongaWeb.PostLive.Index do
           </.dropdown_menu>
         </div>
         <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <.link :if={@current_user} patch={~p"/posts/new"} class="w-full sm:w-auto">
+          <.link
+            :if={@current_user.role == :author || @current_user.role == :admin}
+            patch={~p"/posts/new"}
+            class="w-full sm:w-auto"
+          >
             <.button class="w-full sm:w-auto">
               <.icon name="hero-pencil" class="mr-2 h-5 w-5" /> New Notebook
             </.button>
@@ -332,7 +336,7 @@ defmodule CongaWeb.PostLive.Index do
       |> Ash.load!([:profile])
       |> Enum.map(& &1.profile)
 
-    # IO.inspect(profiles, label: "profiles")
+    IO.inspect(profiles, label: "profiles")
 
     socket
     |> assign(:page_title, "Listing Notebooks")

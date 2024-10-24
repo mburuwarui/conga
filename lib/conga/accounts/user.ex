@@ -44,11 +44,25 @@ defmodule Conga.Accounts.User do
     repo Conga.Repo
   end
 
-  actions do
-    defaults [:read, :destroy, create: []]
+  code_interface do
+    define :update_admin
+    define :update_author
+    define :update_user
+  end
 
-    update :update do
-      accept [:email, :role]
+  actions do
+    defaults [:read, :destroy, create: [], update: []]
+
+    update :update_admin do
+      change set_attribute(:role, :admin)
+    end
+
+    update :update_author do
+      change set_attribute(:role, :author)
+    end
+
+    update :update_user do
+      change set_attribute(:role, :user)
     end
   end
 
@@ -57,9 +71,18 @@ defmodule Conga.Accounts.User do
       authorize_if always()
     end
 
+    policy action_type(:read) do
+      authorize_if always()
+    end
+
+    policy action_type(:create) do
+      authorize_if always()
+    end
+
     policy action_type(:update) do
-      authorize_if actor_present()
-      # authorize_if relates_to_actor_via(:user)
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :author)
+      authorize_if actor_attribute_equals(:role, :user)
     end
   end
 
@@ -88,6 +111,7 @@ defmodule Conga.Accounts.User do
     has_many :comments, Conga.Posts.Comment
     has_many :likes, Conga.Posts.Like
     has_many :bookmarks, Conga.Posts.Bookmark
+    has_many :accounts, Conga.Accounts.Account
     has_one :profile, Conga.Accounts.Profile
   end
 
