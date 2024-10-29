@@ -69,7 +69,10 @@ defmodule CongaWeb.PostLive.Index do
         </div>
         <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <.link
-            :if={@current_user.role == :author || @current_user.role == :admin}
+            :if={
+              (@current_user && @current_user.role == :author) ||
+                (@current_user && @current_user.role == :admin)
+            }
             patch={~p"/posts/new"}
             class="w-full sm:w-auto"
           >

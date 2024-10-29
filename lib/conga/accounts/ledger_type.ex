@@ -40,6 +40,8 @@ defmodule Conga.Accounts.LedgerType do
       end
 
       accept [:name, :asset_scale]
+
+      change set_attribute(:code, arg(:code))
     end
   end
 

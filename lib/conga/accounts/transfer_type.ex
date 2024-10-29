@@ -40,6 +40,8 @@ defmodule Conga.Accounts.TransferType do
       end
 
       accept [:name]
+
+      change set_attribute(:code, arg(:code))
     end
   end
 
