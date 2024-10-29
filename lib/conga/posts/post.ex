@@ -65,6 +65,9 @@ defmodule Conga.Posts.Post do
       primary? true
       accept [:title, :body, :visibility]
 
+      validate string_length(:title, min: 4)
+      validate string_length(:body, min: 100)
+
       argument :user_id, :uuid do
         allow_nil? false
       end

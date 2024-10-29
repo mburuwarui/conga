@@ -328,6 +328,7 @@ defmodule CongaWeb.PostLive.Index do
     |> assign(:page_title, "New Notebook")
     |> assign(:post, nil)
     |> assign(:patch, patch)
+    |> stream(:posts, fetch_posts(socket, socket.assigns.current_user))
   end
 
   defp apply_action(socket, :index, _params) do

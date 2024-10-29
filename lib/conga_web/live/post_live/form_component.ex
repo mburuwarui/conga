@@ -11,15 +11,20 @@ defmodule CongaWeb.PostLive.FormComponent do
         <:subtitle>Use this form to manage notebook records in your database.</:subtitle>
       </.header>
 
+      <div :if={@continue_notice} class="my-2 p-2 ring-1 rounded-lg bg-emerald-50 ring-emerald-500">
+        <%= @continue_notice %>
+      </div>
+
       <.simple_form
         for={@form}
         id="post-form"
         phx-target={@myself}
         phx-change="validate"
+        phx-auto-recover="recover"
         phx-submit="save"
       >
-        <.input_core field={@form[:title]} label="Title" />
-        <.input_core field={@form[:body]} type="textarea" label="Body" />
+        <.input_core field={@form[:title]} label="Title" required />
+        <.input_core field={@form[:body]} type="textarea" label="Body" required />
         <.input_core field={@form[:visibility]} label="Visibility" />
 
         <div class="space-y-2">
@@ -85,6 +90,7 @@ defmodule CongaWeb.PostLive.FormComponent do
        max_entries: 1,
        external: &presign_picture_upload/2
      )
+     |> assign(:continue_notice, nil)
      |> assign_form()}
   end
 
@@ -120,10 +126,47 @@ defmodule CongaWeb.PostLive.FormComponent do
     {:noreply, assign(socket, form: form)}
   end
 
+  @impl true
+  def handle_event("recover", %{"post" => post_params}, socket) do
+    categories =
+      case Map.get(post_params, "categories") do
+        nil -> []
+        categories when is_list(categories) -> categories
+        categories when is_binary(categories) -> [categories]
+        _ -> []
+      end
+      |> Enum.map(fn category ->
+        if is_binary(category) do
+          %{name: category}
+        else
+          category
+        end
+      end)
+
+    post_params =
+      post_params
+      |> Map.put("user_id", socket.assigns.current_user.id)
+      |> Map.put("categories", categories)
+
+    form =
+      socket.assigns.form
+      |> AshPhoenix.Form.validate(post_params)
+      |> AshPhoenix.Form.update_options(fn options ->
+        Keyword.put(options, :selected_categories, socket.assigns.selected_categories)
+      end)
+
+    {:noreply,
+     socket
+     |> assign(form: form)
+     |> assign(:continue_notice, "Your changes were auromatically recovered")}
+  end
+
+  @impl true
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :post_picture, ref)}
   end
 
+  @impl true
   def handle_event("toggle_category", %{"name" => category_name}, socket) do
     selected_categories =
       if category_name in socket.assigns.selected_categories do

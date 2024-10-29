@@ -13,7 +13,7 @@ defmodule CongaWeb.ProfileLive.FormComponent do
 
       <.simple_form
         for={@form}
-        id="post-form"
+        id="profile-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
@@ -77,6 +77,7 @@ defmodule CongaWeb.ProfileLive.FormComponent do
      assign(socket, form: AshPhoenix.Form.validate(socket.assigns.form, profile_params))}
   end
 
+  @impl true
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :profile_picture, ref)}
   end
