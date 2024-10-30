@@ -51,6 +51,7 @@ defmodule Conga.Posts.Pictures do
       primary? true
 
       accept [:url]
+      argument :post_id, :uuid
 
       change set_attribute(:post_id, arg(:post_id))
       change relate_actor(:user)
