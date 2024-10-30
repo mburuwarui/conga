@@ -154,10 +154,46 @@ Copy = {
   },
 };
 
+TrackForm = {
+  mounted() {
+    this.updated();
+  },
+  updated() {
+    console.log("Form mounted", {
+      id: this.el.id,
+      target: this.el.getAttribute("phx-target"),
+    });
+
+    this.handleEvent("phx:page-loading-start", () => {
+      console.log("Page loading started");
+    });
+
+    this.handleEvent("phx:page-loading-stop", () => {
+      console.log("Page loading stopped");
+    });
+  },
+
+  destroyed() {
+    console.log("Form destroyed", this.el.id);
+  },
+
+  reconnected() {
+    console.log("Form reconnected", {
+      id: this.el.id,
+      target: this.el.getAttribute("phx-target"),
+    });
+  },
+
+  disconnected() {
+    console.log("Form disconnected", this.el.id);
+  },
+};
+
 export default {
   Hello,
   LocalTime,
   SearchBar,
   TableOfContents,
   Copy,
+  TrackForm,
 };
